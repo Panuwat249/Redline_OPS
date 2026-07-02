@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-box" id="loginBox">
+    <h2>Admin Login</h2>
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<div id="adminPanel" style="display:none;">
+    <h1>Admin Panel</h1>
+
+    <button onclick="addKPI()">Add KPI</button>
+    <button onclick="addStation()">Add Station</button>
+    <button onclick="saveAll()">Save All</button>
+    <button onclick="logout()">Logout</button>
+
+    <div id="adminContent"></div>
+</div>
+
+<script src="storage.js"></script>
+<script src="auth.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>
