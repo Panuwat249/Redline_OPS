@@ -1,20 +1,29 @@
 {
   "month": "มิถุนายน 2569 (30 มิ.ย. 69)",
-  "punctuality": 100,
-  "reliability": 100,
-  "readiness": 100,
-
-  "north_distance": 119894,
-  "west_distance": 50581,
-  "total_distance": 170475,
-
-  "north_trip": 5340,
-  "west_trip": 3479,
-  "total_trip": 8819,
 
   "cancel_north": 0,
   "cancel_west": 0,
   "cancel_total": 0,
 
-  "graph": "uploads/graph.png"
+  "ontime_north": 100,
+  "ontime_west": 100,
+  "ontime_total": 100,
+
+  "reliable_north": 100,
+  "reliable_west": 100,
+  "reliable_total": 100,
+
+  "ready_north": 100,
+  "ready_west": 100,
+  "ready_total": 100,
+
+  "distance_north": 119894,
+  "distance_west": 50581,
+  "distance_total": 170475,
+
+  "trip_north": 5340,
+  "trip_west": 3479,
+  "trip_total": 8819,
+
+  "graph": "assets/graph.png"
 }
