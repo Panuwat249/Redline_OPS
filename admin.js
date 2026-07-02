@@ -1,45 +1,57 @@
-let adminData = getDashboardData();
+let currentData = {};
 
-function loadAdmin(){
-    let div = document.getElementById("adminContent");
-    div.innerHTML = "";
+fetch("data.json")
+.then(res => res.json())
+.then(data => {
+currentData = data;
 
-    adminData.kpis.forEach((k,index)=>{
-        div.innerHTML += `
-        <div>
-            <input value="${k.title}" onchange="adminData.kpis[${index}].title=this.value">
-            <input value="${k.value}" onchange="adminData.kpis[${index}].value=this.value">
-        </div>`;
-    });
-
-    adminData.stations.forEach((s,index)=>{
-        div.innerHTML += `
-        <div>
-            <input value="${s.name}" onchange="adminData.stations[${index}].name=this.value">
-            <input value="${s.passenger}" onchange="adminData.stations[${index}].passenger=this.value">
-            <input value="${s.growth}" onchange="adminData.stations[${index}].growth=this.value">
-        </div>`;
-    });
+for(let key in data){
+if(document.getElementById(key)){
+document.getElementById(key).value = data[key];
 }
-
-function addKPI(){
-    adminData.kpis.push({
-        title:"New KPI",
-        value:"0"
-    });
-    loadAdmin();
 }
+});
 
-function addStation(){
-    adminData.stations.push({
-        name:"New Station",
-        passenger:"0",
-        growth:"0%"
-    });
-    loadAdmin();
-}
+function saveData(){
 
-function saveAll(){
-    saveDashboardData(adminData);
-    alert("Saved");
+currentData.month =
+document.getElementById("month").value;
+
+currentData.punctuality =
+parseInt(document.getElementById("punctuality").value);
+
+currentData.reliability =
+parseInt(document.getElementById("reliability").value);
+
+currentData.readiness =
+parseInt(document.getElementById("readiness").value);
+
+currentData.north_distance =
+parseInt(document.getElementById("north_distance").value);
+
+currentData.west_distance =
+parseInt(document.getElementById("west_distance").value);
+
+currentData.total_distance =
+parseInt(document.getElementById("total_distance").value);
+
+currentData.north_trip =
+parseInt(document.getElementById("north_trip").value);
+
+currentData.west_trip =
+parseInt(document.getElementById("west_trip").value);
+
+currentData.total_trip =
+parseInt(document.getElementById("total_trip").value);
+
+currentData.cancel_north =
+parseInt(document.getElementById("cancel_north").value);
+
+currentData.cancel_west =
+parseInt(document.getElementById("cancel_west").value);
+
+currentData.cancel_total =
+parseInt(document.getElementById("cancel_total").value);
+
+alert("พร้อมบันทึก (ต้องต่อ backend จริง เช่น PHP / Node.js)");
 }
