@@ -1,72 +1,67 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard รฟฟท.</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Dashboard รถไฟฟ้า</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-<h1>ระดับการให้บริการระบบรถไฟฟ้าชานเมืองสายสีแดง</h1>
-<a href="admin-login.html" class="admin-btn">หลังบ้าน</a>
+<header class="header">
+  <h1>ระบบรถไฟฟ้าสายสีแดง</h1>
+  <p id="date"></p>
 </header>
 
-<div class="month-title" id="month"></div>
+<div class="container">
 
-<div class="top-row">
-<div class="section-title">การยกเลิกเที่ยววิ่ง (เที่ยว)</div>
-<div class="small-box" id="cancel_north"></div>
-<div class="small-box" id="cancel_west"></div>
-<div class="small-box" id="cancel_total"></div>
-</div>
+  <!-- row 1 -->
+  <div class="grid-3">
+    <div class="card red">
+      <h3>สายเหนือ</h3>
+      <div class="percent">100%</div>
+    </div>
 
-<div class="section">
-<h2>ความตรงต่อเวลา</h2>
-<div class="grid3">
-<div class="box"><span>สายเหนือ</span><strong id="ontime_north"></strong></div>
-<div class="box"><span>สายตะวันตก</span><strong id="ontime_west"></strong></div>
-<div class="box"><span>ทั้งสองสาย</span><strong id="ontime_total"></strong></div>
-</div>
-</div>
+    <div class="card lightred">
+      <h3>สายตะวันตก</h3>
+      <div class="percent">100%</div>
+    </div>
 
-<div class="section">
-<h2>ความน่าเชื่อถือ</h2>
-<div class="grid3">
-<div class="box"><span>สายเหนือ</span><strong id="reliable_north"></strong></div>
-<div class="box"><span>สายตะวันตก</span><strong id="reliable_west"></strong></div>
-<div class="box"><span>ทั้งสองสาย</span><strong id="reliable_total"></strong></div>
-</div>
-</div>
+    <div class="card gray">
+      <h3>ทั้งสองสาย</h3>
+      <div class="percent">100%</div>
+    </div>
+  </div>
 
-<div class="section">
-<h2>ความพร้อมของขบวนรถ</h2>
-<div class="grid3">
-<div class="box"><span>สายเหนือ</span><strong id="ready_north"></strong></div>
-<div class="box"><span>สายตะวันตก</span><strong id="ready_west"></strong></div>
-<div class="box"><span>ทั้งสองสาย</span><strong id="ready_total"></strong></div>
-</div>
-</div>
+  <!-- row 2 -->
+  <div class="grid-3">
+    <div class="card">
+      <h3>ความน่าเชื่อถือ</h3>
+      <div class="percent">100%</div>
+    </div>
 
-<div class="bottom-grid">
+    <div class="card">
+      <h3>ความพร้อมขบวนรถ</h3>
+      <div class="percent">100%</div>
+    </div>
 
-<div class="half-section">
-<h2>ระยะทางที่วิ่งให้บริการ (กิโลเมตร)</h2>
-<div class="grid3">
-<div class="box"><span>สายเหนือ</span><strong id="distance_north"></strong></div>
-<div class="box"><span>สายตะวันตก</span><strong id="distance_west"></strong></div>
-<div class="box"><span>ทั้งสองสาย</span><strong id="distance_total"></strong></div>
-</div>
-</div>
+    <div class="card">
+      <h3>การให้บริการ</h3>
+      <div class="percent">100%</div>
+    </div>
+  </div>
 
-<div class="half-section">
-<h2>จำนวนเที่ยวที่ให้บริการ (เที่ยว)</h2>
-<div class="grid3">
-<div class="box"><span>สายเหนือ</span><strong id="trip_north"></strong></div>
-<div class="box"><span>สายตะวันตก</span><strong id="trip_west"></strong></div>
-<div class="box"><span>ทั้งสองสาย</span><strong id="trip_total"></strong></div>
-</div>
-</div>
+  <!-- bottom -->
+  <div class="grid-2">
+    <div class="card big">
+      <h3>ระยะทางที่วิ่ง (กม.)</h3>
+      <div class="value">170,475</div>
+    </div>
+
+    <div class="card big">
+      <h3>จำนวนเที่ยว</h3>
+      <div class="value">8,819</div>
+    </div>
+  </div>
 
 </div>
 
