@@ -2,31 +2,63 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<title>Admin Dashboard รฟฟท.</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="login-box" id="loginBox">
-    <h2>Admin Login</h2>
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
+<div class="header">
+<h1>ระบบหลังบ้าน รฟฟท.</h1>
 </div>
 
-<div id="adminPanel" style="display:none;">
-    <h1>Admin Panel</h1>
+<div class="dashboard">
 
-    <button onclick="addKPI()">Add KPI</button>
-    <button onclick="addStation()">Add Station</button>
-    <button onclick="saveAll()">Save All</button>
-    <button onclick="logout()">Logout</button>
+<label>เดือน</label>
+<input id="month">
 
-    <div id="adminContent"></div>
+<label>ความตรงต่อเวลา</label>
+<input id="punctuality" type="number">
+
+<label>ความน่าเชื่อถือ</label>
+<input id="reliability" type="number">
+
+<label>ความพร้อมขบวนรถ</label>
+<input id="readiness" type="number">
+
+<label>ระยะทางสายเหนือ</label>
+<input id="north_distance" type="number">
+
+<label>ระยะทางสายตะวันตก</label>
+<input id="west_distance" type="number">
+
+<label>รวมระยะทาง</label>
+<input id="total_distance" type="number">
+
+<label>เที่ยวสายเหนือ</label>
+<input id="north_trip" type="number">
+
+<label>เที่ยวสายตะวันตก</label>
+<input id="west_trip" type="number">
+
+<label>รวมเที่ยว</label>
+<input id="total_trip" type="number">
+
+<label>ยกเลิกเที่ยวสายเหนือ</label>
+<input id="cancel_north" type="number">
+
+<label>ยกเลิกเที่ยวสายตะวันตก</label>
+<input id="cancel_west" type="number">
+
+<label>รวมยกเลิก</label>
+<input id="cancel_total" type="number">
+
+<label>อัปโหลดรูปกราฟ</label>
+<input id="graph" type="file">
+
+<button onclick="saveData()">บันทึกข้อมูล</button>
+
 </div>
 
-<script src="storage.js"></script>
-<script src="auth.js"></script>
 <script src="admin.js"></script>
-
 </body>
 </html>
