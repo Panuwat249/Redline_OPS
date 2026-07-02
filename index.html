@@ -1,70 +1,201 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard รถไฟฟ้า</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rail Service Dashboard</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: #f4f4f4;
+        color: #333;
+    }
+
+    .header {
+        background: #b30000;
+        color: white;
+        padding: 20px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .subheader {
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        color: #b30000;
+        font-weight: bold;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    .card {
+        background: white;
+        padding: 15px;
+        border-left: 6px solid #b30000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+
+    .title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .percent {
+        font-size: 40px;
+        font-weight: bold;
+        color: #d10000;
+        text-align: center;
+    }
+
+    .bar {
+        height: 12px;
+        background: #eee;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .fill {
+        height: 100%;
+        background: #d10000;
+        width: 100%;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .stat {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        border-top: 4px solid #b30000;
+    }
+
+    .stat h3 {
+        margin: 0;
+        color: #b30000;
+    }
+
+    .big-number {
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    @media(max-width: 900px){
+        .grid { grid-template-columns: 1fr; }
+        .stats { grid-template-columns: 1fr; }
+    }
+</style>
 </head>
+
 <body>
 
-<header class="header">
-  <h1>ระบบรถไฟฟ้าสายสีแดง</h1>
-  <p id="date"></p>
-</header>
+<div class="header">
+    ระดับการให้บริการระบบรถไฟฟ้าชานเมืองสายสีแดง
+</div>
+
+<div class="subheader">
+    เดือนมิถุนายน 2569 (30 มิ.ย. 69)
+</div>
 
 <div class="container">
 
-  <!-- row 1 -->
-  <div class="grid-3">
-    <div class="card red">
-      <h3>สายเหนือ</h3>
-      <div class="percent">100%</div>
+    <div class="grid">
+
+        <div class="card">
+            <div class="title">สายเหนือ</div>
+            <div class="percent">100%</div>
+            <div class="bar"><div class="fill"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="title">สายตะวันตก</div>
+            <div class="percent">100%</div>
+            <div class="bar"><div class="fill"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="title">ทั้งสองสาย</div>
+            <div class="percent">100%</div>
+            <div class="bar"><div class="fill"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="title">ความน่าเชื่อถือ (ตามเที่ยวจริง)</div>
+            <div class="percent">100%</div>
+            <div class="bar"><div class="fill"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="title">ความพร้อมของขบวนรถ</div>
+            <div class="percent">100%</div>
+            <div class="bar"><div class="fill"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="title">การยกเลิกเที่ยววิ่ง</div>
+            <div class="percent">0%</div>
+            <div class="bar"><div class="fill" style="width:0%"></div></div>
+        </div>
+
     </div>
 
-    <div class="card lightred">
-      <h3>สายตะวันตก</h3>
-      <div class="percent">100%</div>
-    </div>
+    <div class="stats">
 
-    <div class="card gray">
-      <h3>ทั้งสองสาย</h3>
-      <div class="percent">100%</div>
-    </div>
-  </div>
+        <div class="stat">
+            <h3>สายเหนือ</h3>
+            <div class="big-number">119,894</div>
+        </div>
 
-  <!-- row 2 -->
-  <div class="grid-3">
-    <div class="card">
-      <h3>ความน่าเชื่อถือ</h3>
-      <div class="percent">100%</div>
-    </div>
+        <div class="stat">
+            <h3>สายตะวันตก</h3>
+            <div class="big-number">50,581</div>
+        </div>
 
-    <div class="card">
-      <h3>ความพร้อมขบวนรถ</h3>
-      <div class="percent">100%</div>
-    </div>
+        <div class="stat">
+            <h3>ทั้งสองสาย</h3>
+            <div class="big-number">170,475</div>
+        </div>
 
-    <div class="card">
-      <h3>การให้บริการ</h3>
-      <div class="percent">100%</div>
-    </div>
-  </div>
+        <div class="stat">
+            <h3>จำนวนเที่ยว (เหนือ)</h3>
+            <div class="big-number">5,340</div>
+        </div>
 
-  <!-- bottom -->
-  <div class="grid-2">
-    <div class="card big">
-      <h3>ระยะทางที่วิ่ง (กม.)</h3>
-      <div class="value">170,475</div>
-    </div>
+        <div class="stat">
+            <h3>จำนวนเที่ยว (ตะวันตก)</h3>
+            <div class="big-number">3,479</div>
+        </div>
 
-    <div class="card big">
-      <h3>จำนวนเที่ยว</h3>
-      <div class="value">8,819</div>
+        <div class="stat">
+            <h3>รวมเที่ยว</h3>
+            <div class="big-number">8,819</div>
+        </div>
+
     </div>
-  </div>
 
 </div>
 
-<script src="script.js"></script>
 </body>
 </html>
