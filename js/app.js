@@ -1,34 +1,38 @@
 let performanceChart = null;
 
-const startMonthSelect = document.getElementById("startMonth");
-const endMonthSelect = document.getElementById("endMonth");
-const applyBtn = document.getElementById("applyBtn");
-
 document.addEventListener("DOMContentLoaded", init);
 
 function init() {
-    if (!Array.isArray(statistics) || statistics.length === 0) {
+    const data = window.statistics || statistics;
+
+    if (!Array.isArray(data) || data.length === 0) {
         alert("ไม่พบข้อมูลใน js/data.js");
+        console.error("ไม่พบข้อมูล statistics หรือ window.statistics");
         return;
     }
 
-    populateMonthOptions();
+    populateMonthOptions(data);
 
-    const lastIndex = statistics.length - 1;
+    const lastIndex = data.length - 1;
 
-    startMonthSelect.value = statistics[lastIndex].id;
-    endMonthSelect.value = statistics[lastIndex].id;
+    document.getElementById("startMonth").value = data[lastIndex].id;
+    document.getElementById("endMonth").value = data[lastIndex].id;
 
     renderDashboard();
 
-    applyBtn.addEventListener("click", renderDashboard);
+    document
+        .getElementById("applyBtn")
+        .addEventListener("click", renderDashboard);
 }
 
-function populateMonthOptions() {
+function populateMonthOptions(data) {
+    const startMonthSelect = document.getElementById("startMonth");
+    const endMonthSelect = document.getElementById("endMonth");
+
     startMonthSelect.innerHTML = "";
     endMonthSelect.innerHTML = "";
 
-    statistics.forEach(item => {
+    data.forEach(item => {
         const startOption = document.createElement("option");
         startOption.value = item.id;
         startOption.textContent = item.month;
@@ -58,8 +62,13 @@ function renderDashboard() {
 }
 
 function getSelectedRangeData() {
-    const startIndex = statistics.findIndex(item => item.id === startMonthSelect.value);
-    const endIndex = statistics.findIndex(item => item.id === endMonthSelect.value);
+    const data = window.statistics || statistics;
+
+    const startMonthSelect = document.getElementById("startMonth");
+    const endMonthSelect = document.getElementById("endMonth");
+
+    const startIndex = data.findIndex(item => item.id === startMonthSelect.value);
+    const endIndex = data.findIndex(item => item.id === endMonthSelect.value);
 
     if (startIndex === -1 || endIndex === -1) {
         return [];
@@ -68,7 +77,7 @@ function getSelectedRangeData() {
     const from = Math.min(startIndex, endIndex);
     const to = Math.max(startIndex, endIndex);
 
-    return statistics.slice(from, to + 1);
+    return data.slice(from, to + 1);
 }
 
 function calculateDisplayData(items) {
@@ -137,7 +146,10 @@ function updateTextSummary(items) {
         setText("selectedRangeText", `${first.month} - ${last.month}`);
         setText("summaryPeriod", `${first.month} ถึง ${last.month}`);
         setText("calculationMode", `KPI เฉลี่ยจาก ${items.length} เดือน`);
-        setText("operationCalculationMode", `ข้อมูลการเดินรถเป็นผลรวมจาก ${items.length} เดือน`);
+        setText(
+            "operationCalculationMode",
+            `ข้อมูลการเดินรถเป็นผลรวมจาก ${items.length} เดือน`
+        );
     }
 }
 
@@ -196,6 +208,10 @@ function roundSmart(value) {
 function updateChart(items) {
     const labels = items.map(item => item.month);
     const ctx = document.getElementById("performanceChart");
+
+    if (!ctx) {
+        return;
+    }
 
     if (performanceChart) {
         performanceChart.destroy();
