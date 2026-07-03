@@ -161,4 +161,5 @@ const statistics = [
             west: 0,
             total: 0
         }
+    }
 ];
