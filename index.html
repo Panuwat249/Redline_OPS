@@ -8,71 +8,84 @@
 
     css/style.css
 
-    https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800;900&display=swap
+    https://fonts.googleapis.com
+    https://fonts.gstatic.com
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800;900p
 
     https://cdn.jsdelivr.net/npm/chart.jsscript>
 </head>
 
 <body>
 
-    <header class="hero">
+    <div class="page-bg-shape shape-a"></div>
+    <div class="page-bg-shape shape-b"></div>
 
-        <div class="decor decor-1"></div>
-        <div class="decor decor-2"></div>
-        <div class="decor decor-3"></div>
+    <header class="top-hero">
 
-        <div class="hero-inner">
+        <div class="top-pattern"></div>
 
-            <div class="brand-row">
+        <div class="hero-container">
 
-                <div class="brand-mark">
-                    RL
+            <nav class="top-nav">
+
+                <div class="brand-block">
+                    <div class="brand-logo">RL</div>
+
+                    <div>
+                        <div class="brand-title">
+                            บริษัท รถไฟฟ้า ร.ฟ.ท. จำกัด
+                        </div>
+                        <div class="brand-subtitle">
+                            ฝ่ายควบคุมการเดินรถ
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <p class="company-name">
-                        บริษัท รถไฟฟ้า ร.ฟ.ท. จำกัด
-                    </p>
-                    <p class="department-name">
-                        ฝ่ายควบคุมการเดินรถ
-                    </p>
+                <div class="status-pill">
+                    Service Performance Dashboard
                 </div>
 
-            </div>
+            </nav>
 
-            <div class="hero-layout">
+            <div class="hero-main">
 
-                <div class="hero-title-area">
+                <section class="hero-copy">
 
-                    <div class="hero-badge">
-                        Monthly Service Performance Dashboard
+                    <div class="report-label">
+                        รายงานระดับการให้บริการ
                     </div>
 
                     <h1>
-                        ระดับการให้บริการ<br>
-                        ระบบรถไฟฟ้าชานเมืองสายสีแดง
+                        ระบบรถไฟฟ้า<br>
+                        ชานเมืองสายสีแดง
                     </h1>
 
-                    <p id="selectedRangeText" class="hero-month">
-                        -
+                    <p class="hero-description">
+                        แสดงผลค่าดัชนีการให้บริการ แยกตามสายเหนือ สายตะวันตก และรวมทั้ง 2 สาย
                     </p>
 
-                </div>
-
-                <div class="filter-card">
-
-                    <div class="filter-title">
-                        เลือกช่วงเดือนที่ต้องการแสดงผล
+                    <div class="selected-period-card">
+                        <span>ช่วงข้อมูลที่เลือก</span>
+                        <strong id="selectedRangeText">-</strong>
                     </div>
 
-                    <div class="filter-grid">
+                </section>
 
-                        <div class="filter-group">
+                <aside class="control-panel">
+
+                    <div class="control-heading">
+                        <span></span>
+                        เลือกช่วงเดือน
+                    </div>
+
+                    <div class="control-grid">
+
+                        <div class="input-box">
                             <label for="startMonth">เดือนเริ่มต้น</label>
                             <select id="startMonth"></select>
                         </div>
 
-                        <div class="filter-group">
+                        <div class="input-box">
                             <label for="endMonth">เดือนสิ้นสุด</label>
                             <select id="endMonth"></select>
                         </div>
@@ -80,10 +93,14 @@
                     </div>
 
                     <button id="applyBtn">
-                        แสดงผล Dashboard
+                        แสดงผลข้อมูล
                     </button>
 
-                </div>
+                    <p class="control-note">
+                        หากเลือกหลายเดือน ระบบจะแสดงค่าเฉลี่ยของช่วงเดือนนั้น
+                    </p>
+
+                </aside>
 
             </div>
 
@@ -91,52 +108,23 @@
 
     </header>
 
-    <main>
+    <main class="main-container">
 
-        <section class="summary-strip">
+        <section class="overview-row">
 
-            <div class="summary-box">
-                <span>ช่วงข้อมูลที่แสดง</span>
-                <strong id="summaryPeriod">-</strong>
+            <div class="overview-card period-card">
+                <div class="overview-icon">📅</div>
+                <div>
+                    <span>ช่วงข้อมูลที่แสดง</span>
+                    <strong id="summaryPeriod">-</strong>
+                </div>
             </div>
 
-            <div class="summary-box">
-                <span>รูปแบบการคำนวณ</span>
-                <strong id="calculationMode">-</strong>
+            <div class="overview-card calc-card">
+                <div class="overview-icon">∑</div>
+                <div>
+                    <span>รูปแบบการคำนวณ</span>
+                    <strong id="calculationMode">-</strong>
+                </div>
             </div>
 
-        </section>
-
-        <section class="dashboard-grid">
-
-            <article class="kpi-card highlight-card red-card">
-
-                <div class="card-top">
-
-                    <div>
-                        <p class="kpi-index">01</p>
-                        <h2>ความต่อต่อเวลา</h2>
-                    </div>
-
-                    <div class="icon-badge red-icon">
-                        %
-                    </div>
-
-                </div>
-
-                <p class="total-label">
-                    รวมทั้ง 2 สาย
-                </p>
-
-                <div class="main-value" id="onTimeTotal">
-                    -
-                </div>
-
-                <div class="line-detail">
-
-                    <div>
-                        <span>สายเหนือ</span>
-                        <strong id="onTimeNorth">-</strong>
-                    </div>
-
-                    <div>
