@@ -120,46 +120,5 @@ const statistics = [
             west: 0,
             total: 0
         }
-    },
-    
-    {
-        id: "2026-08",
-        month: "กันยายน 2569",
-
-        onTime: {
-            north: 99.98,
-            west: 100,
-            total: 99.99
-        },
-
-        reliability: {
-            north: 100,
-            west: 100,
-            total: 100
-        },
-
-        availability: {
-            north: 100,
-            west: 100,
-            total: 100
-        },
-
-        distance: {
-            north: 121000,
-            west: 51500,
-            total: 172500
-        },
-
-        trips: {
-            north: 5450,
-            west: 3520,
-            total: 8970
-        },
-
-        cancelled: {
-            north: 0,
-            west: 0,
-            total: 0
-        }
     }
 ];
