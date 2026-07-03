@@ -232,6 +232,8 @@ function updateChart(items) {
     performanceChart = new Chart(ctx, {
         type: "bar",
 
+        plugins: [ChartDataLabels],
+
         data: {
             labels: labels,
 
@@ -285,7 +287,27 @@ function updateChart(items) {
             responsive: true,
             maintainAspectRatio: false,
 
-            plugins: {
+            plugins: {  
+                datalabels: {
+                    anchor: "end",
+                    align: "top",
+                    offset: 4,
+                    color: "#111827",
+                    font: {
+                        family: "Sarabun",
+                        size: 12,
+                        weight: "bold"
+                    },
+                    formatter: function(value) {               
+                        const num = Number(value);
+
+                        if (Number.isInteger(num)) {
+                            return num + "%";
+                        }
+                        return num.toFixed(2) + "%";
+                    }
+                },
+
                 legend: {
                     position: "bottom",
                     labels: {
