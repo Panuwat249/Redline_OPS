@@ -9,6 +9,14 @@ window.statistics = [
             total: 100
         },
 
+        
+        punctuality5: {
+            north: 100,
+            west: 100,
+            total: 100
+        },
+
+
         reliability: {
             north: 100,
             west: 100,
@@ -45,6 +53,12 @@ window.statistics = [
         month: "กรกฎาคม 2569",
 
         onTime: {
+            north: 100,
+            west: 100,
+            total: 100
+        },
+
+        punctuality5: {
             north: 100,
             west: 100,
             total: 100
@@ -91,6 +105,12 @@ window.statistics = [
             total: 99.99
         },
 
+        punctuality5: {
+            north: 100,
+            west: 100,
+            total: 100
+        },
+
         reliability: {
             north: 100,
             west: 100,
@@ -130,6 +150,12 @@ window.statistics = [
             north: 99.98,
             west: 100,
             total: 99.99
+        },
+
+         punctuality5: {
+            north: 100,
+            west: 100,
+            total: 100
         },
 
         reliability: {
