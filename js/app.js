@@ -1296,6 +1296,16 @@ function createPdfChartSlides() {
     return slides;
 }
 
+function waitForChartsReady() {
+    return new Promise(resolve => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setTimeout(resolve, 500);
+            });
+        });
+    });
+}
+
 function waitForPdfImages(root) {
     const images = Array.from(root.querySelectorAll("img"));
 
