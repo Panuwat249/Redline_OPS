@@ -1,5 +1,10 @@
 let performanceChart = null;
 
+let punctuality5Chart = null;
+let onTimeChart = null;
+let reliabilityChart = null;
+let availabilityChart = null;
+
 document.addEventListener("DOMContentLoaded", init);
 
 function init() {
