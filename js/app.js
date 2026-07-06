@@ -63,7 +63,13 @@ function renderDashboard() {
 
     updateTextSummary(selectedData);
     updateKpiCards(calculatedData);
+    
+    // กราฟเดิมที่รวม KPI ทั้งหมดไว้ในกราฟเดียว
     updateChart(selectedData);
+
+    // กราฟแยกรายตัว 4 กราฟด้านล่าง
+    updateSeparateCharts(selectedData);
+
 }
 
 function getSelectedRangeData() {
@@ -356,6 +362,203 @@ function updateChart(items) {
                         stepSize: 0.1,
                         color: "#64748b",
                         callback: value => value + "%",
+                        font: {
+                            family: "Sarabun",
+                            weight: "bold"
+                        }
+                    },
+                    grid: {
+                        color: "rgba(148, 163, 184, 0.22)"
+                    },
+                    border: {
+                        display: false
+                    }
+                },
+
+                x: {
+                    ticks: {
+                        color: "#475569",
+                        font: {
+                            family: "Sarabun",
+                            weight: "bold"
+                        }
+                    },
+                    grid: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateSeparateCharts(items) {
+    const labels = items.map(item => item.month);
+
+    // 1. ความตรงต่อเวลา ล่าช้าไม่เกิน 5 นาที
+    punctuality5Chart = createSingleBarChart({
+        canvasId: "punctuality5Chart",
+        chartInstance: punctuality5Chart,
+        labels: labels,
+        label: "ความตรงต่อเวลา ไม่เกิน 5 นาที",
+        data: items.map(item => item.punctuality5.total),
+        backgroundColor: "rgba(244, 63, 94, 0.82)",
+        borderColor: "rgba(190, 18, 60, 1)"
+    });
+
+    // 2. ความตรงต่อเวลา ล่าช้าไม่เกิน 10 นาที
+    onTimeChart = createSingleBarChart({
+        canvasId: "onTimeChart",
+        chartInstance: onTimeChart,
+        labels: labels,
+        label: "ความตรงต่อเวลา ไม่เกิน 10 นาที",
+        data: items.map(item => item.onTime.total),
+        backgroundColor: "rgba(239, 35, 60, 0.88)",
+        borderColor: "rgba(181, 18, 27, 1)"
+    });
+
+    // 3. ความน่าเชื่อถือ
+    reliabilityChart = createSingleBarChart({
+        canvasId: "reliabilityChart",
+        chartInstance: reliabilityChart,
+        labels: labels,
+        label: "ความน่าเชื่อถือ",
+        data: items.map(item => item.reliability.total),
+        backgroundColor: "rgba(123, 44, 191, 0.88)",
+        borderColor: "rgba(91, 33, 182, 1)"
+    });
+
+    // 4. ความพร้อมของขบวนรถไฟ
+    availabilityChart = createSingleBarChart({
+        canvasId: "availabilityChart",
+        chartInstance: availabilityChart,
+        labels: labels,
+        label: "ความพร้อมของขบวนรถไฟ",
+        data: items.map(item => item.availability.total),
+        backgroundColor: "rgba(0, 119, 182, 0.88)",
+        borderColor: "rgba(3, 105, 161, 1)"
+    });
+}
+
+function createSingleBarChart(config) {
+    const canvas = document.getElementById(config.canvasId);
+
+    if (!canvas) {
+        console.warn(`ไม่พบ canvas id="${config.canvasId}"`);
+        return null;
+    }
+
+    if (typeof Chart === "undefined") {
+        console.warn("Chart.js ไม่ถูกโหลด");
+        return null;
+    }
+
+    if (config.chartInstance) {
+        config.chartInstance.destroy();
+    }
+
+    const chartPlugins =
+        typeof ChartDataLabels !== "undefined"
+            ? [ChartDataLabels]
+            : [];
+
+    return new Chart(canvas, {
+        type: "bar",
+
+        plugins: chartPlugins,
+
+        data: {
+            labels: config.labels,
+
+            datasets: [
+                {
+                    label: config.label,
+                    data: config.data,
+                    backgroundColor: config.backgroundColor,
+                    borderColor: config.borderColor,
+                    borderWidth: 1,
+                    borderRadius: 14,
+                    barPercentage: 0.55,
+                    categoryPercentage: 0.65
+                }
+            ]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            layout: {
+                padding: {
+                    top: 28
+                }
+            },
+
+            plugins: {
+                datalabels: {
+                    anchor: "end",
+                    align: "top",
+                    offset: 4,
+                    color: "#111827",
+                    font: {
+                        family: "Sarabun",
+                        size: 16,
+                        weight: "bold"
+                    },
+                    formatter: function(value) {
+                        const num = Number(value);
+
+                        if (Number.isInteger(num)) {
+                            return num + "%";
+                        }
+
+                        return num.toFixed(2) + "%";
+                    }
+                },
+
+                legend: {
+                    display: true,
+                    position: "bottom",
+                    labels: {
+                        color: "#334155",
+                        usePointStyle: true,
+                        pointStyle: "circle",
+                        padding: 20,
+                        font: {
+                            family: "Sarabun",
+                            size: 14,
+                            weight: "bold"
+                        }
+                    }
+                },
+
+                tooltip: {
+                    backgroundColor: "#111827",
+                    titleColor: "#ffffff",
+                    bodyColor: "#ffffff",
+                    padding: 14,
+                    cornerRadius: 14,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}%`;
+                        }
+                    }
+                }
+            },
+
+            scales: {
+                y: {
+                    min: 99.5,
+                    max: 100,
+                    ticks: {
+                        stepSize: 0.1,
+                        color: "#64748b",
+                        callback: function(value) {
+                            return Number(value).toFixed(2) + "%";
+                        },
                         font: {
                             family: "Sarabun",
                             weight: "bold"
