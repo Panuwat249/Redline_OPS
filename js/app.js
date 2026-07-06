@@ -219,10 +219,10 @@ function formatNumber(value) {
 }
 
 function roundSmart(value) {
-    const rounded = Math.round(value * 100) / 100;
+    const rounded = Math.round(Number(value) * 100) / 100;
 
-    if (Number.isInteger(rounded)) {
-        return rounded;
+    if (rounded === 100) {
+        return 100;
     }
 
     return rounded.toFixed(2);
