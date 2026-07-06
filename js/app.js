@@ -1202,30 +1202,35 @@ function createPdfChartSlides() {
     const chartConfigs = [
         {
             canvasId: "performanceChart",
+            chartInstance: performanceChart,
             title: "กราฟเปรียบเทียบค่าดัชนีหลัก",
             subtitle: "กราฟรวม KPI ทั้งหมด",
             badge: "Overview Chart"
         },
         {
             canvasId: "punctuality5Chart",
+            chartInstance: punctuality5Chart,
             title: "ความตรงต่อเวลา",
             subtitle: "ความล่าช้าไม่เกิน 5 นาที",
             badge: "TSP 5 Min"
         },
         {
             canvasId: "onTimeChart",
+            chartInstance: onTimeChart,
             title: "ความตรงต่อเวลา",
             subtitle: "ความล่าช้าไม่เกิน 10 นาที",
             badge: "TSP 10 Min"
         },
         {
             canvasId: "reliabilityChart",
+            chartInstance: reliabilityChart,
             title: "ความน่าเชื่อถือ",
             subtitle: "Train Service Availability (TSA)",
             badge: "Reliability"
         },
         {
             canvasId: "availabilityChart",
+            chartInstance: availabilityChart,
             title: "ความพร้อมของขบวนรถไฟ",
             subtitle: "Train Availability (TA)",
             badge: "Availability"
@@ -1235,48 +1240,86 @@ function createPdfChartSlides() {
     const slides = [];
 
     chartConfigs.forEach(config => {
-        const canvas = document.getElementById(config.canvasId);
+        const image = getChartImage(config.canvasId, config.chartInstance);
 
-        if (!canvas) {
-            console.warn(`ไม่พบ canvas id="${config.canvasId}"`);
-            return;
-        }
-
-        let image = "";
-
-        try {
-            image = canvas.toDataURL("image/png");
-        } catch (error) {
-            console.warn(`ไม่สามารถแปลงกราฟ ${config.canvasId} เป็นรูปภาพได้`, error);
-            return;
-        }
-
-        if (!image || image === "data:,") {
-            console.warn(`กราฟ ${config.canvasId} ยังไม่มีรูปภาพ`);
+        if (!image) {
+            console.warn(`ไม่สามารถสร้างรูปกราฟจาก ${config.canvasId}`);
             return;
         }
 
         const slide = document.createElement("section");
         slide.className = "pdf-slide";
 
-        slide.innerHTML = `
-            <div class="pdf-slide-header">
-                <div>
-                    <div class="pdf-slide-kicker">MONTHLY PERFORMANCE</div>
-                    <div class="pdf-slide-title">${config.title}</div>
-                    <div class="pdf-slide-subtitle">${config.subtitle}</div>
-                </div>
+        const header = document.createElement("div");
+        header.className = "pdf-slide-header";
 
-                <div class="pdf-badge">${config.badge}</div>
-            </div>
+        const headerLeft = document.createElement("div");
 
-            ${image}
-        `;
+        const kicker = document.createElement("div");
+        kicker.className = "pdf-slide-kicker";
+        kicker.textContent = "MONTHLY PERFORMANCE";
+
+        const title = document.createElement("div");
+        title.className = "pdf-slide-title";
+        title.textContent = config.title;
+
+        const subtitle = document.createElement("div");
+        subtitle.className = "pdf-slide-subtitle";
+        subtitle.textContent = config.subtitle;
+
+        headerLeft.appendChild(kicker);
+        headerLeft.appendChild(title);
+        headerLeft.appendChild(subtitle);
+
+        const badge = document.createElement("div");
+        badge.className = "pdf-badge";
+        badge.textContent = config.badge;
+
+        header.appendChild(headerLeft);
+        header.appendChild(badge);
+
+        const img = document.createElement("img");
+        img.className = "pdf-chart-image";
+        img.src = image;
+        img.alt = config.title;
+
+        slide.appendChild(header);
+        slide.appendChild(img);
 
         slides.push(slide);
     });
 
     return slides;
+}
+
+function getChartImage(canvasId, chartInstance) {
+    if (chartInstance && typeof chartInstance.toBase64Image === "function") {
+        const image = chartInstance.toBase64Image("image/png", 1);
+
+        if (image && image !== "data:,") {
+            return image;
+        }
+    }
+
+    const canvas = document.getElementById(canvasId);
+
+    if (!canvas) {
+        console.warn(`ไม่พบ canvas id="${canvasId}"`);
+        return "";
+    }
+
+    try {
+        const image = canvas.toDataURL("image/png");
+
+        if (!image || image === "data:,") {
+            return "";
+        }
+
+        return image;
+    } catch (error) {
+        console.warn(`แปลง canvas ${canvasId} เป็นรูปไม่ได้`, error);
+        return "";
+    }
 }
 
 function waitForChartsReady() {
