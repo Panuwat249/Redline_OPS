@@ -178,14 +178,17 @@ function updateCostCards(selectedData, data) {
     setCostText("selectedFiscalYearText", fiscalYearText);
     setCostText("costFiscalYearText", fiscalYearText);
 
-    setCostText("staffCostText", formatCost(data.staffCost));
-    setCostText("energyCostText", formatCost(data.energyCost));
-    setCostText("maintenanceCostText", formatCost(data.maintenanceCost));
-    setCostText("indirectCostText", formatCost(data.indirectCost));
+    // แสดงข้อมูลรายปีงบในกล่องทั้ง 4 ด้าน ไม่ใช่การ sum
+    setCostYearList("staffCostText", selectedData, "staffCost");
+    setCostYearList("energyCostText", selectedData, "energyCost");
+    setCostYearList("maintenanceCostText", selectedData, "maintenanceCost");
+    setCostYearList("indirectCostText", selectedData, "indirectCost");
 
+    // กล่อง Total ยังเป็นผลรวมของช่วงที่เลือก
     setCostText("totalCostText", formatCost(data.totalCost));
     setCostText("totalCostPill", `Total ${formatCost(data.totalCost)}`);
 
+    // กล่อง Average เฉลี่ยเฉพาะช่วงที่เลือก
     if (selectedData.length === 1) {
         setCostText("averageCostText", "ไม่คำนวณเฉลี่ย");
         setCostText("averageCostCardText", "ไม่คำนวณ");
@@ -193,6 +196,28 @@ function updateCostCards(selectedData, data) {
         setCostText("averageCostText", formatCost(data.averageTotalCost));
         setCostText("averageCostCardText", formatCost(data.averageTotalCost));
     }
+}
+
+function setCostYearList(id, selectedData, key) {
+    const element = document.getElementById(id);
+
+    if (!element) {
+        console.warn(`ไม่พบ id="${id}" ใน cost.html`);
+        return;
+    }
+
+    element.classList.add("cost-year-list");
+
+    element.innerHTML = selectedData
+        .map(item => {
+            return `
+                <div class="cost-year-row">
+                    <span>ปีงบ ${item.fiscalYear}</span>
+                    <strong>${formatCost(item[key])}</strong>
+                </div>
+            `;
+        })
+        .join("");
 }
 
 function updateCostTable(selectedData) {
