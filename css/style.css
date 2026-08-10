@@ -1641,3 +1641,23 @@ COST APPLY BUTTON
     transform: translateY(0);
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
 }
+
+/* =========================
+   COST TABLE FOOTER AVERAGE
+========================= */
+
+.cost-table tfoot td {
+    padding: 16px 14px;
+    color: var(--red-900);
+    background: #fee2e2;
+    font-size: 15px;
+    font-weight: 900;
+    text-align: right;
+    border: 1px solid #fecaca;
+}
+
+.cost-table tfoot td:first-child {
+    text-align: left;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--red-900), var(--red-600));
+}
