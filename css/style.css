@@ -1689,8 +1689,8 @@ COST APPLY BUTTON
 }
 
 .cost-year-row span {
-    color: var(--slate-500);
-    font-size: 14px;
+    color: #111827;
+    font-size: 16px;
     font-weight: 900;
     white-space: nowrap;
 }
