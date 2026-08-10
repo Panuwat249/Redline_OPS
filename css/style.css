@@ -1523,3 +1523,69 @@ footer {
         font-size: 42px;
     }
 }
+
+/* =========================
+   NAV PAGE BUTTON
+========================= */
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.nav-page-button {
+    position: relative;
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 900;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.12));
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(16px);
+    cursor: pointer;
+    transition: 0.22s ease;
+}
+
+.nav-page-button:hover {
+    transform: translateY(-2px);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.18));
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28);
+}
+
+.nav-page-button:active {
+    transform: translateY(0);
+}
+
+.nav-page-button-icon {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    color: var(--red-900);
+    background: #ffffff;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+/* ถ้าอยู่บนจอเล็ก ให้ปุ่มไม่ล้น */
+@media (max-width: 760px) {
+    .nav-actions {
+        width: 100%;
+    }
+
+    .nav-page-button {
+        width: fit-content;
+    }
+}
