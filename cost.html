@@ -103,11 +103,19 @@
                     </div>
 
                     <div class="filter-field">
-                        <label for="fiscalYearSelect">
-                            ปีงบประมาณ
+                        <label for="startFiscalYearSelect">
+                            ปีงบประมาณเริ่มต้น
                         </label>
 
-                        <select id="fiscalYearSelect"></select>
+                        <select id="startFiscalYearSelect"></select>
+                    </div>
+
+                    <div class="filter-field">
+                        <label for="endFiscalYearSelect">
+                            ปีงบประมาณสิ้นสุด
+                        </label>
+
+                        <select id="endFiscalYearSelect"></select>
                     </div>
 
                     <button id="applyCostBtn">
@@ -326,11 +334,11 @@
                             <th>Maintenance Cost</th>
                             <th>Indirect Cost</th>
                             <th>Total</th>
-                            <th>Average</th>
                         </tr>
                     </thead>
 
                     <tbody id="costTableBody"></tbody>
+                    <tfoot id="costTableFooter"></tfoot>
                 </table>
             </div>
 
