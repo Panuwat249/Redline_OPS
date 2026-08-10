@@ -1616,7 +1616,7 @@ a.dashboard-pill:hover {
 COST APPLY BUTTON
 ========================= */
 
-#applyBtn {
+#applyCostBtn {
     width: 100%;
     margin-top: 6px;
     padding: 16px 20px;
@@ -1632,7 +1632,7 @@ COST APPLY BUTTON
     transition: 0.2s ease;
 }
 
-#applyBtn:hover {
+#applyCostBtn:hover {
     transform: translateY(-2px);
     filter: brightness(1.08);
 }
