@@ -1611,3 +1611,33 @@ a.dashboard-pill:hover {
     transform: translateY(-2px);
     filter: brightness(1.08);
 }
+
+/* =========================
+COST APPLY BUTTON
+========================= */
+
+#applyBtn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 16px 20px;
+    border: none;
+    border-radius: 18px;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--slate-900), var(--slate-950));
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+    transition: 0.2s ease;
+}
+
+#applyBtn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+}
+
+#applyCostBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+}
