@@ -208,7 +208,7 @@ function setCostYearList(id, selectedData, key) {
 
     element.classList.add("cost-year-list");
 
-    element.innerHTML = selectedData
+    const yearRows = selectedData
         .map(item => {
             return `
                 <div class="cost-year-row">
@@ -218,6 +218,24 @@ function setCostYearList(id, selectedData, key) {
             `;
         })
         .join("");
+
+    let averageRow = "";
+
+    if (selectedData.length > 1) {
+        const averageValue =
+            selectedData.reduce((sum, item) => {
+                return sum + Number(item[key] || 0);
+            }, 0) / selectedData.length;
+
+        averageRow = `
+            <div class="cost-year-row cost-year-average-row">
+                <span>เฉลี่ย</span>
+                <strong>${formatCost(averageValue)}</strong>
+            </div>
+        `;
+    }
+
+    element.innerHTML = yearRows + averageRow;
 }
 
 function updateCostTable(selectedData) {
