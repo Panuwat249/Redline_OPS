@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>ต้นทุนการเดินรถไฟฟ้าสายสีแดง</title>
+
+    <!-- CSS -->
+    <linktyle.css?v=cost-1
+
+    <!-- Font: Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    />
+</head>
+
+<body>
+
+    <div class="background-glow glow-red"></div>
+    <div class="background-glow glow-blue"></div>
+
+    <!-- ===============================
+        HERO / HEADER
+    ================================ -->
+
+    <header class="hero">
+
+        <div class="hero-grid"></div>
+        <div class="hero-circle circle-one"></div>
+        <div class="hero-circle circle-two"></div>
+
+        <div class="hero-inner">
+
+            <nav class="navbar">
+
+                <div class="brand">
+                    <div class="brand-logo">RL</div>
+
+                    <div class="brand-text">
+                        <div class="brand-name">
+                            บริษัท รถไฟฟ้า ร.ฟ.ท. จำกัด
+                        </div>
+
+                        <div class="brand-desc">
+                            ฝ่ายควบคุมการเดินรถ
+                        </div>
+
+                        <div class="brand-desc">
+                            ส่วนวางแผนและวิเคราะห์การปฏิบัติการเดินรถ
+                        </div>
+
+                        <div class="brand-desc">
+                            แผนกวางแผนและวิเคราะห์การปฏิบัติการเดินรถ
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-actions">
+                    <a class="dashboard-pill nav-link-pill" href="index.html">
+                        กลับหน้า Dashboard
+                    </a>
+                </div>
+
+            </nav>
+
+            <section class="hero-content">
+
+                <div class="hero-left">
+
+                    <div class="mini-label">
+                        Operating Cost Dashboard
+                    </div>
+
+                    <h1>
+                        ต้นทุนการเดินรถ<br />
+                        ระบบรถไฟฟ้าชานเมืองสายสีแดง
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        Dashboard สรุปต้นทุนการเดินรถ แยกตามปีงบประมาณ
+                        และแสดงต้นทุน 4 ด้าน พร้อมค่าเฉลี่ยและยอดรวม
+                    </p>
+
+                    <div class="current-period-card">
+                        <span>ปีงบประมาณที่แสดง</span>
+                        <strong id="selectedFiscalYearText">-</strong>
+                    </div>
+
+                </div>
+
+                <aside class="filter-card">
+
+                    <div class="filter-header">
+                        <span></span>
+                        เลือกปีงบประมาณ
+                    </div>
+
+                    <div class="filter-field">
+                        <label for="fiscalYearSelect">
+                            ปีงบประมาณ
+                        </label>
+
+                        <select id="fiscalYearSelect"></select>
+                    </div>
+
+                    <button id="applyCostBtn">
+                        แสดงผลต้นทุน
+                    </button>
+
+                    <p>
+                        ข้อมูลต้นทุนสามารถเพิ่มปีงบประมาณใหม่ได้ในไฟล์
+                        js/cost-data.js
+                    </p>
+
+                </aside>
+
+            </section>
+
+        </div>
+
+    </header>
+
+    <!-- ===============================
+        MAIN CONTENT
+    ================================ -->
+
+    <main class="container">
+
+        <!-- SUMMARY -->
+        <section class="summary-row">
+
+            <div class="summary-card">
+                <div class="summary-icon red-icon">฿</div>
+
+                <div>
+                    <span>ปีงบประมาณ</span>
+                    <strong id="costFiscalYearText">-</strong>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon blue-icon">x̄</div>
+
+                <div>
+                    <span>ค่าเฉลี่ยต้นทุน 4 ด้าน</span>
+                    <strong id="averageCostText">-</strong>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- COST TITLE -->
+        <section class="section-title">
+
+            <div>
+                <p>OPERATING COST SUMMARY</p>
+                <h2>ภาพรวมต้นทุนการเดินรถ</h2>
+            </div>
+
+            <span id="totalCostPill">Total -</span>
+
+        </section>
+
+        <!-- COST KPI CARDS -->
+        <section class="cost-dashboard">
+
+            <!-- Staff Cost -->
+            <article class="dashboard-card cost-card red-theme">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">COST 01</p>
+                        <h3>Staff Cost</h3>
+                        <h4>ต้นทุนบุคลากร</h4>
+                    </div>
+
+                    <div class="card-unit">฿</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">มูลค่าต้นทุน</div>
+                    <div class="total-box-value cost-value" id="staffCostText">-</div>
+                </div>
+
+            </article>
+
+            <!-- Energy Cost -->
+            <article class="dashboard-card cost-card orange-theme">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">COST 02</p>
+                        <h3>Energy Cost</h3>
+                        <h4>ต้นทุนพลังงาน</h4>
+                    </div>
+
+                    <div class="card-unit">฿</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">มูลค่าต้นทุน</div>
+                    <div class="total-box-value cost-value" id="energyCostText">-</div>
+                </div>
+
+            </article>
+
+            <!-- Maintenance Cost -->
+            <article class="dashboard-card cost-card green-theme">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">COST 03</p>
+                        <h3>Maintenance Cost</h3>
+                        <h4>ต้นทุนซ่อมบำรุง</h4>
+                    </div>
+
+                    <div class="card-unit">฿</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">มูลค่าต้นทุน</div>
+                    <div class="total-box-value cost-value" id="maintenanceCostText">-</div>
+                </div>
+
+            </article>
+
+            <!-- Indirect Cost -->
+            <article class="dashboard-card cost-card purple-theme">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">COST 04</p>
+                        <h3>Indirect Cost</h3>
+                        <h4>ต้นทุนทางอ้อม</h4>
+                    </div>
+
+                    <div class="card-unit">฿</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">มูลค่าต้นทุน</div>
+                    <div class="total-box-value cost-value" id="indirectCostText">-</div>
+                </div>
+
+            </article>
+
+        </section>
+
+        <!-- TOTAL AND AVERAGE -->
+        <section class="cost-summary-grid">
+
+            <article class="dashboard-card total-cost-card dark-red-theme">
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">TOTAL COST</p>
+                        <h3>รวมต้นทุนทั้งปีงบประมาณ</h3>
+                    </div>
+
+                    <div class="card-unit">฿</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">Total</div>
+                    <div class="total-box-value cost-grand-value" id="totalCostText">-</div>
+                </div>
+            </article>
+
+            <article class="dashboard-card average-cost-card blue-theme">
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">AVERAGE COST</p>
+                        <h3>เฉลี่ยต้นทุนต่อหมวด</h3>
+                    </div>
+
+                    <div class="card-unit">x̄</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">Average</div>
+                    <div class="total-box-value cost-grand-value" id="averageCostCardText">-</div>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- TABLE -->
+        <section class="cost-table-card">
+
+            <div class="chart-header">
+                <div>
+                    <p>FISCAL YEAR COST</p>
+                    <h2>ตารางต้นทุนรายปีงบประมาณ</h2>
+                    <span>ใช้สำหรับตรวจสอบและเปรียบเทียบต้นทุนแต่ละปี</span>
+                </div>
+
+                <div class="chart-pill">
+                    Cost Table
+                </div>
+            </div>
+
+            <div class="cost-table-wrap">
+                <table class="cost-table">
+                    <thead>
+                        <tr>
+                            <th>ปีงบประมาณ</th>
+                            <th>Staff Cost</th>
+                            <th>Energy Cost</th>
+                            <th>Maintenance Cost</th>
+                            <th>Indirect Cost</th>
+                            <th>Total</th>
+                            <th>Average</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="costTableBody"></tbody>
+                </table>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        Red Line Operating Cost Dashboard
+    </footer>
+
+    js/cost-data.js?v=1script>
+    js/cost-app.js?v=1script>
+
+</body>
+
+</html>
