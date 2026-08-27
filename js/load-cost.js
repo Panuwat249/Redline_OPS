@@ -24,43 +24,47 @@ async function loadCostData() {
 
         if (!worksheet) {
             throw new Error(
-                'ไม่พบ Sheet ชื่อ "Cost" ในไฟล์ Excel'
+                'ไม่พบ Sheet ชื่อ "Cost"'
             );
         }
 
-        // แปลงชื่อ Column จาก Excel
+        const excelRows =
+            XLSX.utils.sheet_to_json(
+                worksheet
+            );
+
         window.costData =
-            XLSX.utils.sheet_to_json(worksheet)
-                .map(row => ({
-                    fiscalYear: String(
-                        row.FiscalYear || ""
-                    ),
+            excelRows.map(row => ({
+                fiscalYear: String(
+                    row.FiscalYear || ""
+                ),
 
-                    staffCost: Number(
-                        row.StaffCost || 0
-                    ),
+                staffCost: Number(
+                    row.StaffCost || 0
+                ),
 
-                    energyCost: Number(
-                        row.EnergyCost || 0
-                    ),
+                energyCost: Number(
+                    row.EnergyCost || 0
+                ),
 
-                    maintenanceCost: Number(
-                        row.MaintenanceCost || 0
-                    ),
+                maintenanceCost: Number(
+                    row.MaintenanceCost || 0
+                ),
 
-                    indirectCost: Number(
-                        row.IndirectCost || 0
-                    )
-                }));
+                indirectCost: Number(
+                    row.IndirectCost || 0
+                )
+            }));
 
         console.log(
-            "Excel Data Loaded:",
+            "Converted Data :",
             window.costData
         );
 
         initCostDashboard();
 
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(error);
 
