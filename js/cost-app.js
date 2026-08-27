@@ -1,5 +1,3 @@
-document.addEventListener("DOMContentLoaded", initCostDashboard);
-
 let activeCostData = [];
 
 function initCostDashboard() {
