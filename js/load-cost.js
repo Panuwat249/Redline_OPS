@@ -1,23 +1,35 @@
 async function loadCostData() {
+    console.log("load-cost.js loaded");
 
-    const response =
-        await fetch("data/cost-data.xlsx");
+    try {
+        const response = await fetch("data/cost-data.xlsx");
 
-    const buffer =
-        await response.arrayBuffer();
+        if (!response.ok) {
+            throw new Error(
+                `โหลดไฟล์ Excel ไม่สำเร็จ (${response.status})`
+            );
+        }
 
-    const workbook =
-        XLSX.read(buffer);
+        const buffer = await response.arrayBuffer();
 
-    const worksheet =
-        workbook.Sheets["Cost"];
+        const workbook = XLSX.read(buffer);
 
-    window.costData =
-        XLSX.utils.sheet_to_json(
-            worksheet
+        const worksheet = workbook.Sheets["Cost"];
+
+        window.costData =
+            XLSX.utils.sheet_to_json(worksheet);
+
+        console.log("Excel Data:", window.costData);
+
+        initCostDashboard();
+
+    } catch (error) {
+        console.error(error);
+
+        alert(
+            "ไม่สามารถโหลดไฟล์ cost-data.xlsx ได้"
         );
-
-    initCostDashboard();
+    }
 }
 
 document.addEventListener(
