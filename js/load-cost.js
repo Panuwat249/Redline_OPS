@@ -1,8 +1,11 @@
 async function loadCostData() {
+
     console.log("load-cost.js loaded");
 
     try {
-        const response = await fetch("data/cost-data.xlsx");
+
+        const response =
+            await fetch("data/cost-data.xlsx");
 
         if (!response.ok) {
             throw new Error(
@@ -10,24 +13,59 @@ async function loadCostData() {
             );
         }
 
-        const buffer = await response.arrayBuffer();
+        const buffer =
+            await response.arrayBuffer();
 
-        const workbook = XLSX.read(buffer);
+        const workbook =
+            XLSX.read(buffer);
 
-        const worksheet = workbook.Sheets["Cost"];
+        const worksheet =
+            workbook.Sheets["Cost"];
 
+        if (!worksheet) {
+            throw new Error(
+                'ไม่พบ Sheet ชื่อ "Cost" ในไฟล์ Excel'
+            );
+        }
+
+        // แปลงชื่อ Column จาก Excel
         window.costData =
-            XLSX.utils.sheet_to_json(worksheet);
+            XLSX.utils.sheet_to_json(worksheet)
+                .map(row => ({
+                    fiscalYear: String(
+                        row.FiscalYear || ""
+                    ),
 
-        console.log("Excel Data:", window.costData);
+                    staffCost: Number(
+                        row.StaffCost || 0
+                    ),
+
+                    energyCost: Number(
+                        row.EnergyCost || 0
+                    ),
+
+                    maintenanceCost: Number(
+                        row.MaintenanceCost || 0
+                    ),
+
+                    indirectCost: Number(
+                        row.IndirectCost || 0
+                    )
+                }));
+
+        console.log(
+            "Excel Data Loaded:",
+            window.costData
+        );
 
         initCostDashboard();
 
     } catch (error) {
+
         console.error(error);
 
         alert(
-            "ไม่สามารถโหลดไฟล์ cost-data.xlsx ได้"
+            "ไม่สามารถโหลดข้อมูลจาก cost-data.xlsx ได้"
         );
     }
 }
