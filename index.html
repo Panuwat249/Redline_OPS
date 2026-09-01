@@ -32,6 +32,9 @@
     <!-- Chart.js Data Labels Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 
+    <!-- xlsx: ใช้อ่านไฟล์ ops-data.xlsx -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 </head>
 
 <body>
@@ -112,46 +115,52 @@
                 <!-- Filter Panel -->
                 <aside class="filter-card">
 
-                    <div class="filter-header">
-                        <span></span>
-                        เลือกช่วงเดือน
-                    </div>
+    <div class="filter-header">
+        <span></span>
+        เลือกช่วงข้อมูล
+    </div>
 
-                    <div class="filter-field">
-                        <label for="startMonth">
-                            เดือนเริ่มต้น
-                        </label>
-                        <select id="startMonth"></select>
-                    </div>
+    <!-- โหมดการเลือก -->
+    <div class="filter-mode">
+        <button type="button" class="mode-btn is-active" data-mode="month">รายเดือน</button>
+        <button type="button" class="mode-btn" data-mode="fy">รายปีงบ</button>
+        <button type="button" class="mode-btn" data-mode="all">ทั้งหมด</button>
+    </div>
 
-                    <div class="filter-field">
-                        <label for="endMonth">
-                            เดือนสิ้นสุด
-                        </label>
-                        <select id="endMonth"></select>
-                    </div>
+    <div class="filter-field" id="fieldStartMonth">
+        <label for="startMonth">เดือนเริ่มต้น</label>
+        <select id="startMonth"></select>
+    </div>
 
-                    <button id="applyBtn">
-                        แสดงผล Dashboard
-                    </button>
-                  
-                    <div class="export-actions">
-                        <button id="exportPdfBtn" type="button" class="export-btn pdf-btn">
-                            นำออก PDF
-                        </button>
+    <div class="filter-field" id="fieldEndMonth">
+        <label for="endMonth">เดือนสิ้นสุด</label>
+        <select id="endMonth"></select>
+    </div>
 
-                        <button id="exportExcelBtn" type="button" class="export-btn excel-btn">
-                            นำออก Excel
-                        </button>
-                    </div>
+    <div class="filter-field" id="fieldFiscalYear" hidden>
+        <label for="fiscalYear">ปีงบประมาณ (ต.ค. – ก.ย.)</label>
+        <select id="fiscalYear"></select>
+    </div>
 
-                    <p>
-                        เลือกเดือนเดียวจะแสดงค่าของเดือนนั้น
-                        หากเลือกหลายเดือน KPI จะแสดงค่าเฉลี่ย
-                        และข้อมูลการเดินรถจะแสดงผลรวม
-                    </p>
+    <button id="applyBtn">แสดงผล Dashboard</button>
 
-                </aside>
+    <div class="export-actions">
+        <button id="exportPdfBtn" type="button" class="export-btn pdf-btn">นำออก PDF</button>
+        <button id="exportExcelBtn" type="button" class="export-btn excel-btn">นำออก Excel</button>
+    </div>
+
+    <div class="data-source-row">
+        <span class="data-source-label">แหล่งข้อมูล</span>
+        <span id="dataSourceBadge" class="data-source-badge state-loading">กำลังโหลด...</span>
+    </div>
+
+    <p>
+        เลือกเดือนเดียวจะแสดงค่าของเดือนนั้น
+        หากเลือกหลายเดือน KPI จะแสดงค่าเฉลี่ย
+        และข้อมูลการเดินรถจะแสดงผลรวม
+    </p>
+
+</aside>
 
             </section>
 
@@ -568,6 +577,49 @@
     </article>
 
 </section>
+        <!-- ===============================
+    MONTHLY DATA TABLE
+================================ -->
+<section class="section-title operation-title">
+    <div>
+        <p>MONTHLY DETAIL</p>
+        <h2>ตารางข้อมูลรายเดือน</h2>
+    </div>
+    <span id="tableSummaryMode">-</span>
+</section>
+
+<section class="cost-table-card">
+
+    <div class="chart-header">
+        <div>
+            <p>DETAIL &amp; AVERAGE</p>
+            <h2>รายละเอียดและค่าสถิติ</h2>
+            <span>ค่าเฉลี่ย / สูงสุด / ต่ำสุด / ผลรวม ของช่วงที่เลือก</span>
+        </div>
+        <div class="chart-pill">Data Table</div>
+    </div>
+
+    <div class="cost-table-wrap">
+        <table class="cost-table stats-table">
+            <thead>
+                <tr>
+                    <th>เดือน</th>
+                    <th>ปีงบ</th>
+                    <th>TSP 5 นาที</th>
+                    <th>TSP 10 นาที</th>
+                    <th>TSA</th>
+                    <th>TA</th>
+                    <th>ระยะทาง (กม.)</th>
+                    <th>เที่ยววิ่ง</th>
+                    <th>ยกเลิก</th>
+                </tr>
+            </thead>
+            <tbody id="statsTableBody"></tbody>
+            <tfoot id="statsTableFooter"></tfoot>
+        </table>
+    </div>
+
+</section>
 
     </main>
 
@@ -578,6 +630,7 @@
     <!-- JS: ต้องโหลด data.js ก่อน app.js เสมอ -->
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/load-data.js"></script>
 
 </body>
 
