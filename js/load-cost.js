@@ -1,80 +1,70 @@
+const COST_DATA_FILE  = "data/cost-data.xlsx";
+const COST_SHEET_NAME = "Cost";
+
+document.addEventListener("DOMContentLoaded", loadCostData);
+
 async function loadCostData() {
-
-    console.log("load-cost.js loaded");
-
     try {
-
-        const response =
-            await fetch("data/cost-data.xlsx");
+        const response = await fetch(COST_DATA_FILE + "?t=" + Date.now());
 
         if (!response.ok) {
-            throw new Error(
-                `โหลดไฟล์ Excel ไม่สำเร็จ (${response.status})`
-            );
+            throw new Error(`โหลดไฟล์ Excel ไม่สำเร็จ (${response.status})`);
         }
 
-        const buffer =
-            await response.arrayBuffer();
-
-        const workbook =
-            XLSX.read(buffer);
+        const workbook = XLSX.read(await response.arrayBuffer(), { type: "array" });
 
         const worksheet =
-            workbook.Sheets["Cost"];
+            workbook.Sheets[COST_SHEET_NAME] ||
+            workbook.Sheets[workbook.SheetNames[0]];
 
         if (!worksheet) {
-            throw new Error(
-                'ไม่พบ Sheet ชื่อ "Cost"'
-            );
+            throw new Error(`ไม่พบชีตชื่อ "${COST_SHEET_NAME}"`);
         }
 
-        const excelRows =
-            XLSX.utils.sheet_to_json(
-                worksheet
-            );
+        const rows = XLSX.utils.sheet_to_json(worksheet, { defval: 0 });
 
-        window.costData =
-            excelRows.map(row => ({
-                fiscalYear: String(
-                    row.FiscalYear || ""
-                ),
+        window.costData = rows
+            .map(row => {
+                const clean = {};
 
-                staffCost: Number(
-                    row.StaffCost || 0
-                ),
+                Object.keys(row).forEach(key => {
+                    clean[String(key).replace(/[\s_\-]/g, "").toLowerCase()] = row[key];
+                });
 
-                energyCost: Number(
-                    row.EnergyCost || 0
-                ),
+                return {
+                    fiscalYear: String(clean.fiscalyear || clean.ปีงบประมาณ || "").trim(),
+                    staffCost: toNumber(clean.staffcost),
+                    energyCost: toNumber(clean.energycost),
+                    maintenanceCost: toNumber(clean.maintenancecost),
+                    indirectCost: toNumber(clean.indirectcost)
+                };
+            })
+            .filter(item => item.fiscalYear !== "");
 
-                maintenanceCost: Number(
-                    row.MaintenanceCost || 0
-                ),
+        if (window.costData.length === 0) {
+            throw new Error("ไม่มีข้อมูลในชีต Cost");
+        }
 
-                indirectCost: Number(
-                    row.IndirectCost || 0
-                )
-            }));
-
-        console.log(
-            "Converted Data :",
-            window.costData
-        );
-
-        initCostDashboard();
-
+        console.log("โหลด cost-data.xlsx สำเร็จ:", window.costData.length, "ปี");
     }
     catch (error) {
+        console.warn("โหลด cost-data.xlsx ไม่ได้:", error.message);
 
-        console.error(error);
-
-        alert(
-            "ไม่สามารถโหลดข้อมูลจาก cost-data.xlsx ได้"
-        );
+        if (!Array.isArray(window.costData) || window.costData.length === 0) {
+            alert(
+                "โหลดข้อมูลต้นทุนไม่ได้\n\n" +
+                "1) ตรวจสอบไฟล์ data/cost-data.xlsx (ชีตชื่อ Cost)\n" +
+                "2) ต้องเปิดผ่าน Live Server หรือ GitHub Pages"
+            );
+            return;
+        }
     }
+
+    initCostDashboard();
 }
 
-document.addEventListener(
-    "DOMContentLoaded",
-    loadCostData
-);
+function toNumber(value) {
+    const parsed = parseFloat(String(value ?? "").replace(/,/g, ""));
+
+    return isNaN(parsed) ? 0 : parsed;
+}
