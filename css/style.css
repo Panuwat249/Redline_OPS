@@ -1730,3 +1730,156 @@ COST APPLY BUTTON
     font-size: 22px;
     font-weight: 900;
 }
+
+/* =========================================================
+   UPGRADE PACK
+========================================================= */
+
+/* ---- Mode Switch ---- */
+.filter-mode {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+    margin-bottom: 18px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.mode-btn {
+    padding: 12px 8px;
+    border: none;
+    border-radius: 15px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.78);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.22s ease;
+}
+
+.mode-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.mode-btn.is-active {
+    color: var(--red-900);
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+/* ---- Data Source Badge ---- */
+.data-source-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.data-source-label {
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.data-source-badge {
+    padding: 6px 13px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.state-loading  { color: #7c2d12; background: #ffedd5; }
+.state-excel    { color: #065f46; background: #d1fae5; }
+.state-fallback { color: #9a3412; background: #fed7aa; }
+.state-error    { color: #ffffff; background: #b91c1c; }
+
+/* ---- Stats Table ---- */
+.stats-table td { text-align: center; }
+.stats-table td:first-child { text-align: left; }
+
+.stats-table tfoot td {
+    padding: 15px 14px;
+    font-size: 14px;
+    font-weight: 900;
+    text-align: center;
+    border: 1px solid #fecaca;
+}
+
+.stats-table tfoot td:first-child { text-align: left; }
+
+.stats-table tfoot .row-average td { color: var(--red-900); background: #fee2e2; }
+.stats-table tfoot .row-max td     { color: #065f46; background: #d1fae5; }
+.stats-table tfoot .row-min        { }
+.stats-table tfoot .row-min td     { color: #9a3412; background: #ffedd5; }
+
+.stats-table tfoot .row-total td {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--red-900), var(--red-600));
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.stats-table tbody tr { transition: 0.18s ease; }
+.stats-table tbody tr:hover td { background: #fff1f2 !important; }
+
+/* ---- Card Polish ---- */
+.dashboard-card {
+    backdrop-filter: blur(6px);
+    animation: cardFadeUp 0.5s ease both;
+}
+
+@keyframes cardFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.kpi-dashboard .dashboard-card:nth-child(2) { animation-delay: 0.06s; }
+.kpi-dashboard .dashboard-card:nth-child(3) { animation-delay: 0.12s; }
+.kpi-dashboard .dashboard-card:nth-child(4) { animation-delay: 0.18s; }
+
+.total-box-value {
+    background: linear-gradient(135deg, currentColor, currentColor);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.brand-logo {
+    background: linear-gradient(145deg, #ffffff, #ffe4e6);
+    transition: 0.25s ease;
+}
+
+.brand-logo:hover { transform: rotate(-6deg) scale(1.05); }
+
+.chart-card { transition: 0.25s ease; }
+.chart-card:hover { box-shadow: var(--shadow-hover); }
+
+/* ---- Scrollbar ---- */
+.cost-table-wrap::-webkit-scrollbar { height: 10px; }
+.cost-table-wrap::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 999px; }
+.cost-table-wrap::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, var(--red-700), var(--red-500));
+    border-radius: 999px;
+}
+
+/* ---- Disabled Button ---- */
+.export-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ---- Print ---- */
+@media print {
+    .hero, .filter-card, .export-actions, footer { display: none !important; }
+    .container { margin-top: 0; }
+    .dashboard-card, .chart-card { break-inside: avoid; box-shadow: none; }
+}
