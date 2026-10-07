@@ -30,6 +30,21 @@ async function loadCostData() {
             }
         );
 
+        /* โหลด sheet dashboard_cost_detail */
+ 
+        const detailSheet =
+            workbook.Sheets[
+            "dashboard_cost_detail"
+        ];
+ 
+        window.costDetail =
+            XLSX.utils.sheet_to_json(
+            detailSheet,
+        {
+            defval: 0
+        }
+    );
+
         const worksheet =
             workbook.Sheets[COST_SHEET_NAME];
 
