@@ -209,16 +209,62 @@ function setCostYearList(id, selectedData, key) {
 
     element.classList.add("cost-year-list");
 
-    const yearRows = selectedData
-        .map(item => {
-            return `
-                <div class="cost-year-row">
-                    <span>ปีงบ ${item.fiscalYear}</span>
-                    <strong>${formatCost(item[key])}</strong>
-                </div>
-            `;
-        })
-        .join("");
+    const groupMap = {
+
+    staffCost:
+        "Staff",
+
+    energyCost:
+        "Energy",
+
+    maintenanceCost:
+        "Maintenance",
+
+    indirectCost:
+        "Indirect"
+
+};
+
+const costGroup =
+    groupMap[key];
+
+const yearRows =
+    selectedData
+    .map(item => {
+
+        return `
+
+        <div
+            class="cost-year-row expandable-row"
+            data-year="${item.fiscalYear}"
+            data-group="${costGroup}"
+        >
+
+            <span>
+
+                ▼ ปีงบ ${item.fiscalYear}
+
+            </span>
+
+            <strong>
+
+                ${formatCost(
+                    item[key]
+                )}
+
+            </strong>
+
+        </div>
+
+        <div
+            id="detail-${costGroup}-${item.fiscalYear}"
+            class="cost-detail-panel"
+        ></div>
+
+        `;
+
+    })
+    .join("");
 
     let averageRow = "";
 
@@ -237,6 +283,10 @@ function setCostYearList(id, selectedData, key) {
     }
 
     element.innerHTML = yearRows + averageRow;
+    setTimeout(
+    setupExpandRows,
+    0
+);
 }
 
 function updateCostTable(selectedData) {
@@ -313,6 +363,100 @@ function formatCost(value) {
     return number.toLocaleString("th-TH", {
         maximumFractionDigits: 0
     });
+}
+
+function setupExpandRows(){
+
+    document
+        .querySelectorAll(
+            ".expandable-row"
+        )
+        .forEach(row => {
+
+            row.onclick = () => {
+
+                const year =
+                    row.dataset.year;
+
+                const group =
+                    row.dataset.group;
+
+                const panel =
+                    document
+                    .getElementById(
+
+                      `detail-${group}-${year}`
+
+                    );
+
+                if(
+                    panel.innerHTML
+                ){
+                    panel.innerHTML =
+                        "";
+                    return;
+                }
+
+                const rows =
+                    window.costDetail
+                    .filter(
+
+                        item =>
+
+                            Number(
+                                item.FiscalYear
+                            )
+
+                            ===
+
+                            Number(
+                                year
+                            )
+
+                            &&
+
+                            item.CostGroup
+                            ===
+                            group
+
+                    );
+
+                panel.innerHTML =
+
+                    rows
+                    .map(
+
+                        x => `
+
+                        <div
+                          class="cost-sub-row"
+                        >
+
+                          <span>
+
+                           ${x.CostItem}
+
+                          </span>
+
+                          <strong>
+
+                           ${formatCost(
+                                x.Amount
+                            )}
+
+                          </strong>
+
+                        </div>
+
+                    `
+
+                    )
+                    .join("");
+
+            };
+
+        });
+
 }
 
 let costPieChart = null;
