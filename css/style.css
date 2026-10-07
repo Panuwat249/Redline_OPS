@@ -1883,3 +1883,24 @@ COST APPLY BUTTON
     .container { margin-top: 0; }
     .dashboard-card, .chart-card { break-inside: avoid; box-shadow: none; }
 }
+
+.cost-card{
+    cursor:pointer;
+}
+
+.cost-card:hover{
+    transform:translateY(-4px);
+}
+
+.cost-card.active-card{
+
+    outline:5px solid #ef233c;
+
+    box-shadow:
+      0 0 0 4px rgba(
+        239,
+        35,
+        60,
+        .22
+      );
+}
