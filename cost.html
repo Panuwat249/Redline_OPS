@@ -179,7 +179,7 @@
         <section class="cost-dashboard">
 
             <!-- Staff Cost -->
-            <article class="dashboard-card cost-card red-theme">
+            <article class="dashboard-card cost-card red-theme"id="staffCard">
 
                 <div class="card-topline"></div>
 
@@ -201,7 +201,7 @@
             </article>
 
             <!-- Energy Cost -->
-            <article class="dashboard-card cost-card orange-theme">
+            <article class="dashboard-card cost-card orange-theme"id="energyCard">
 
                 <div class="card-topline"></div>
 
@@ -223,7 +223,7 @@
             </article>
 
             <!-- Maintenance Cost -->
-            <article class="dashboard-card cost-card green-theme">
+            <article class="dashboard-card cost-card green-theme"id="maintenanceCard">
 
                 <div class="card-topline"></div>
 
@@ -245,7 +245,7 @@
             </article>
 
             <!-- Indirect Cost -->
-            <article class="dashboard-card cost-card purple-theme">
+            <article class="dashboard-card cost-card purple-theme"id="indirectCard">
 
                 <div class="card-topline"></div>
 
@@ -362,9 +362,24 @@
 
     </div>
 
-    <div class="chart-wrap">
-        <canvas id="costPieChart"></canvas>
-    </div>
+    <div
+ class="chart-wrap"
+ style="
+   display:flex;
+   justify-content:center;
+   align-items:center;
+ "
+>
+
+    <canvas
+      id="costPieChart"
+      style="
+       max-width:700px;
+       max-height:500px;
+      "
+    ></canvas>
+
+</div>
 
 </section>
 
@@ -379,32 +394,6 @@
                 เจาะลึกรายการต้นทุน
             </span>
         </div>
-
-        <select
-            id="costGroupSelect"
-            style="
-                padding:10px;
-                border-radius:10px;
-            "
-        >
-
-            <option value="Staff">
-                Staff Cost
-            </option>
-
-            <option value="Energy">
-                Energy Cost
-            </option>
-
-            <option value="Maintenance">
-                Maintenance Cost
-            </option>
-
-            <option value="Indirect">
-                Indirect Cost
-            </option>
-
-        </select>
 
     </div>
 
