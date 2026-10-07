@@ -81,7 +81,6 @@ function renderCostDashboard() {
     updateCostCards(selectedData, calculatedData);
     updateCostTable(selectedData);
     renderPieCharts();
-    renderDetailBreakdown();
 }
 
 function getSelectedCostRangeData() {
