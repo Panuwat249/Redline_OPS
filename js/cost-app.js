@@ -371,47 +371,106 @@ function renderPieCharts() {
         }
 
         costPieChart =
-            new Chart(
-                pieCanvas,
-                {
+    new Chart(
+        pieCanvas,
+        {
 
-                    type: "pie",
+            type: "pie",
 
-                    data: {
+            data: {
 
-                        labels: [
+                labels: [
 
-                            "Staff",
+                    "Staff",
+                    "Energy",
+                    "Maintenance",
+                    "Indirect"
 
-                            "Energy",
+                ],
 
-                            "Maintenance",
+                datasets: [
 
-                            "Indirect"
+                    {
+
+                        data: [
+
+                            data.staffCost,
+                            data.energyCost,
+                            data.maintenanceCost,
+                            data.indirectCost
 
                         ],
 
-                        datasets: [
-
-                            {
-
-                                data: [
-
-                                    data.staffCost,
-                                    data.energyCost,
-                                    data.maintenanceCost,
-                                    data.indirectCost
-
-                                ]
-
-                            }
-
+                        backgroundColor:[
+                            "#dc2626",
+                            "#f97316",
+                            "#10b981",
+                            "#8b5cf6"
                         ]
 
                     }
 
+                ]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+                        position:"right"
+                    },
+
+                    tooltip:{
+
+                        callbacks:{
+
+                            label:function(context){
+
+                                const value =
+                                    context.raw;
+
+                                const total =
+                                    context.dataset.data
+                                        .reduce(
+                                            (a,b)=>a+b,
+                                            0
+                                        );
+
+                                const percent =
+                                    (
+                                        value /
+                                        total *
+                                        100
+                                    )
+                                    .toFixed(1);
+
+                                return (
+                                    context.label +
+                                    " : " +
+                                    formatCost(value) +
+                                    " บาท (" +
+                                    percent +
+                                    "%)"
+                                );
+
+                            }
+
+                        }
+
+                    }
+
                 }
-            );
+
+            }
+
+        }
+    );
 
     }
 
