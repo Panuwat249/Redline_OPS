@@ -1,6 +1,4 @@
 let activeCostData = [];
-let selectedGroup =
-    "Staff";
 
 function initCostDashboard() {
     const data = window.costData;
@@ -45,20 +43,6 @@ function initCostDashboard() {
     renderCostDashboard();
 
     applyCostBtn.addEventListener("click", renderCostDashboard);
-    const groupSelect =
-    document.getElementById(
-        "costGroupSelect"
-    );
-
-if (groupSelect) {
-
-    groupSelect
-        .addEventListener(
-            "change",
-            renderDetailBreakdown
-        );
-
-}
 
     startFiscalYearSelect.addEventListener("change", renderCostDashboard);
     endFiscalYearSelect.addEventListener("change", renderCostDashboard);
@@ -332,7 +316,6 @@ function formatCost(value) {
 }
 
 let costPieChart = null;
-let detailPieChart = null;
 
 function renderPieCharts() {
 
@@ -473,179 +456,5 @@ function renderPieCharts() {
     );
 
     }
-
-    renderDetailBreakdown();
-
-}
-
-function renderDetailBreakdown() {
-
-    const year =
-        Number(
-            document
-                .getElementById(
-                    "endFiscalYearSelect"
-                )
-                .value
-        );
-
-    const group =
-        selectedGroup;
-
-    if (!group) {
-        return;
-    }
-
-    const rows =
-        window.costDetail.filter(
-            item =>
-
-                Number(
-                    item.FiscalYear
-                ) === year
-
-                &&
-
-                item.CostGroup === group
-        );
-
-    const tbody =
-        document.getElementById(
-            "detailTableBody"
-        );
-
-    if (tbody) {
-
-        tbody.innerHTML =
-            rows.map(r => `
-
-            <tr>
-
-              <td>${r.CostGroup}</td>
-
-              <td>${r.CostItem}</td>
-
-              <td>${formatCost(r.Amount)}</td>
-
-            </tr>
-
-        `).join("");
-
-    }
-
-    const pie =
-        document.getElementById(
-            "detailPieChart"
-        );
-
-    if (!pie) {
-        return;
-    }
-
-    if (detailPieChart) {
-        detailPieChart.destroy();
-    }
-
-    detailPieChart =
-        new Chart(
-            pie,
-            {
-
-                type: "pie",
-
-                data: {
-
-                    labels:
-                        rows.map(
-                            x =>
-                            x.CostItem
-                        ),
-
-                    datasets: [
-
-                        {
-
-                            data:
-                                rows.map(
-                                    x =>
-                                    x.Amount
-                                )
-
-                        }
-
-                    ]
-
-                }
-
-            }
-
-        );
-}
-
-function setupCostCards(){
-
-    document
-        .getElementById(
-            "staffCard"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                selectedGroup =
-                    "Staff";
-
-                renderDetailBreakdown();
-
-            }
-        );
-
-    document
-        .getElementById(
-            "energyCard"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                selectedGroup =
-                    "Energy";
-
-                renderDetailBreakdown();
-
-            }
-        );
-
-    document
-        .getElementById(
-            "maintenanceCard"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                selectedGroup =
-                    "Maintenance";
-
-                renderDetailBreakdown();
-
-            }
-        );
-
-    document
-        .getElementById(
-            "indirectCard"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                selectedGroup =
-                    "Indirect";
-
-                renderDetailBreakdown();
-
-            }
-        );
 
 }
