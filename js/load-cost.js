@@ -1,70 +1,123 @@
-const COST_DATA_FILE  = "data/cost-data.xlsx";
-const COST_SHEET_NAME = "Cost";
+const COST_DATA_FILE = "data/cost-data.xlsx";
+const COST_SHEET_NAME = "dashboard_cost";
 
-document.addEventListener("DOMContentLoaded", loadCostData);
+document.addEventListener(
+    "DOMContentLoaded",
+    loadCostData
+);
 
 async function loadCostData() {
+
     try {
-        const response = await fetch(COST_DATA_FILE + "?t=" + Date.now());
+
+        const response =
+            await fetch(
+                COST_DATA_FILE +
+                "?t=" +
+                Date.now()
+            );
 
         if (!response.ok) {
-            throw new Error(`โหลดไฟล์ Excel ไม่สำเร็จ (${response.status})`);
+            throw new Error(
+                `โหลดไฟล์ Excel ไม่สำเร็จ (${response.status})`
+            );
         }
 
-        const workbook = XLSX.read(await response.arrayBuffer(), { type: "array" });
+        const workbook = XLSX.read(
+            await response.arrayBuffer(),
+            {
+                type: "array"
+            }
+        );
 
         const worksheet =
-            workbook.Sheets[COST_SHEET_NAME] ||
-            workbook.Sheets[workbook.SheetNames[0]];
+            workbook.Sheets[COST_SHEET_NAME];
 
         if (!worksheet) {
-            throw new Error(`ไม่พบชีตชื่อ "${COST_SHEET_NAME}"`);
+            throw new Error(
+                `ไม่พบชีต ${COST_SHEET_NAME}`
+            );
         }
 
-        const rows = XLSX.utils.sheet_to_json(worksheet, { defval: 0 });
+        const rows =
+            XLSX.utils.sheet_to_json(
+                worksheet,
+                {
+                    defval: 0
+                }
+            );
 
-        window.costData = rows
-            .map(row => {
-                const clean = {};
+        window.costData =
+            rows.map(row => ({
 
-                Object.keys(row).forEach(key => {
-                    clean[String(key).replace(/[\s_\-]/g, "").toLowerCase()] = row[key];
-                });
+                fiscalYear:
+                    Number(row.FiscalYear),
 
-                return {
-                    fiscalYear: String(clean.fiscalyear || clean.ปีงบประมาณ || "").trim(),
-                    staffCost: toNumber(clean.staffcost),
-                    energyCost: toNumber(clean.energycost),
-                    maintenanceCost: toNumber(clean.maintenancecost),
-                    indirectCost: toNumber(clean.indirectcost)
-                };
-            })
-            .filter(item => item.fiscalYear !== "");
+                staffCost:
+                    toNumber(row.StaffCost),
 
-        if (window.costData.length === 0) {
-            throw new Error("ไม่มีข้อมูลในชีต Cost");
-        }
+                energyCost:
+                    toNumber(row.EnergyCost),
 
-        console.log("โหลด cost-data.xlsx สำเร็จ:", window.costData.length, "ปี");
+                maintenanceCost:
+                    toNumber(row.MaintenanceCost),
+
+                indirectCost:
+                    toNumber(row.IndirectCost),
+
+                totalCost:
+                    toNumber(row.TotalCost),
+
+                carKm:
+                    toNumber(row.CarKm),
+
+                passenger:
+                    toNumber(row.Passenger),
+
+                avgFare:
+                    toNumber(row.AvgFare),
+
+                costPerCarKm:
+                    toNumber(row.CostPerCarKm),
+
+                costPerPassenger:
+                    toNumber(row.CostPerPassenger)
+
+            }));
+
+        console.log(
+            "โหลด Cost Dashboard สำเร็จ",
+            window.costData
+        );
+
     }
     catch (error) {
-        console.warn("โหลด cost-data.xlsx ไม่ได้:", error.message);
 
-        if (!Array.isArray(window.costData) || window.costData.length === 0) {
-            alert(
-                "โหลดข้อมูลต้นทุนไม่ได้\n\n" +
-                "1) ตรวจสอบไฟล์ data/cost-data.xlsx (ชีตชื่อ Cost)\n" +
-                "2) ต้องเปิดผ่าน Live Server หรือ GitHub Pages"
-            );
-            return;
-        }
+        alert(
+            "โหลดข้อมูลต้นทุนไม่ได้\n\n" +
+            error.message
+        );
+
+        console.error(error);
+
+        return;
+
     }
 
     initCostDashboard();
+
 }
 
 function toNumber(value) {
-    const parsed = parseFloat(String(value ?? "").replace(/,/g, ""));
 
-    return isNaN(parsed) ? 0 : parsed;
+    const parsed =
+        parseFloat(
+            String(value ?? "")
+                .replace(/,/g, "")
+        );
+
+    return isNaN(parsed)
+        ? 0
+        : parsed;
 }
+``
