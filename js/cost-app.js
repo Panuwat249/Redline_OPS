@@ -42,6 +42,20 @@ function initCostDashboard() {
     renderCostDashboard();
 
     applyCostBtn.addEventListener("click", renderCostDashboard);
+    const groupSelect =
+    document.getElementById(
+        "costGroupSelect"
+    );
+
+if (groupSelect) {
+
+    groupSelect
+        .addEventListener(
+            "change",
+            renderDetailBreakdown
+        );
+
+}
 
     startFiscalYearSelect.addEventListener("change", renderCostDashboard);
     endFiscalYearSelect.addEventListener("change", renderCostDashboard);
@@ -80,6 +94,7 @@ function renderCostDashboard() {
 
     updateCostCards(selectedData, calculatedData);
     updateCostTable(selectedData);
+    renderPieCharts();
 }
 
 function getSelectedCostRangeData() {
@@ -310,4 +325,200 @@ function formatCost(value) {
     return number.toLocaleString("th-TH", {
         maximumFractionDigits: 0
     });
+}
+
+let costPieChart = null;
+let detailPieChart = null;
+
+function renderPieCharts() {
+
+    const endSelect =
+        document.getElementById(
+            "endFiscalYearSelect"
+        );
+
+    if (!endSelect) {
+        return;
+    }
+
+    const selectedYear =
+        Number(endSelect.value);
+
+    const data =
+        activeCostData.find(
+            x =>
+                Number(x.fiscalYear)
+                === selectedYear
+        );
+
+    if (!data) {
+        return;
+    }
+
+    const pieCanvas =
+        document.getElementById(
+            "costPieChart"
+        );
+
+    if (pieCanvas) {
+
+        if (costPieChart) {
+            costPieChart.destroy();
+        }
+
+        costPieChart =
+            new Chart(
+                pieCanvas,
+                {
+
+                    type: "pie",
+
+                    data: {
+
+                        labels: [
+
+                            "Staff",
+
+                            "Energy",
+
+                            "Maintenance",
+
+                            "Indirect"
+
+                        ],
+
+                        datasets: [
+
+                            {
+
+                                data: [
+
+                                    data.staffCost,
+                                    data.energyCost,
+                                    data.maintenanceCost,
+                                    data.indirectCost
+
+                                ]
+
+                            }
+
+                        ]
+
+                    }
+
+                }
+            );
+
+    }
+
+    renderDetailBreakdown();
+
+}
+
+function renderDetailBreakdown() {
+
+    const year =
+        Number(
+            document
+                .getElementById(
+                    "endFiscalYearSelect"
+                )
+                .value
+        );
+
+    const group =
+        document
+            .getElementById(
+                "costGroupSelect"
+            )
+            ?.value;
+
+    if (!group) {
+        return;
+    }
+
+    const rows =
+        window.costDetail.filter(
+            item =>
+
+                Number(
+                    item.FiscalYear
+                ) === year
+
+                &&
+
+                item.CostGroup === group
+        );
+
+    const tbody =
+        document.getElementById(
+            "detailTableBody"
+        );
+
+    if (tbody) {
+
+        tbody.innerHTML =
+            rows.map(r => `
+
+            <tr>
+
+              <td>${r.CostGroup}</td>
+
+              <td>${r.CostItem}</td>
+
+              <td>${formatCost(r.Amount)}</td>
+
+            </tr>
+
+        `).join("");
+
+    }
+
+    const pie =
+        document.getElementById(
+            "detailPieChart"
+        );
+
+    if (!pie) {
+        return;
+    }
+
+    if (detailPieChart) {
+        detailPieChart.destroy();
+    }
+
+    detailPieChart =
+        new Chart(
+            pie,
+            {
+
+                type: "pie",
+
+                data: {
+
+                    labels:
+                        rows.map(
+                            x =>
+                            x.CostItem
+                        ),
+
+                    datasets: [
+
+                        {
+
+                            data:
+                                rows.map(
+                                    x =>
+                                    x.Amount
+                                )
+
+                        }
+
+                    ]
+
+                }
+
+            }
+
+        );
 }
