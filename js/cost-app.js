@@ -1,7 +1,10 @@
 let activeCostData = [];
+let selectedGroup =
+    "Staff";
 
 function initCostDashboard() {
     const data = window.costData;
+    setupCostCards();
 
     if (!Array.isArray(data) || data.length === 0) {
         alert("ไม่พบข้อมูลใน js/cost-data.js");
@@ -95,6 +98,7 @@ function renderCostDashboard() {
     updateCostCards(selectedData, calculatedData);
     updateCostTable(selectedData);
     renderPieCharts();
+    renderDetailBreakdown();
 }
 
 function getSelectedCostRangeData() {
@@ -427,11 +431,7 @@ function renderDetailBreakdown() {
         );
 
     const group =
-        document
-            .getElementById(
-                "costGroupSelect"
-            )
-            ?.value;
+        selectedGroup;
 
     if (!group) {
         return;
@@ -521,4 +521,72 @@ function renderDetailBreakdown() {
             }
 
         );
+}
+
+function setupCostCards(){
+
+    document
+        .getElementById(
+            "staffCard"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                selectedGroup =
+                    "Staff";
+
+                renderDetailBreakdown();
+
+            }
+        );
+
+    document
+        .getElementById(
+            "energyCard"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                selectedGroup =
+                    "Energy";
+
+                renderDetailBreakdown();
+
+            }
+        );
+
+    document
+        .getElementById(
+            "maintenanceCard"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                selectedGroup =
+                    "Maintenance";
+
+                renderDetailBreakdown();
+
+            }
+        );
+
+    document
+        .getElementById(
+            "indirectCard"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                selectedGroup =
+                    "Indirect";
+
+                renderDetailBreakdown();
+
+            }
+        );
+
 }
