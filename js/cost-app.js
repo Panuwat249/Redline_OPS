@@ -2,7 +2,6 @@ let activeCostData = [];
 
 function initCostDashboard() {
     const data = window.costData;
-    setupCostCards();
 
     if (!Array.isArray(data) || data.length === 0) {
         alert("ไม่พบข้อมูลใน js/cost-data.js");
