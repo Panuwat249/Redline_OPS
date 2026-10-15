@@ -86,6 +86,7 @@ function renderCostDashboard() {
     renderPieCharts(selectedData);
     renderCostTrendChart(selectedData);
     renderCostStructureYearChart(selectedData);
+    renderRevenueCostChart(selectedData);
     renderCostDriverRanking(selectedData);
     renderCostInsight(selectedData,calculatedData);
 }
@@ -550,6 +551,7 @@ function setupExpandRows(){
 let costPieChart = null;
 let costTrendChart = null;
 let costStructureYearChart = null;
+let revenueCostChart = null;
 
 function renderPieCharts(selectedData) {
 
@@ -1097,6 +1099,127 @@ function updateBreakEven(
         formatCost(
             breakEvenPassenger
         )
+    );
+
+}
+
+function renderRevenueCostChart(
+    selectedData
+){
+
+    const canvas =
+    document.getElementById(
+        "revenueCostChart"
+    );
+
+    if(!canvas){
+        return;
+    }
+
+    if(revenueCostChart){
+        revenueCostChart.destroy();
+    }
+
+    const revenueData =
+    selectedData.map(
+        item =>
+            Number(
+                item.passenger || 0
+            )
+            *
+            Number(
+                item.avgFare || 0
+            )
+    );
+
+    const costData =
+    selectedData.map(
+        item =>
+            Number(
+                item.totalCost || 0
+            )
+    );
+
+    revenueCostChart =
+    new Chart(
+        canvas,
+        {
+            type:"bar",
+
+            data:{
+
+                labels:
+                selectedData.map(
+                    x=>x.fiscalYear
+                ),
+
+                datasets:[
+
+                    {
+
+                        label:
+                        "Revenue",
+
+                        data:
+                        revenueData,
+
+                        backgroundColor:
+                        "#10b981"
+
+                    },
+
+                    {
+
+                        label:
+                        "Cost",
+
+                        data:
+                        costData,
+
+                        backgroundColor:
+                        "#dc2626"
+
+                    }
+
+                ]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+                        position:"top"
+                    },
+
+                    tooltip:{
+                        callbacks:{
+                            label:
+                            function(
+                                context
+                            ){
+                                return (
+                                    context.dataset.label +
+                                    " : " +
+                                    formatCost(
+                                        context.raw
+                                    ) +
+                                    " บาท"
+                                );
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+        }
     );
 
 }
