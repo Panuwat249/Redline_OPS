@@ -428,12 +428,19 @@ function setCostText(id, value) {
     }
 }
 
-function formatCost(value) {
-    const number = Number(value || 0);
+function formatCost(value){
 
-    return number.toLocaleString("th-TH", {
-        maximumFractionDigits: 0
-    });
+    const number =
+    Number(value || 0);
+
+    return number.toLocaleString(
+        "th-TH",
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
+    );
+
 }
 
 function setupExpandRows(){
