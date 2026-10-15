@@ -80,6 +80,7 @@ function renderCostDashboard() {
 
     updateCostCards(selectedData, calculatedData);
     updateOverviewKpi(selectedData,calculatedData);
+    updateBreakEven(selectedData,calculatedData);
     updateCostUnitTable(selectedData);
     updateCostTable(selectedData);
     renderPieCharts(selectedData);
@@ -1023,5 +1024,79 @@ function updateCostUnitTable(
         `
     )
     .join("");
+
+}
+
+function updateBreakEven(
+    selectedData,
+    calculatedData
+){
+
+    const totalPassenger =
+    selectedData.reduce(
+        (sum,item)=>
+        sum +
+        Number(
+            item.passenger || 0
+        ),
+        0
+    );
+
+    const avgFare =
+
+    selectedData.reduce(
+        (sum,item)=>
+            sum +
+            Number(
+                item.avgFare || 0
+            ),
+        0
+    )
+
+    / selectedData.length;
+
+    const revenue =
+
+        totalPassenger *
+        avgFare;
+
+    const profitGap =
+
+        revenue -
+        calculatedData.totalCost;
+
+    const breakEvenPassenger =
+
+        avgFare > 0
+
+        ?
+
+        calculatedData.totalCost /
+        avgFare
+
+        :
+
+        0;
+
+    setCostText(
+        "estimatedRevenue",
+        formatCost(
+            revenue
+        )
+    );
+
+    setCostText(
+        "profitGap",
+        formatCost(
+            profitGap
+        )
+    );
+
+    setCostText(
+        "breakEvenPassenger",
+        formatCost(
+            breakEvenPassenger
+        )
+    );
 
 }
