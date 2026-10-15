@@ -79,8 +79,13 @@ function renderCostDashboard() {
     const calculatedData = calculateCostRangeData(selectedData);
 
     updateCostCards(selectedData, calculatedData);
+    updateOverviewKpi(selectedData,calculatedData);
     updateCostTable(selectedData);
     renderPieCharts();
+    renderCostTrendChart();
+    renderCostStructureYearChart();
+    renderCostDriverRanking(selectedData);
+    renderCostInsight(selectedData,calculatedData);
 }
 
 function getSelectedCostRangeData() {
@@ -163,6 +168,74 @@ function calculateSingleYearCost(item) {
         indirectCost,
         totalCost
     };
+}
+
+function updateOverviewKpi(
+    selectedData,
+    data
+){
+
+    const avgFare =
+        selectedData.reduce(
+            (sum,item)=>
+                sum +
+                Number(
+                    item.avgFare || 0
+                ),
+            0
+        )
+        / selectedData.length;
+
+    const avgCarKm =
+        selectedData.reduce(
+            (sum,item)=>
+                sum +
+                Number(
+                    item.costPerCarKm || 0
+                ),
+            0
+        )
+        / selectedData.length;
+
+    const avgPassenger =
+        selectedData.reduce(
+            (sum,item)=>
+                sum +
+                Number(
+                    item.costPerPassenger || 0
+                ),
+            0
+        )
+        / selectedData.length;
+
+    setCostText(
+        "overviewTotalCost",
+        formatCost(
+            data.totalCost
+        )
+    );
+
+    setCostText(
+        "overviewCostPerCarKm",
+        formatCost(
+            avgCarKm
+        )
+    );
+
+    setCostText(
+        "overviewCostPerPassenger",
+        formatCost(
+            avgPassenger
+        )
+    );
+
+    setCostText(
+        "overviewAvgFare",
+        formatCost(
+            avgFare
+        )
+    );
+
 }
 
 function updateCostCards(selectedData, data) {
@@ -458,6 +531,8 @@ function setupExpandRows(){
 }
 
 let costPieChart = null;
+let costTrendChart = null;
+let costStructureYearChart = null;
 
 function renderPieCharts() {
 
@@ -598,5 +673,142 @@ function renderPieCharts() {
     );
 
     }
+
+}
+
+function renderCostTrendChart(){
+
+    const canvas =
+        document.getElementById(
+            "costTrendChart"
+        );
+
+    if(!canvas){
+        return;
+    }
+
+    if(costTrendChart){
+        costTrendChart.destroy();
+    }
+
+    costTrendChart =
+    new Chart(
+        canvas,
+        {
+            type:"line",
+
+            data:{
+                labels:
+                    activeCostData.map(
+                        x=>x.fiscalYear
+                    ),
+
+                datasets:[
+                    {
+                        label:
+                            "Total Cost",
+
+                        data:
+                            activeCostData.map(
+                                x=>x.totalCost
+                            ),
+
+                        borderColor:
+                            "#dc2626",
+
+                        backgroundColor:
+                            "rgba(220,38,38,.15)",
+
+                        fill:true,
+
+                        tension:.3
+                    }
+                ]
+            },
+
+            options:{
+                responsive:true,
+                maintainAspectRatio:false
+            }
+        }
+    );
+
+}
+
+function renderCostStructureYearChart(){
+
+    const canvas =
+        document.getElementById(
+            "costStructureYearChart"
+        );
+
+    if(!canvas){
+        return;
+    }
+
+    if(costStructureYearChart){
+        costStructureYearChart.destroy();
+    }
+
+    costStructureYearChart =
+    new Chart(
+        canvas,
+        {
+            type:"bar",
+
+            data:{
+
+                labels:
+                    activeCostData.map(
+                        x=>x.fiscalYear
+                    ),
+
+                datasets:[
+
+                    {
+                        label:"Staff",
+                        data:
+                        activeCostData.map(
+                            x=>x.staffCost
+                        ),
+                        backgroundColor:"#dc2626"
+                    },
+
+                    {
+                        label:"Energy",
+                        data:
+                        activeCostData.map(
+                            x=>x.energyCost
+                        ),
+                        backgroundColor:"#f97316"
+                    },
+
+                    {
+                        label:"Maintenance",
+                        data:
+                        activeCostData.map(
+                            x=>x.maintenanceCost
+                        ),
+                        backgroundColor:"#10b981"
+                    },
+
+                    {
+                        label:"Indirect",
+                        data:
+                        activeCostData.map(
+                            x=>x.indirectCost
+                        ),
+                        backgroundColor:"#8b5cf6"
+                    }
+
+                ]
+            },
+
+            options:{
+                responsive:true,
+                maintainAspectRatio:false
+            }
+        }
+    );
 
 }
