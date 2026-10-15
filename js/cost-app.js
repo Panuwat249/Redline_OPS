@@ -82,8 +82,8 @@ function renderCostDashboard() {
     updateOverviewKpi(selectedData,calculatedData);
     updateCostTable(selectedData);
     renderPieCharts();
-    renderCostTrendChart();
-    renderCostStructureYearChart();
+    renderCostTrendChart(selectedData);
+    renderCostStructureYearChart(selectedData);
     renderCostDriverRanking(selectedData);
     renderCostInsight(selectedData,calculatedData);
 }
@@ -676,7 +676,7 @@ function renderPieCharts() {
 
 }
 
-function renderCostTrendChart(){
+function renderCostTrendChart(data){
 
     const canvas =
         document.getElementById(
@@ -699,7 +699,7 @@ function renderCostTrendChart(){
 
             data:{
                 labels:
-                    activeCostData.map(
+                    data.map(
                         x=>x.fiscalYear
                     ),
 
@@ -709,7 +709,7 @@ function renderCostTrendChart(){
                             "Total Cost",
 
                         data:
-                            activeCostData.map(
+                            data.map(
                                 x=>x.totalCost
                             ),
 
@@ -735,7 +735,7 @@ function renderCostTrendChart(){
 
 }
 
-function renderCostStructureYearChart(){
+function renderCostStructureYearChart(data){
 
     const canvas =
         document.getElementById(
@@ -759,7 +759,7 @@ function renderCostStructureYearChart(){
             data:{
 
                 labels:
-                    activeCostData.map(
+                    data.map(
                         x=>x.fiscalYear
                     ),
 
@@ -768,7 +768,7 @@ function renderCostStructureYearChart(){
                     {
                         label:"Staff",
                         data:
-                        activeCostData.map(
+                        data.map(
                             x=>x.staffCost
                         ),
                         backgroundColor:"#dc2626"
@@ -777,7 +777,7 @@ function renderCostStructureYearChart(){
                     {
                         label:"Energy",
                         data:
-                        activeCostData.map(
+                        data.map(
                             x=>x.energyCost
                         ),
                         backgroundColor:"#f97316"
@@ -786,7 +786,7 @@ function renderCostStructureYearChart(){
                     {
                         label:"Maintenance",
                         data:
-                        activeCostData.map(
+                        data.map(
                             x=>x.maintenanceCost
                         ),
                         backgroundColor:"#10b981"
@@ -795,7 +795,7 @@ function renderCostStructureYearChart(){
                     {
                         label:"Indirect",
                         data:
-                        activeCostData.map(
+                        data.map(
                             x=>x.indirectCost
                         ),
                         backgroundColor:"#8b5cf6"
