@@ -2208,3 +2208,25 @@ UNIT COST TABLE
     background:#fff5f5;
 }
 ``
+.break-even-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(3,1fr);
+
+    gap:24px;
+
+    margin-top:30px;
+
+    margin-bottom:30px;
+}
+
+@media(max-width:1000px){
+
+    .break-even-grid{
+
+        grid-template-columns:1fr;
+    }
+
+}
