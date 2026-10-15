@@ -216,25 +216,19 @@ function updateOverviewKpi(
     );
 
     setCostText(
-        "overviewCostPerCarKm",
-        formatCost(
-            avgCarKm
-        )
-    );
+    "overviewCostPerCarKm",
+    `${formatCost2(avgCarKm)} บาท`
+);
 
     setCostText(
-        "overviewCostPerPassenger",
-        formatCost(
-            avgPassenger
-        )
-    );
+    "overviewCostPerPassenger",
+    `${formatCost2(avgPassenger)} บาท`
+);
 
     setCostText(
-        "overviewAvgFare",
-        formatCost(
-            avgFare
-        )
-    );
+    "overviewAvgFare",
+    `${formatCost2(avgFare)} บาท`
+);
 
 }
 
@@ -428,7 +422,21 @@ function setCostText(id, value) {
     }
 }
 
-function formatCost(value){
+function formatCost(value) {
+
+    const number =
+    Number(value || 0);
+
+    return number.toLocaleString(
+        "th-TH",
+        {
+            maximumFractionDigits: 0
+        }
+    );
+
+}
+
+function formatCost2(value){
 
     const number =
     Number(value || 0);
