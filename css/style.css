@@ -1956,3 +1956,190 @@ COST APPLY BUTTON
     cursor:pointer;
 
 }
+
+/* =========================================
+OVERVIEW KPI
+========================================= */
+
+.overview-kpi-grid{
+    display:grid;
+    grid-template-columns:
+    repeat(4,minmax(0,1fr));
+
+    gap:24px;
+    margin-bottom:32px;
+}
+
+.overview-kpi-card{
+
+    background:#fff;
+
+    border-radius:28px;
+
+    padding:24px;
+
+    border:1px solid #e2e8f0;
+
+    box-shadow:
+    0 12px 30px
+    rgba(15,23,42,.08);
+
+    transition:.25s ease;
+}
+
+.overview-kpi-card:hover{
+
+    transform:
+    translateY(-4px);
+
+    box-shadow:
+    0 18px 40px
+    rgba(15,23,42,.14);
+}
+
+.overview-kpi-card span{
+
+    display:block;
+
+    color:#64748b;
+
+    font-size:14px;
+
+    font-weight:800;
+
+    margin-bottom:10px;
+}
+
+.overview-kpi-card strong{
+
+    display:block;
+
+    color:#7f0b0b;
+
+    font-weight:900;
+
+    font-size:36px;
+}
+
+/* =========================================
+RANKING
+========================================= */
+
+#costDriverRanking{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+}
+
+.cost-driver-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:14px 18px;
+
+    border-radius:16px;
+
+    background:#f8fafc;
+
+    border:1px solid #e2e8f0;
+}
+
+.cost-driver-row:hover{
+
+    background:#fff7f7;
+}
+
+.cost-driver-label{
+
+    font-size:15px;
+
+    font-weight:800;
+}
+
+.cost-driver-value{
+
+    color:#a1121b;
+
+    font-size:16px;
+
+    font-weight:900;
+}
+
+/* =========================================
+INSIGHT
+========================================= */
+
+.insight-box{
+
+    padding:24px;
+
+    border-radius:24px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #fff7f7,
+        #ffffff
+    );
+
+    border:1px solid #fecaca;
+
+    font-size:16px;
+
+    line-height:1.8;
+
+    font-weight:700;
+}
+
+/* =========================================
+EXPORT
+========================================= */
+
+.export-actions{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(2,1fr);
+
+    gap:16px;
+}
+
+/* =========================================
+RESPONSIVE
+========================================= */
+
+@media(max-width:1100px){
+
+    .overview-kpi-grid{
+
+        grid-template-columns:
+        repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:768px){
+
+    .overview-kpi-grid{
+
+        grid-template-columns:1fr;
+    }
+
+    .export-actions{
+
+        grid-template-columns:1fr;
+    }
+
+}
+
+
