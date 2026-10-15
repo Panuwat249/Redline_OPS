@@ -989,6 +989,7 @@ function updateCostUnitTable(
                         maximumFractionDigits:2
                     }
                 )}
+                บาท
             </td>
 
             <td>
@@ -1001,6 +1002,7 @@ function updateCostUnitTable(
                         maximumFractionDigits:2
                     }
                 )}
+                บาท
             </td>
 
             <td>
@@ -1013,6 +1015,7 @@ function updateCostUnitTable(
                         maximumFractionDigits:2
                     }
                 )}
+                บาท
             </td>
 
         </tr>
