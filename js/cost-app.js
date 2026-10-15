@@ -1155,33 +1155,73 @@ function renderRevenueCostChart(
 
                 datasets:[
 
-                    {
+    {
 
-                        label:
-                        "Revenue",
+        label:"Revenue",
 
-                        data:
-                        revenueData,
+        data:revenueData,
 
-                        backgroundColor:
-                        "#10b981"
+        backgroundColor:"#10b981",
 
-                    },
+        order:2
 
-                    {
+    },
 
-                        label:
-                        "Cost",
+    {
 
-                        data:
-                        costData,
+        label:"Cost",
 
-                        backgroundColor:
-                        "#dc2626"
+        data:costData,
 
-                    }
+        backgroundColor:"#dc2626",
 
-                ]
+        order:2
+
+    },
+
+    {
+
+        type:"line",
+
+        label:"Profit / Loss",
+
+        data:selectedData.map(
+
+            item =>
+
+            (Number(item.passenger || 0)
+
+            *
+
+            Number(item.avgFare || 0))
+
+            -
+
+            Number(item.totalCost || 0)
+
+        ),
+
+        borderColor:"#2563eb",
+
+        backgroundColor:"#2563eb",
+
+        borderWidth:4,
+
+        pointRadius:5,
+
+        pointBackgroundColor:"#2563eb",
+
+        fill:false,
+
+        tension:.3,
+
+        yAxisID:"y1",
+
+        order:1
+
+    }
+
+]
 
             },
 
@@ -1190,6 +1230,24 @@ function renderRevenueCostChart(
                 responsive:true,
 
                 maintainAspectRatio:false,
+
+                scales:{
+
+    y:{
+        beginAtZero:true
+    },
+
+    y1:{
+
+        position:"right",
+
+        grid:{
+            drawOnChartArea:false
+        }
+
+    }
+
+},
 
                 plugins:{
 
