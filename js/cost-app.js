@@ -81,7 +81,7 @@ function renderCostDashboard() {
     updateCostCards(selectedData, calculatedData);
     updateOverviewKpi(selectedData,calculatedData);
     updateCostTable(selectedData);
-    renderPieCharts();
+    renderPieCharts(selectedData);
     renderCostTrendChart(selectedData);
     renderCostStructureYearChart(selectedData);
     renderCostDriverRanking(selectedData);
