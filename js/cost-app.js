@@ -84,8 +84,8 @@ function renderCostDashboard() {
     renderPieCharts(selectedData);
     renderCostTrendChart(selectedData);
     renderCostStructureYearChart(selectedData);
-    renderCostDriverRanking(selectedData);
-    renderCostInsight(selectedData,calculatedData);
+    //renderCostDriverRanking(selectedData);
+    //renderCostInsight(selectedData,calculatedData);
 }
 
 function getSelectedCostRangeData() {
@@ -534,26 +534,13 @@ let costPieChart = null;
 let costTrendChart = null;
 let costStructureYearChart = null;
 
-function renderPieCharts() {
-
-    const endSelect =
-        document.getElementById(
-            "endFiscalYearSelect"
-        );
-
-    if (!endSelect) {
-        return;
-    }
-
-    const selectedYear =
-        Number(endSelect.value);
+function renderPieCharts(selectedData) {
 
     const data =
-        activeCostData.find(
-            x =>
-                Number(x.fiscalYear)
-                === selectedYear
-        );
+selectedData[
+    selectedData.length - 1
+];
+``
 
     if (!data) {
         return;
