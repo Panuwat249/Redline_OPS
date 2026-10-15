@@ -2142,4 +2142,69 @@ RESPONSIVE
 
 }
 
+/* =====================================
+UNIT COST TABLE
+===================================== */
 
+.cost-unit-table-card{
+
+    margin-top:30px;
+
+    position:relative;
+
+    overflow:hidden;
+
+    padding:34px;
+
+    border-radius:38px;
+
+    background:#fff;
+
+    border:1px solid rgba(
+        226,
+        232,
+        240,
+        .95
+    );
+
+    box-shadow:
+    0 22px 54px
+    rgba(
+        15,
+        23,
+        42,
+        .12
+    );
+}
+
+.cost-unit-table-card th{
+
+    text-align:center;
+}
+
+.cost-unit-table-card td{
+
+    text-align:center !important;
+
+    font-size:20px;
+
+    font-weight:800;
+}
+
+.cost-unit-table-card td:first-child{
+
+    font-size:22px;
+
+    font-weight:900;
+}
+
+.cost-unit-table-card tbody tr{
+
+    height:80px;
+}
+
+.cost-unit-table-card tbody tr:hover{
+
+    background:#fff5f5;
+}
+``
