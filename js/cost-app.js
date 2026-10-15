@@ -80,6 +80,7 @@ function renderCostDashboard() {
 
     updateCostCards(selectedData, calculatedData);
     updateOverviewKpi(selectedData,calculatedData);
+    updateCostUnitTable(selectedData);
     updateCostTable(selectedData);
     renderPieCharts(selectedData);
     renderCostTrendChart(selectedData);
@@ -951,5 +952,73 @@ function renderCostInsight(
     ปีงบประมาณ
 
     `;
+
+}
+
+function updateCostUnitTable(
+    selectedData
+){
+
+    const tbody =
+    document.getElementById(
+        "costUnitTableBody"
+    );
+
+    if(!tbody){
+        return;
+    }
+
+    tbody.innerHTML =
+    selectedData
+    .map(
+        item=>`
+
+        <tr>
+
+            <td>
+                ${item.fiscalYear}
+            </td>
+
+            <td>
+                ${Number(
+                    item.costPerCarKm || 0
+                ).toLocaleString(
+                    "th-TH",
+                    {
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2
+                    }
+                )}
+            </td>
+
+            <td>
+                ${Number(
+                    item.costPerPassenger || 0
+                ).toLocaleString(
+                    "th-TH",
+                    {
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2
+                    }
+                )}
+            </td>
+
+            <td>
+                ${Number(
+                    item.avgFare || 0
+                ).toLocaleString(
+                    "th-TH",
+                    {
+                        minimumFractionDigits:2,
+                        maximumFractionDigits:2
+                    }
+                )}
+            </td>
+
+        </tr>
+
+        `
+    )
+    .join("");
 
 }
