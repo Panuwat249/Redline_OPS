@@ -163,6 +163,32 @@
 
         </section>
 
+                <!-- OVERVIEW KPI -->
+
+<section class="overview-kpi-grid">
+
+    <article class="overview-kpi-card">
+        <span>ต้นทุนรวม</span>
+        <strong id="overviewTotalCost">-</strong>
+    </article>
+
+    <article class="overview-kpi-card">
+        <span>ต้นทุนต่อ Car-Km</span>
+        <strong id="overviewCostPerCarKm">-</strong>
+    </article>
+
+    <article class="overview-kpi-card">
+        <span>ต้นทุนต่อผู้โดยสาร</span>
+        <strong id="overviewCostPerPassenger">-</strong>
+    </article>
+
+    <article class="overview-kpi-card">
+        <span>ค่าโดยสารเฉลี่ย</span>
+        <strong id="overviewAvgFare">-</strong>
+    </article>
+
+</section>
+
         <!-- COST TITLE -->
         <section class="section-title">
 
@@ -383,6 +409,116 @@
 
 </section>
 
+<section class="chart-card">
+
+    <div class="chart-header">
+
+        <div>
+            <p>COST TREND</p>
+            <h2>แนวโน้มต้นทุนรายปี</h2>
+        </div>
+
+        <div class="chart-pill">
+            Trend
+        </div>
+
+    </div>
+
+    <div class="chart-wrap">
+        <canvas id="costTrendChart"></canvas>
+    </div>
+
+</section>
+
+<section class="chart-card">
+
+    <div class="chart-header">
+
+        <div>
+            <p>COST STRUCTURE</p>
+            <h2>เปรียบเทียบต้นทุนรายปี</h2>
+        </div>
+
+        <div class="chart-pill">
+            Compare
+        </div>
+
+    </div>
+
+    <div class="chart-wrap">
+        <canvas id="costStructureYearChart"></canvas>
+    </div>
+
+</section>
+
+<section class="chart-card">
+
+    <div class="chart-header">
+
+        <div>
+            <p>COST DRIVER</p>
+            <h2>รายการต้นทุนสูงสุด</h2>
+        </div>
+
+    </div>
+
+    <div id="costDriverRanking">
+
+    </div>
+
+</section>
+
+<section class="chart-card">
+
+    <div class="chart-header">
+
+        <div>
+            <p>INSIGHT</p>
+            <h2>สรุปวิเคราะห์ต้นทุน</h2>
+        </div>
+
+    </div>
+
+    <div
+        id="costInsightBox"
+        class="insight-box"
+    >
+        รอวิเคราะห์ข้อมูล...
+    </div>
+
+</section>
+
+<section class="chart-card">
+
+    <div class="chart-header">
+
+        <div>
+            <p>EXPORT</p>
+            <h2>ส่งออกรายงาน</h2>
+        </div>
+
+    </div>
+
+    <div class="export-actions">
+
+        <button
+            id="exportCostPdfBtn"
+            class="export-btn pdf-btn"
+        >
+            Export PDF
+        </button>
+
+        <button
+            id="exportCostExcelBtn"
+            class="export-btn excel-btn"
+        >
+            Export Excel
+        </button>
+
+    </div>
+
+</section>
+
     </main>
 
     <footer>
@@ -392,6 +528,7 @@
     <!--<script src="js/cost-data.js"></script>-->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="js/cost-app.js"></script>
     <script src="js/load-cost.js"></script>
 
