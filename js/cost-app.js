@@ -84,8 +84,8 @@ function renderCostDashboard() {
     renderPieCharts(selectedData);
     renderCostTrendChart(selectedData);
     renderCostStructureYearChart(selectedData);
-    //renderCostDriverRanking(selectedData);
-    //renderCostInsight(selectedData,calculatedData);
+    renderCostDriverRanking(selectedData);
+    renderCostInsight(selectedData,calculatedData);
 }
 
 function getSelectedCostRangeData() {
@@ -797,5 +797,144 @@ function renderCostStructureYearChart(data){
             }
         }
     );
+
+}
+
+function renderCostDriverRanking(
+    selectedData
+){
+
+    const container =
+    document.getElementById(
+        "costDriverRanking"
+    );
+
+    if(!container){
+        return;
+    }
+
+    const latestYear =
+    selectedData[
+        selectedData.length - 1
+    ].fiscalYear;
+
+    const rows =
+    (window.costDetail || [])
+
+    .filter(
+        x=>
+        Number(x.FiscalYear)
+        ===
+        Number(latestYear)
+    )
+
+    .sort(
+        (a,b)=>
+        Number(b.Amount||0)
+        -
+        Number(a.Amount||0)
+    )
+
+    .slice(0,10);
+
+    container.innerHTML =
+    rows.map(
+        item=>`
+
+        <div class="cost-driver-row">
+
+            <span
+              class="cost-driver-label"
+            >
+                ${item.CostItem}
+            </span>
+
+            <strong
+              class="cost-driver-value"
+            >
+                ${formatCost(
+                    item.Amount
+                )}
+            </strong>
+
+        </div>
+
+        `
+    ).join("");
+
+}
+
+function renderCostInsight(
+    selectedData,
+    calculatedData
+){
+
+    const box =
+    document.getElementById(
+        "costInsightBox"
+    );
+
+    if(!box){
+        return;
+    }
+
+    const totalCost =
+    calculatedData.totalCost;
+
+    const highestYear =
+    selectedData.reduce(
+        (max,item)=>
+        item.totalCost >
+        max.totalCost
+            ? item
+            : max
+    );
+
+    const lowestYear =
+    selectedData.reduce(
+        (min,item)=>
+        item.totalCost <
+        min.totalCost
+            ? item
+            : min
+    );
+
+    box.innerHTML =
+
+    `
+
+    <b>ต้นทุนรวม</b>
+
+    ${formatCost(totalCost)}
+
+    บาท
+
+    <br><br>
+
+    <b>ปีงบที่ต้นทุนสูงสุด</b>
+
+    ${highestYear.fiscalYear}
+
+    (${formatCost(
+        highestYear.totalCost
+    )} บาท)
+
+    <br><br>
+
+    <b>ปีงบที่ต้นทุนต่ำสุด</b>
+
+    ${lowestYear.fiscalYear}
+
+    (${formatCost(
+        lowestYear.totalCost
+    )} บาท)
+
+    <br><br>
+
+    Dashboard กำลังแสดง
+    ${selectedData.length}
+    ปีงบประมาณ
+
+    `;
 
 }
