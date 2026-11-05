@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#c8102e" />
+    <title>Dashboard OPS</title>
+
+    <!-- ธีมสว่าง/มืด: ต้องโหลดก่อนวาดหน้า เพื่อไม่ให้หน้ากะพริบ -->
+    <script src="js/theme.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/chart-tools.css" />
+    <link rel="stylesheet" href="css/chart-info.css" />
+
+    <!-- Font: Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- html2canvas: ใช้จับหน้า Dashboard เป็นรูป -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- jsPDF: ใช้สร้าง PDF -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.0.0/jspdf.umd.min.js"></script>
+
+    <!-- xlsx-js-style: ใช้สร้าง Excel พร้อมสีและ style -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js"></script>
+
+    <!-- Chart.js Data Labels Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+
+    <!-- xlsx: ใช้อ่านไฟล์ ops-data.xlsx -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- ===============================
+        BACKGROUND DECORATION
+    ================================ -->
+    <div class="background-glow glow-red"></div>
+    <div class="background-glow glow-blue"></div>
+
+    <!-- ===============================
+        HERO / HEADER
+    ================================ -->
+    <header class="hero">
+
+        <div class="hero-grid"></div>
+        <div class="hero-circle circle-one"></div>
+        <div class="hero-circle circle-two"></div>
+
+        <div class="hero-inner">
+
+            <!-- Top Navbar -->
+            <nav class="navbar">
+
+                <div class="brand">
+                    <div class="brand-logo">OPS</div>
+
+                    <div class="brand-text">
+                        <div class="brand-name">
+                            บริษัท รถไฟฟ้า ร.ฟ.ท. จำกัด
+                        </div>
+
+                        <div class="brand-desc">
+                            ฝ่ายควบคุมการเดินรถ
+                        </div>
+
+                        <div class="brand-desc">
+                            ส่วนวางแผนและวิเคราะห์การปฏิบัติการเดินรถ
+                        </div>
+
+                        <div class="brand-desc">
+                            แผนกวางแผนและวิเคราะห์การปฏิบัติการเดินรถ
+                        </div>
+                    </div>
+                </div>
+
+                    <div class="nav-actions">
+                        <a class="dashboard-pill" href="cost.html">
+                            ต้นทุนการเดินรถ
+                        </a>
+                        <button type="button" class="theme-toggle" data-theme-toggle aria-label="เปลี่ยนเป็นโหมดมืด" title="โหมดมืด">
+                        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    </button>
+                    </div>
+            </nav>
+
+            <!-- Hero Content -->
+            <section class="hero-content">
+
+                <div class="hero-left">
+
+                    <div class="mini-label">
+                        Monthly Performance Report
+                    </div>
+
+                    <h1>
+                        ภาพรวมประสิทธิภาพการเดินรถ<br />
+                        ระบบรถไฟฟ้าชานเมืองสายสีแดง
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        Dashboard สรุปค่าดัชนีการให้บริการ
+                        แยกตามสายเหนือ สายตะวันตก และรวมทั้ง 2 สาย
+                    </p>
+
+                    <div class="current-period-card">
+                        <span>ช่วงข้อมูลที่แสดง</span>
+                        <strong id="selectedRangeText">-</strong>
+                    </div>
+
+                </div>
+
+                <!-- Filter Panel -->
+                <aside class="filter-card">
+
+    <div class="filter-header">
+        <span></span>
+        เลือกช่วงข้อมูล
+    </div>
+
+    <!-- โหมดการเลือก -->
+    <div class="filter-mode">
+        <button type="button" class="mode-btn is-active" data-mode="month">รายเดือน</button>
+        <button type="button" class="mode-btn" data-mode="fy">รายปีงบ</button>
+        <button type="button" class="mode-btn" data-mode="all">ทั้งหมด</button>
+    </div>
+
+    <div class="filter-field" id="fieldStartMonth">
+        <label for="startMonth">เดือนเริ่มต้น</label>
+        <select id="startMonth"></select>
+    </div>
+
+    <div class="filter-field" id="fieldEndMonth">
+        <label for="endMonth">เดือนสิ้นสุด</label>
+        <select id="endMonth"></select>
+    </div>
+
+    <div class="filter-field" id="fieldFiscalYear" hidden>
+        <label for="fiscalYear">ปีงบประมาณ (ต.ค. – ก.ย.)</label>
+        <select id="fiscalYear"></select>
+    </div>
+
+    <button id="applyBtn">แสดงผล Dashboard</button>
+
+    <div class="export-actions">
+        <button id="exportPdfBtn" type="button" class="export-btn pdf-btn">นำออก PDF</button>
+        <button id="exportExcelBtn" type="button" class="export-btn excel-btn">นำออก Excel</button>
+    </div>
+
+    <div class="data-source-row">
+        <span class="data-source-label">แหล่งข้อมูล</span>
+        <span id="dataSourceBadge" class="data-source-badge state-loading">กำลังโหลด...</span>
+    </div>
+
+    <p>
+        เลือกเดือนเดียวจะแสดงค่าของเดือนนั้น
+        หากเลือกหลายเดือน KPI จะแสดงค่าเฉลี่ย
+        และข้อมูลการเดินรถจะแสดงผลรวม
+    </p>
+
+</aside>
+
+            </section>
+
+        </div>
+
+    </header>
+
+    <!-- ===============================
+        MAIN CONTENT
+    ================================ -->
+    <main class="container">
+
+        <!-- ===============================
+            SUMMARY ROW
+        ================================ -->
+        <section class="summary-row">
+
+            <div class="summary-card" data-info="sum-period">
+                <div class="summary-icon red-icon">📅</div>
+
+                <div>
+                    <span>ช่วงข้อมูลที่แสดง</span>
+                    <strong id="summaryPeriod">-</strong>
+                </div>
+            </div>
+
+            <div class="summary-card" data-info="sum-mode">
+                <div class="summary-icon blue-icon">x̄</div>
+
+                <div>
+                    <span>รูปแบบการคำนวณ KPI</span>
+                    <strong id="calculationMode">-</strong>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ===============================
+            KPI SECTION TITLE
+        ================================ -->
+        <section class="section-title">
+
+            <div>
+                <p>KPI SUMMARY</p>
+                <h2>ภาพรวมประสิทธิภาพการเดินรถ</h2>
+            </div>
+
+            <!--<span>รวมทั้ง 2 สาย</span>-->
+
+        </section>
+
+        <!-- ===============================
+            KPI DASHBOARD CARDS
+        ================================ -->
+        <section class="kpi-dashboard">
+
+            <!-- KPI 01B: Punctuality 5 Minutes -->
+            <article class="dashboard-card kpi-card pink-theme" data-info="kpi-tsp5">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <h3>ความตรงต่อเวลา</h3>
+                        <h4>ความล่าช้าไม่เกิน 5 นาที</h4>
+                        <p class="card-code">Train Service Punctuality (TSP)</p>
+                    </div>
+
+                    <div class="card-unit">%</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">รวมทั้ง 2 สาย</div>
+                    <div class="total-box-value" id="punctuality5Total">-</div>
+                </div>
+
+                <div class="sub-metric-grid">
+                    <div class="sub-metric">
+                        <span>สายเหนือ</span>
+                        <strong id="punctuality5North">-</strong>
+                    </div>
+
+                    <div class="sub-metric">
+                        <span>สายตะวันตก</span>
+                        <strong id="punctuality5West">-</strong>
+                    </div>
+                </div>
+
+            </article>
+
+            <!-- KPI 01: On-Time -->
+            <article class="dashboard-card kpi-card red-theme" data-info="kpi-tsp10">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <h3>ความตรงต่อเวลา</h3>
+                        <h4>ความล่าช้าไม่เกิน 10 นาที</h4>
+                        <p class="card-code">Train Service Punctuality (TSP)</p>
+                    </div>
+
+                    <div class="card-unit">%</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">รวมทั้ง 2 สาย</div>
+                    <div class="total-box-value" id="onTimeTotal">-</div>
+                </div>
+
+                <div class="sub-metric-grid">
+                    <div class="sub-metric">
+                        <span>สายเหนือ</span>
+                        <strong id="onTimeNorth">-</strong>
+                    </div>
+
+                    <div class="sub-metric">
+                        <span>สายตะวันตก</span>
+                        <strong id="onTimeWest">-</strong>
+                    </div>
+                </div>
+
+            </article>
+
+            <!-- KPI 02: Reliability -->
+            <article class="dashboard-card kpi-card purple-theme" data-info="kpi-tsa">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <h3>ความน่าเชื่อถือ</h3>
+                        <p class="card-code">Train Service Availability (TSA)</p>
+                    </div>
+
+                    <div class="card-unit">%</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">รวมทั้ง 2 สาย</div>
+                    <div class="total-box-value" id="reliabilityTotal">-</div>
+                </div>
+
+                <div class="sub-metric-grid">
+                    <div class="sub-metric">
+                        <span>สายเหนือ</span>
+                        <strong id="reliabilityNorth">-</strong>
+                    </div>
+
+                    <div class="sub-metric">
+                        <span>สายตะวันตก</span>
+                        <strong id="reliabilityWest">-</strong>
+                    </div>
+                </div>
+
+            </article>
+
+            <!-- KPI 03: Availability -->
+            <article class="dashboard-card kpi-card blue-theme" data-info="kpi-ta">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <h3>ความพร้อมของขบวนรถไฟ</h3>
+                        <p class="card-code">Train Availability (TA)</p>
+                    </div>
+
+                    <div class="card-unit">%</div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-box-label">รวมทั้ง 2 สาย</div>
+                    <div class="total-box-value" id="availabilityTotal">-</div>
+                </div>
+
+                <div class="sub-metric-grid">
+                    <div class="sub-metric">
+                        <span>สายเหนือ</span>
+                        <strong id="availabilityNorth">-</strong>
+                    </div>
+
+                    <div class="sub-metric">
+                        <span>สายตะวันตก</span>
+                        <strong id="availabilityWest">-</strong>
+                    </div>
+                </div>
+
+            </article>
+
+        </section>
+
+        <!-- ===============================
+            OPERATION SECTION TITLE
+        ================================ -->
+        <section class="section-title operation-title">
+
+            <div>
+                <p>OPERATION SUMMARY</p>
+                <h2>ข้อมูลการเดินรถและการให้บริการ</h2>
+            </div>
+
+            <span id="operationCalculationMode">-</span>
+
+        </section>
+
+        <!-- ===============================
+            OPERATION DASHBOARD CARDS
+        ================================ -->
+        <section class="operation-dashboard">
+
+            <!-- OPR 01: Distance -->
+            <article class="dashboard-card operation-card orange-theme" data-info="op-dist">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">OPR 01</p>
+                        <h3>ระยะทางที่วิ่งให้บริการ</h3>
+                    </div>
+
+                    <div class="card-unit">กม.</div>
+                </div>
+
+                <div class="total-box operation-total">
+                    <div class="total-box-label">รวมทั้ง 2 สาย</div>
+                    <div class="total-box-value" id="distanceTotal">-</div>
+                </div>
+
+                <div class="sub-metric-grid">
+                    <div class="sub-metric">
+                        <span>สายเหนือ</span>
+                        <strong id="distanceNorth">-</strong>
+                    </div>
+
+                    <div class="sub-metric">
+                        <span>สายตะวันตก</span>
+                        <strong id="distanceWest">-</strong>
+                    </div>
+                </div>
+
+            </article>
+
+            <!-- OPR 02: Trips -->
+            <article class="dashboard-card operation-card green-theme" data-info="op-trips">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">OPR 02</p>
+                        <h3>จำนวนเที่ยววิ่งที่ให้บริการ</h3>
+                    </div>
+
+                    <div class="card-unit">เที่ยว</div>
+                </div>
+
+                <div class="total-box operation-total">
+                    <div class="total-box-label">รวมทั้ง 2 สาย</div>
+                    <div class="total-box-value" id="tripsTotal">-</div>
+                </div>
+
+                <div class="sub-metric-grid">
+                    <div class="sub-metric">
+                        <span>สายเหนือ</span>
+                        <strong id="tripsNorth">-</strong>
+                    </div>
+
+                    <div class="sub-metric">
+                        <span>สายตะวันตก</span>
+                        <strong id="tripsWest">-</strong>
+                    </div>
+                </div>
+
+            </article>
+
+            <!-- OPR 03: Cancelled Trips -->
+            <article class="dashboard-card operation-card dark-red-theme" data-info="op-cancel">
+
+                <div class="card-topline"></div>
+
+                <div class="dashboard-card-header">
+                    <div>
+                        <p class="card-code">OPR 03</p>
+                        <h3>การยกเลิกเที่ยววิ่ง</h3>
+                    </div>
+
+                    <div class="card-unit">เที่ยว</div>
+                </div>
+
+                <div class="total-box operation-total">
+                    <div class="total-box-label">รวมทั้ง 2 สาย</div>
+                    <div class="total-box-value" id="cancelledTotal">-</div>
+                </div>
+
+                <div class="sub-metric-grid">
+                    <div class="sub-metric">
+                        <span>สายเหนือ</span>
+                        <strong id="cancelledNorth">-</strong>
+                    </div>
+
+                    <div class="sub-metric">
+                        <span>สายตะวันตก</span>
+                        <strong id="cancelledWest">-</strong>
+                    </div>
+                </div>
+
+            </article>
+
+        </section>
+
+        <!-- ===============================
+            CHART SECTION
+        ================================ -->
+        <section class="chart-card" data-info="ch-perf">
+
+            <div class="chart-header">
+                <div>
+                    <p>MONTHLY PERFORMANCE</p>
+                    <h2>กราฟเปรียบเทียบค่าดัชนีหลัก</h2>
+                    <span>ความต่อต่อเวลา / ความน่าเชื่อถือ / ความพร้อมของขบวนรถไฟ</span>
+                </div>
+
+                <div class="chart-pill">Bar Chart</div>
+            </div>
+
+            <div class="chart-wrap">
+                <canvas id="performanceChart"></canvas>
+            </div>
+
+        </section>
+
+        <!-- ===============================
+    SEPARATE CHARTS SECTION
+================================ -->
+
+<section class="chart-stack">
+
+    <!-- Chart 01: Punctuality 5 Min -->
+    <article class="chart-card" data-info="ch-tsp5">
+
+        <div class="chart-header">
+            <div>
+                <p>MONTHLY PERFORMANCE</p>
+                <h2>ความตรงต่อเวลา</h2>
+                <span>Train Service Punctuality (TSP) - ความล่าช้าไม่เกิน 5 นาที</span>
+            </div>
+
+            <div class="chart-pill">TSP 5 Min</div>
+        </div>
+
+        <div class="chart-wrap">
+            <canvas id="punctuality5Chart"></canvas>
+        </div>
+
+    </article>
+
+    <!-- Chart 02: Punctuality 10 Min -->
+    <article class="chart-card" data-info="ch-tsp10">
+
+        <div class="chart-header">
+            <div>
+                <p>MONTHLY PERFORMANCE</p>
+                <h2>ความตรงต่อเวลา</h2>
+                <span>Train Service Punctuality (TSP) - ความล่าช้าไม่เกิน 10 นาที</span>
+            </div>
+
+            <div class="chart-pill">TSP 10 Min</div>
+        </div>
+
+        <div class="chart-wrap">
+            <canvas id="onTimeChart"></canvas>
+        </div>
+
+    </article>
+
+    <!-- Chart 03: Reliability -->
+    <article class="chart-card" data-info="ch-tsa">
+
+        <div class="chart-header">
+            <div>
+                <p>MONTHLY PERFORMANCE</p>
+                <h2>ความน่าเชื่อถือ</h2>
+                <span>Train Service Availability (TSA)</span>
+            </div>
+
+            <div class="chart-pill">Reliability</div>
+        </div>
+
+        <div class="chart-wrap">
+            <canvas id="reliabilityChart"></canvas>
+        </div>
+
+    </article>
+
+    <!-- Chart 04: Availability -->
+    <article class="chart-card" data-info="ch-ta">
+
+        <div class="chart-header">
+            <div>
+                <p>MONTHLY PERFORMANCE</p>
+                <h2>ความพร้อมของขบวนรถไฟ</h2>
+                <span>Train Availability (TA)</span>
+            </div>
+
+            <div class="chart-pill">Availability</div>
+        </div>
+
+        <div class="chart-wrap">
+            <canvas id="availabilityChart"></canvas>
+        </div>
+
+    </article>
+
+</section>
+        <!-- ===============================
+    MONTHLY DATA TABLE
+================================ -->
+<section class="section-title operation-title">
+    <div>
+        <p>MONTHLY DETAIL</p>
+        <h2>ตารางข้อมูลรายเดือน</h2>
+    </div>
+    <span id="tableSummaryMode">-</span>
+</section>
+
+<section class="cost-table-card" data-info="tbl-stats">
+
+    <div class="chart-header">
+        <div>
+            <p>DETAIL &amp; AVERAGE</p>
+            <h2>รายละเอียดและค่าสถิติ</h2>
+            <span>ค่าเฉลี่ย / สูงสุด / ต่ำสุด / ผลรวม ของช่วงที่เลือก</span>
+        </div>
+        <div class="chart-pill">Data Table</div>
+    </div>
+
+    <div class="cost-table-wrap">
+        <table class="cost-table stats-table">
+            <thead>
+                <tr>
+                    <th>เดือน</th>
+                    <th>ปีงบ</th>
+                    <th>TSP 5 นาที</th>
+                    <th>TSP 10 นาที</th>
+                    <th>TSA</th>
+                    <th>TA</th>
+                    <th>ระยะทาง (กม.)</th>
+                    <th>เที่ยววิ่ง</th>
+                    <th>ยกเลิก</th>
+                </tr>
+            </thead>
+            <tbody id="statsTableBody"></tbody>
+            <tfoot id="statsTableFooter"></tfoot>
+        </table>
+    </div>
+
+</section>
+
+    </main>
+
+    <footer>
+        Red Line Service Performance Dashboard
+    </footer>
+
+    <!-- JS: ต้องโหลด data.js ก่อน app.js เสมอ -->
+    <script src="js/chart-tools.js"></script>
+    <script src="js/chart-info.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/load-data.js"></script>
+
+</body>
+
+</html>

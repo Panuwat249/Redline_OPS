@@ -1,0 +1,382 @@
+/* =========================================================
+   chart-tools.css
+   หน้าตาของปุ่มและแผง "ปรับแต่งกราฟ" (ใช้คู่กับ js/chart-tools.js)
+   ธีมขาว-แดง ขอบมน
+   ========================================================= */
+
+.ct-actions {
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ct-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 15px 9px 13px;
+    border: 1px solid #f3d3d6;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #a1121b;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.ct-btn:hover,
+.ct-btn[aria-expanded="true"] {
+    background: #c8102e;
+    border-color: #c8102e;
+    color: #ffffff;
+}
+
+.ct-btn:focus-visible {
+    outline: 3px solid rgba(200, 16, 46, 0.35);
+    outline-offset: 2px;
+}
+
+/* จุดแดงเล็ก ๆ บอกว่ากราฟนี้ถูกปรับแต่งอยู่ */
+.ct-btn.is-dirty::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #c8102e;
+    box-shadow: 0 0 0 2px #ffffff;
+}
+
+.ct-btn.is-dirty:hover::after,
+.ct-btn.is-dirty[aria-expanded="true"]::after {
+    background: #ffffff;
+    box-shadow: none;
+}
+
+/* ---------- แผง ---------- */
+
+.ct-panel {
+    position: fixed;
+    z-index: 1000;
+    width: 340px;
+    max-height: min(560px, calc(100vh - 24px));
+    display: flex;
+    flex-direction: column;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #f0dcde;
+    box-shadow: 0 24px 60px rgba(70, 10, 18, 0.22);
+    font-family: "Sarabun", sans-serif;
+    color: #1b1416;
+    animation: ctIn 0.16s ease both;
+}
+
+@keyframes ctIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.ct-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    font-size: 16px;
+}
+
+.ct-close {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 999px;
+    background: #f7eced;
+    color: #8f0a20;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.ct-close:hover { background: #f1d6d9; }
+
+.ct-body {
+    overflow-y: auto;
+    padding: 2px 18px 8px;
+}
+
+.ct-sec { padding: 10px 0 14px; border-top: 1px solid #f5ecec; }
+.ct-sec:first-child { border-top: none; }
+
+.ct-label {
+    margin-bottom: 9px;
+    color: #7a6b6f;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.ct-seg {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 14px;
+    background: #f7eced;
+}
+
+.ct-seg button {
+    padding: 8px 6px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #6f5459;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.ct-seg button.is-on {
+    background: #ffffff;
+    color: #a1121b;
+    box-shadow: 0 2px 8px rgba(120, 20, 30, 0.14);
+}
+
+.ct-palettes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.ct-pal {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 10px 5px 6px;
+    border: 1px solid #f0e3e4;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #4a3a3e;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ct-pal:hover { border-color: #c8102e; }
+
+.ct-pal i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: -3px;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1.5px #ffffff;
+}
+
+.ct-pal span { margin-left: 4px; }
+
+.ct-colors { display: grid; gap: 6px; }
+
+.ct-color {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 8px 6px 12px;
+    border-radius: 14px;
+    background: #fbf6f6;
+    cursor: pointer;
+}
+
+.ct-color-name {
+    min-width: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.ct-color-pick {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ct-color-pick code {
+    color: #8a7a7e;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.ct-color input[type="color"] {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    background: none;
+    box-shadow: 0 0 0 1px #e8d5d7;
+    cursor: pointer;
+}
+
+.ct-color input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.ct-color input[type="color"]::-webkit-color-swatch { border: none; border-radius: 999px; }
+.ct-color input[type="color"]::-moz-color-swatch { border: none; border-radius: 999px; }
+
+.ct-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 2px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ct-switch input { position: absolute; opacity: 0; pointer-events: none; }
+
+.ct-switch i {
+    position: relative;
+    flex-shrink: 0;
+    width: 42px;
+    height: 24px;
+    border-radius: 999px;
+    background: #e4d6d8;
+    transition: background 0.18s ease;
+}
+
+.ct-switch i::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.18s ease;
+}
+
+.ct-switch input:checked + i { background: #c8102e; }
+.ct-switch input:checked + i::after { transform: translateX(18px); }
+.ct-switch input:focus-visible + i { outline: 3px solid rgba(200, 16, 46, 0.35); outline-offset: 2px; }
+
+.ct-foot {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 8px;
+    padding: 12px 18px 16px;
+    border-top: 1px solid #f5ecec;
+}
+
+.ct-foot button {
+    padding: 11px 12px;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.ct-reset {
+    border: 1px solid #f0dcde;
+    background: #ffffff;
+    color: #8f0a20;
+}
+
+.ct-reset:hover { background: #fdf1f2; }
+
+.ct-save {
+    border: none;
+    background: #c8102e;
+    color: #ffffff;
+}
+
+.ct-save:hover { background: #a1121b; }
+
+/* มือถือ: แสดงเป็นแผงเลื่อนขึ้นจากด้านล่าง */
+.ct-panel.is-sheet {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: auto;
+    max-height: 56vh;
+    border-radius: 26px 26px 0 0;
+    animation: ctSheet 0.2s ease both;
+}
+
+@keyframes ctSheet {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ct-panel, .ct-panel.is-sheet { animation: none; }
+}
+
+@media (max-width: 760px) {
+    .ct-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+}
+
+@media print {
+    .ct-actions .ct-btn, .ct-panel { display: none !important; }
+}
+
+/* =========================================================
+   โหมดมืด
+   ========================================================= */
+
+:root[data-theme="dark"] .ct-btn {
+    background: #271a1e;
+    border-color: #4a3338;
+    color: #ff9aa8;
+}
+
+:root[data-theme="dark"] .ct-btn:hover,
+:root[data-theme="dark"] .ct-btn[aria-expanded="true"] {
+    background: #e5384f;
+    border-color: #e5384f;
+    color: #ffffff;
+}
+
+:root[data-theme="dark"] .ct-panel {
+    background: #231a1d;
+    border-color: #3d2d31;
+    color: #f6eeef;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme="dark"] .ct-close { background: #34262a; color: #ffb3bd; }
+:root[data-theme="dark"] .ct-close:hover { background: #443236; }
+:root[data-theme="dark"] .ct-sec,
+:root[data-theme="dark"] .ct-foot { border-color: #35272b; }
+:root[data-theme="dark"] .ct-label { color: #a89a9e; }
+
+:root[data-theme="dark"] .ct-seg { background: #2d2125; }
+:root[data-theme="dark"] .ct-seg button { color: #c7b6ba; }
+:root[data-theme="dark"] .ct-seg button.is-on { background: #44323a; color: #ffffff; box-shadow: none; }
+:root[data-theme="dark"] .ct-pal { background: #2a1d21; border-color: #46353a; color: #e6d7da; }
+:root[data-theme="dark"] .ct-pal:hover { border-color: #e5384f; }
+:root[data-theme="dark"] .ct-pal i { box-shadow: 0 0 0 1.5px #2a1d21; }
+:root[data-theme="dark"] .ct-color { background: #2a1d21; }
+:root[data-theme="dark"] .ct-color-pick code { color: #a89a9e; }
+:root[data-theme="dark"] .ct-color input[type="color"] { border-color: #2a1d21; box-shadow: 0 0 0 1px #5a4247; }
+:root[data-theme="dark"] .ct-switch i { background: #4a393e; }
+:root[data-theme="dark"] .ct-switch input:checked + i { background: #e5384f; }
+:root[data-theme="dark"] .ct-reset { background: transparent; border-color: #4a3439; color: #ffb3bd; }
+:root[data-theme="dark"] .ct-reset:hover { background: #2f2024; }
+:root[data-theme="dark"] .ct-save { background: #e5384f; }
+:root[data-theme="dark"] .ct-save:hover { background: #cc2a41; }
+
+/* มือถือ: ปุ่มแสดงเฉพาะไอคอนเพื่อประหยัดที่ */
+@media (max-width: 760px) {
+    .ct-btn { padding: 9px 13px; }
+}

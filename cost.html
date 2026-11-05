@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#c8102e" />
+    <title>ต้นทุนการเดินรถ | Redline OPS</title>
+
+    <!-- ธีมสว่าง/มืด: ต้องโหลดก่อนวาดหน้า เพื่อไม่ให้หน้ากะพริบ -->
+    <script src="js/theme.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/cost.css" />
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/chart-tools.css" />
+    <link rel="stylesheet" href="css/chart-info.css" />
+
+    <!-- Font: Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    />
+
+    <!-- Libraries (ปักเวอร์ชันไว้ เพื่อให้หน้าเว็บไม่เปลี่ยนเองเมื่อไลบรารีอัปเดต) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         HERO : สรุปใจความสำคัญของช่วงที่เลือก (เขียนโดย JS)
+    ====================================================== -->
+    <header class="hero">
+        <div class="wrap">
+
+            <nav class="topbar">
+                <div class="brand">
+                    <div class="brand-logo">OPS</div>
+                    <div class="brand-text">
+                        <strong>บริษัท รถไฟฟ้า ร.ฟ.ท. จำกัด</strong>
+                        <span>ฝ่ายควบคุมการเดินรถ · ส่วนวางแผนและวิเคราะห์การปฏิบัติการเดินรถ</span>
+                    </div>
+                </div>
+
+                <div class="topbar-actions">
+                    <a class="back-link" href="index.html">
+                        <span aria-hidden="true">←</span>
+                        กลับหน้า Dashboard
+                    </a>
+                    <button type="button" class="theme-toggle" data-theme-toggle aria-label="เปลี่ยนเป็นโหมดมืด" title="โหมดมืด">
+                        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="hero-body">
+                <p class="hero-kicker">ต้นทุนการเดินรถ · ระบบรถไฟฟ้าชานเมืองสายสีแดง</p>
+                <h1 id="heroHeadline">กำลังโหลดข้อมูล…</h1>
+                <p class="hero-sub" id="heroSub"></p>
+                <ul class="hero-points" id="heroPoints"></ul>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="wrap main">
+
+        <!-- =====================================================
+             ตัวเลือกช่วงปีงบประมาณ
+        ====================================================== -->
+        <section class="toolbar" aria-label="เลือกช่วงปีงบประมาณ">
+
+            <div class="toolbar-range">
+                <label for="startFiscalYearSelect">ปีงบประมาณ</label>
+                <select id="startFiscalYearSelect"></select>
+                <span class="toolbar-to">ถึง</span>
+                <select id="endFiscalYearSelect" aria-label="ปีงบประมาณสิ้นสุด"></select>
+
+                <div class="quick">
+                    <button type="button" id="quickAll">ทุกปี</button>
+                    <button type="button" id="quickLatest">ปีล่าสุด</button>
+                </div>
+            </div>
+
+            <div class="toolbar-actions">
+                <button type="button" class="btn-ghost" id="printBtn">พิมพ์ / PDF</button>
+                <button type="button" class="btn-solid" id="exportExcelBtn">ส่งออก Excel</button>
+            </div>
+
+        </section>
+
+        <p class="pending-note" id="pendingNote" hidden></p>
+
+        <!-- =====================================================
+             KPI
+        ====================================================== -->
+        <section class="kpis" id="kpiGrid" aria-label="ตัวชี้วัดหลัก"></section>
+
+        <!-- =====================================================
+             แนวโน้มต้นทุนรวม
+        ====================================================== -->
+        <section class="card" data-ct-card data-info="cc-trend">
+            <header class="card-head chart-header">
+                <div>
+                    <h2>ต้นทุนรวมรายปีงบประมาณ</h2>
+                    <p id="trendNote">ผลรวมต้นทุน 4 หมวด หน่วย ล้านบาท</p>
+                </div>
+            </header>
+
+            <div class="chart-box h-300"><canvas id="trendChart"></canvas></div>
+            <div class="chips" id="yoyChips"></div>
+        </section>
+
+        <!-- =====================================================
+             โครงสร้างต้นทุน
+        ====================================================== -->
+        <div class="grid-2">
+
+            <section class="card" data-ct-card data-info="cc-mix">
+                <header class="card-head chart-header">
+                    <div>
+                        <h2>สัดส่วนต้นทุนแต่ละหมวด</h2>
+                        <p id="mixNote">รวมทุกปีที่เลือก</p>
+                    </div>
+                </header>
+
+                <div class="mix">
+                    <div class="chart-box h-260 mix-chart"><canvas id="mixChart"></canvas></div>
+                    <ul class="mix-legend" id="mixLegend"></ul>
+                </div>
+            </section>
+
+            <section class="card" data-ct-card data-info="cc-stack">
+                <header class="card-head chart-header">
+                    <div>
+                        <h2>ต้นทุนแยกหมวดรายปี</h2>
+                        <p>ดูว่าหมวดไหนโตขึ้นหรือลดลง หน่วย ล้านบาท</p>
+                    </div>
+                </header>
+
+                <div class="chart-box h-300"><canvas id="stackChart"></canvas></div>
+            </section>
+
+        </div>
+
+        <!-- =====================================================
+             ต้นทุนต่อหน่วย
+        ====================================================== -->
+        <div class="grid-2">
+
+            <section class="card" data-ct-card data-info="cc-unit">
+                <header class="card-head chart-header">
+                    <div>
+                        <h2>ต้นทุนต่อหน่วยบริการ</h2>
+                        <p>บาทต่อ Car-Km และบาทต่อผู้โดยสาร</p>
+                    </div>
+                </header>
+
+                <div class="chart-box h-300"><canvas id="unitChart"></canvas></div>
+            </section>
+
+            <section class="card" data-ct-card data-info="cc-index">
+                <header class="card-head chart-header">
+                    <div>
+                        <h2>ต้นทุนโตเร็วกว่าการใช้งานหรือไม่</h2>
+                        <p id="indexNote">ดัชนีเทียบปีแรก = 100</p>
+                    </div>
+                </header>
+
+                <div class="chart-box h-300"><canvas id="indexChart"></canvas></div>
+            </section>
+
+        </div>
+
+        <!-- =====================================================
+             รายได้เทียบต้นทุน
+        ====================================================== -->
+        <section class="card" data-ct-card data-info="cc-rev">
+            <header class="card-head chart-header">
+                <div>
+                    <h2>รายได้ค่าโดยสารเทียบกับต้นทุน</h2>
+                    <p>รายได้ประมาณการ = ผู้โดยสาร × ค่าโดยสารเฉลี่ย หน่วย ล้านบาท</p>
+                </div>
+            </header>
+
+            <div class="rev">
+                <div class="chart-box h-300"><canvas id="revChart"></canvas></div>
+                <aside class="recovery" id="recoveryPanel"></aside>
+            </div>
+
+            <div class="facts" id="revFacts"></div>
+        </section>
+
+        <!-- =====================================================
+             รายการต้นทุนเชิงลึก
+        ====================================================== -->
+        <section class="card" data-info="cc-drill">
+            <header class="card-head">
+                <div>
+                    <h2>เจาะลึกรายการต้นทุน</h2>
+                    <p>รายการที่ใช้เงินมากที่สุด และรายการที่เปลี่ยนแปลงมากที่สุด</p>
+                </div>
+
+                <div class="drill-year">
+                    <label for="drillYear">ปีงบประมาณ</label>
+                    <select id="drillYear"></select>
+                </div>
+            </header>
+
+            <div class="tabs" id="drillTabs" role="tablist"></div>
+
+            <div class="drill">
+                <div>
+                    <h3 class="sub-title">รายการต้นทุนสูงสุด</h3>
+                    <ol class="rank" id="rankList"></ol>
+                    <button type="button" class="more" id="rankMore" hidden></button>
+                </div>
+
+                <div>
+                    <h3 class="sub-title" id="moversTitle">เปลี่ยนแปลงมากที่สุด</h3>
+                    <div class="movers" id="movers"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             ตารางสรุป
+        ====================================================== -->
+        <section class="card" data-info="cc-table">
+            <header class="card-head">
+                <div>
+                    <h2>ตารางสรุปรายปีงบประมาณ</h2>
+                    <p>ตัวเลขต้นทุนหน่วย ล้านบาท · ส่งออกเป็น Excel ได้ในหน่วยบาทเต็ม</p>
+                </div>
+            </header>
+
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                    <tfoot id="tableFoot"></tfoot>
+                </table>
+            </div>
+        </section>
+
+        <!-- แจ้งปัญหาโหลดข้อมูล -->
+        <section class="card load-error" id="loadError" hidden>
+            <h2>โหลดข้อมูลต้นทุนไม่สำเร็จ</h2>
+            <p id="loadErrorText"></p>
+            <ul>
+                <li>ตรวจสอบว่ามีไฟล์ <code>data/cost-data.xlsx</code> และมีชีต <code>dashboard_cost</code></li>
+                <li>ต้องเปิดผ่าน Live Server หรือ GitHub Pages (เปิดไฟล์ตรง ๆ แบบ file:// จะโดนบล็อก)</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer class="foot">
+        <div class="wrap">
+            Red Line Operating Cost Dashboard · ที่มาข้อมูล: ไฟล์พี่ไก่ใน W (data/cost-data.xlsx) ·
+            รายได้เป็นค่าประมาณจากจำนวนผู้โดยสารคูณค่าโดยสารเฉลี่ย
+        </div>
+    </footer>
+
+    <script src="js/chart-tools.js"></script>
+    <script src="js/chart-info.js"></script>
+    <script src="js/cost-app.js"></script>
+    <script src="js/load-cost.js"></script>
+
+</body>
+
+</html>
