@@ -161,31 +161,6 @@
             return svg(out);
         },
 
-        /* สองเส้นต้นทุนต่อหน่วย */
-        unit: function () {
-            return svg(
-                '<line x1="40" x2="480" y1="128" y2="128" class="ci-axis"/>' +
-                '<polyline points="60,40 160,52 260,60 360,84 460,100" class="ci-line ci-line-b"/>' +
-                '<polyline points="60,92 160,96 260,94 360,100 460,108" class="ci-line"/>' +
-                [60, 160, 260, 360, 460].map(function (x, i) { return '<circle cx="' + x + '" cy="' + [40, 52, 60, 84, 100][i] + '" r="4.5" class="ci-dot-b"/>'; }).join("") +
-                [60, 160, 260, 360, 460].map(function (x, i) { return '<circle cx="' + x + '" cy="' + [92, 96, 94, 100, 108][i] + '" r="4.5" class="ci-dot"/>'; }).join("") +
-                t(60, 30, "บาท / ผู้โดยสาร", "ci-note-b") + t(60, 142, "บาท / Car-Km", "ci-note") +
-                callout(476, 76, "เส้นลง = ถูกลงต่อหน่วย", "end")
-            );
-        },
-
-        /* ดัชนี 100 */
-        index: function () {
-            return svg(
-                '<line x1="40" x2="480" y1="96" y2="96" class="ci-avg"/>' + t(484, 100, "100", "ci-note", "start") +
-                '<polyline points="60,96 160,84 260,70 360,66 460,60" class="ci-line"/>' +
-                '<polyline points="60,96 160,78 260,52 360,34 460,22" class="ci-line ci-line-b"/>' +
-                '<polyline points="60,96 160,92 260,98 360,100 460,104" class="ci-line ci-line-c"/>' +
-                t(466, 24, "ผู้โดยสาร", "ci-note-b", "start") + t(466, 62, "ต้นทุน", "ci-note", "start") + t(466, 118, "Car-Km", "ci-note-c", "start") +
-                callout(60, 140, "เริ่มที่ 100 ทุกเส้น · เส้นไหนสูงกว่า = โตเร็วกว่า", "start")
-            );
-        },
-
         /* รายได้เทียบต้นทุน */
         revenue: function () {
             var pairs = [[40, 74], [70, 96], [92, 104], [102, 94]], out = "";
