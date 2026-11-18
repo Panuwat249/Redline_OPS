@@ -486,7 +486,7 @@
                 label: "ต้นทุนต่อ Car-Km",
                 info: "ck-carkm",
                 value: fmt2(focus.costPerCarKm),
-                unit: "บาท",
+                unit: "บาท/ตู้/กม.",
                 delta: prev ? pctChange(focus.costPerCarKm, prev.costPerCarKm) : null,
                 good: "down",
                 series: valid.map(d => d.costPerCarKm)
@@ -495,7 +495,7 @@
                 label: "ต้นทุนต่อผู้โดยสาร",
                 info: "ck-pax",
                 value: fmt2(focus.costPerPassenger),
-                unit: "บาท",
+                unit: "บาท/คน",
                 delta: prev ? pctChange(focus.costPerPassenger, prev.costPerPassenger) : null,
                 good: "down",
                 series: valid.map(d => d.costPerPassenger)
