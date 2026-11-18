@@ -23,7 +23,7 @@
         { key: "staffCost",       group: "Staff",       th: "บุคลากร",   en: "Staff",       color: "#c8102e" },
         { key: "energyCost",      group: "Energy",      th: "พลังงาน",   en: "Energy",      color: "#eda100" },
         { key: "maintenanceCost", group: "Maintenance", th: "ซ่อมบำรุง", en: "Maintenance", color: "#2a78d6" },
-        { key: "indirectCost",    group: "Indirect",    th: "ทางอ้อม",   en: "Indirect",    color: "#e87ba4" }
+        { key: "indirectCost",    group: "Indirect",    th: "อื่น ๆ",   en: "Indirect",    color: "#e87ba4" }
     ];
 
     const COLOR = {
@@ -1030,7 +1030,7 @@
         { label: "บุคลากร" },
         { label: "พลังงาน" },
         { label: "ซ่อมบำรุง" },
-        { label: "ทางอ้อม" },
+        { label: "อื่น ๆ" },
         { label: "ต้นทุนรวม", cls: "strong" },
         { label: "เปลี่ยนจากปีก่อน" },
         { label: "Car-Km" },
@@ -1113,7 +1113,7 @@
 
         const summary = [[
             "ปีงบประมาณ",
-            "ต้นทุนบุคลากร (บาท)", "ต้นทุนพลังงาน (บาท)", "ต้นทุนซ่อมบำรุง (บาท)", "ต้นทุนทางอ้อม (บาท)",
+            "ต้นทุนบุคลากร (บาท)", "ต้นทุนพลังงาน (บาท)", "ต้นทุนซ่อมบำรุง (บาท)", "ต้นทุนอื่น ๆ (บาท)",
             "ต้นทุนรวม (บาท)", "เปลี่ยนจากปีก่อน (%)",
             "Car-Km", "ผู้โดยสาร (คน)", "บาทต่อ Car-Km", "บาทต่อผู้โดยสาร",
             "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ประมาณการ (บาท)", "คืนทุน (%)"
