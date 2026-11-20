@@ -580,8 +580,9 @@ a:focus-visible {
 .fact {
     padding: 14px 18px;
     border-radius: 18px;
-    background: var(--red-25);
-    border: 1px solid var(--line);
+    background: #fff;
+    border: 2px solid #e2c8cc;
+    box-shadow: 0 3px 10px rgba(80,10,20,.08);
 }
 
 .fact span { display: block; font-size: 13px; color: var(--mute); font-weight: 600; }
