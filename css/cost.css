@@ -27,7 +27,8 @@
     --ink-2: #4a3d41;
     --mute: #76686c;
     --line: #f0e4e5;
-    --bg: #fbf7f7;
+    --bg: #f3eaec;              /* พื้นหลังหน้า: ชมพูเทาอ่อน ให้การ์ดสีขาวเด่นขึ้นมา */
+    --card-bd: #e6d0d4;          /* ขอบการ์ด */
     --card: #ffffff;
 
     --good: #0b6b49;
@@ -39,7 +40,7 @@
     --r-lg: 26px;
     --r-md: 18px;
 
-    --shadow: 0 1px 2px rgba(80, 10, 20, 0.04), 0 14px 36px rgba(80, 10, 20, 0.06);
+    --shadow: 0 1px 3px rgba(80, 10, 20, 0.08), 0 12px 32px rgba(80, 10, 20, 0.11);
 
     --accent-text: #a1121b;
     --border-2: #ead7d9;
@@ -71,6 +72,7 @@
     --mute: #a89a9e;
     --line: #35272b;
     --bg: #150e10;
+    --card-bd: #3a2a2f;
     --card: #1f1518;
 
     --good: #6fdcab;
@@ -374,7 +376,7 @@ a:focus-visible {
     padding: 20px 22px 18px;
     border-radius: var(--r-lg);
     background: var(--card);
-    border: 1px solid var(--line);
+    border: 1px solid var(--card-bd);
     box-shadow: var(--shadow);
 }
 
@@ -449,7 +451,7 @@ a:focus-visible {
     padding: 26px 28px 28px;
     border-radius: var(--r-xl);
     background: var(--card);
-    border: 1px solid var(--line);
+    border: 1px solid var(--card-bd);
     box-shadow: var(--shadow);
     min-width: 0;
 }
