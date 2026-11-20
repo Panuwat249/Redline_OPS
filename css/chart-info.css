@@ -1,0 +1,360 @@
+/* =========================================================
+   chart-info.css
+   ปุ่ม "?" ของทุกการ์ด และหน้าต่างอธิบายกราฟ (ใช้คู่กับ js/chart-info.js)
+   ธีมขาว-แดง ขอบมน รองรับโหมดมืดและมือถือ
+   ========================================================= */
+
+/* ---------- ปุ่ม ? ---------- */
+
+.info-btn {
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 1.5px solid #e9b9bf;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #c8102e;
+    font-family: "Sarabun", sans-serif;
+    font-size: 19px;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+    order: 99;                 /* อยู่ขวาสุดเสมอ ถัดจากปุ่ม "ปรับแต่งกราฟ" */
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.info-btn:hover,
+.info-btn:focus-visible {
+    background: #c8102e;
+    border-color: #c8102e;
+    color: #ffffff;
+}
+
+.info-btn:focus-visible { outline: 3px solid rgba(200, 16, 46, 0.35); outline-offset: 2px; }
+.info-btn:active { transform: scale(0.94); }
+.info-btn.is-sm { width: 30px; height: 30px; font-size: 16px; }
+
+/* ลอยมุมขวาบนของการ์ดที่ไม่มีหัวการ์ดให้วาง */
+.info-btn.is-float { position: absolute; top: 14px; right: 14px; }
+.summary-card { position: relative; }
+
+/* กลุ่มหน่วย + ปุ่ม ในหัวการ์ดตัวชี้วัด */
+.info-side {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.kpi-top .info-side { gap: 8px; }
+
+.ct-actions .info-btn { margin-left: 2px; }
+
+@media print { .info-btn { display: none !important; } }
+
+/* ---------- หน้าต่างอธิบาย ---------- */
+
+html.ci-lock { overflow: hidden; }
+
+.ci-overlay {
+    --ci-bg: #ffffff;
+    --ci-ink: #1b1416;
+    --ci-ink2: #4a3a3e;
+    --ci-mute: #7a6b6f;
+    --ci-line: #f0e1e3;
+    --ci-soft: #fbf4f4;
+    --ci-red: #c8102e;
+    --ci-red-text: #a1121b;
+    --ci-red-bg: #fdecee;
+    --ci-good-bg: #e8f6ee;
+    --ci-good: #146c3a;
+    --ci-watch-bg: #fff4dc;
+    --ci-watch: #8a5a00;
+    --ci-fig: #fff7f7;
+
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(40, 8, 14, 0.5);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    font-family: "Sarabun", sans-serif;
+}
+
+.ci-overlay[hidden] { display: none; }
+.ci-overlay.is-open { opacity: 1; }
+
+.ci-dialog {
+    display: flex;
+    flex-direction: column;
+    width: min(620px, 100%);
+    max-height: min(86vh, 760px);
+    border-radius: 28px;
+    background: var(--ci-bg);
+    color: var(--ci-ink);
+    box-shadow: 0 30px 80px rgba(40, 8, 14, 0.4);
+    outline: none;
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.2s ease;
+}
+
+.ci-overlay.is-open .ci-dialog { transform: none; }
+
+.ci-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 22px 24px 14px;
+}
+
+.ci-tag {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 999px;
+    background: var(--ci-red-bg);
+    color: var(--ci-red-text);
+    font-size: 12.5px;
+    font-weight: 800;
+}
+
+.ci-head h2 {
+    margin-top: 8px;
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 900;
+}
+
+.ci-close {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 999px;
+    background: var(--ci-soft);
+    color: var(--ci-red-text);
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.ci-close:hover { background: var(--ci-red-bg); }
+.ci-close:focus-visible { outline: 3px solid rgba(200, 16, 46, 0.35); outline-offset: 2px; }
+
+.ci-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 24px 24px;
+}
+
+.ci-fig {
+    margin: 4px 0 6px;
+    padding: 12px 12px 8px;
+    border-radius: 20px;
+    background: var(--ci-fig);
+    border: 1px solid var(--ci-line);
+}
+
+.ci-fig figcaption {
+    margin-top: 2px;
+    text-align: center;
+    color: var(--ci-mute);
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.ci-svg { display: block; width: 100%; height: auto; }
+
+.ci-sec { margin-top: 18px; }
+
+.ci-sec h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 900;
+}
+
+.ci-sec p,
+.ci-analogy p {
+    color: var(--ci-ink2);
+    font-size: 15px;
+    line-height: 1.65;
+    font-weight: 500;
+}
+
+.ci-analogy {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    background: var(--ci-soft);
+    border: 1px dashed #e9b9bf;
+}
+
+.ci-an-ico { font-size: 30px; line-height: 1; }
+.ci-analogy b { display: block; margin-bottom: 2px; font-size: 14px; color: var(--ci-red-text); font-weight: 900; }
+
+.ci-read { list-style: none; display: grid; gap: 8px; }
+
+.ci-read li {
+    display: grid;
+    grid-template-columns: minmax(96px, 150px) 1fr;
+    gap: 12px;
+    align-items: baseline;
+    padding: 10px 14px;
+    border-radius: 16px;
+    background: var(--ci-soft);
+    font-size: 14.5px;
+    line-height: 1.55;
+}
+
+.ci-read b { color: var(--ci-red-text); font-weight: 800; }
+.ci-read span { color: var(--ci-ink2); font-weight: 500; }
+
+.ci-signals { display: grid; gap: 8px; }
+
+.ci-sig { padding: 12px 16px; border-radius: 18px; }
+.ci-sig b { display: block; margin-bottom: 2px; font-size: 13.5px; font-weight: 900; }
+.ci-sig p { font-size: 14.5px; line-height: 1.6; }
+.ci-sig-good { background: var(--ci-good-bg); }
+.ci-sig-good b { color: var(--ci-good); }
+.ci-sig-watch { background: var(--ci-watch-bg); }
+.ci-sig-watch b { color: var(--ci-watch); }
+
+.ci-formula {
+    margin-top: 16px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: var(--ci-soft);
+    color: var(--ci-ink2);
+    font-size: 14px;
+    line-height: 1.55;
+    font-weight: 600;
+}
+
+.ci-formula b { color: var(--ci-red-text); margin-right: 4px; }
+
+/* ---------- ภาพประกอบ SVG ---------- */
+
+.ci-svg text { font-family: "Sarabun", sans-serif; fill: var(--ci-ink2); }
+.ci-t    { font-size: 15px; font-weight: 700; }
+.ci-t-s  { font-size: 14px; font-weight: 700; fill: var(--ci-mute); }
+.ci-t-xs { font-size: 12px; font-weight: 700; fill: var(--ci-mute); }
+.ci-big  { font-size: 42px; font-weight: 900; fill: var(--ci-ink); }
+.ci-mid  { font-size: 22px; font-weight: 900; fill: var(--ci-ink); }
+.ci-th   { font-size: 13px; font-weight: 800; fill: #ffffff; }
+.ci-note   { font-size: 12.5px; font-weight: 800; fill: var(--ci-red-text); }
+.ci-note-b { font-size: 12.5px; font-weight: 800; fill: #2a78d6; }
+.ci-note-c { font-size: 12.5px; font-weight: 800; fill: var(--ci-mute); }
+.ci-chip-t { font-size: 15px; font-weight: 900; fill: var(--ci-good); }
+
+.ci-card       { fill: var(--ci-bg); stroke: var(--ci-line); stroke-width: 1.5; }
+.ci-card-dark  { fill: #8f0a20; }
+.ci-card-light { fill: var(--ci-red-bg); stroke: #f3c3c9; }
+.ci-card-dark text.ci-t-s, .ci-card-dark ~ text.ci-t-s { fill: #ffd5da; }
+.ci-chip-good  { fill: var(--ci-good-bg); }
+.ci-chip-flat  { fill: var(--ci-red-bg); }
+.ci-track      { fill: var(--ci-line); }
+.ci-range      { fill: var(--ci-red-bg); stroke: var(--ci-red); stroke-width: 2; }
+
+.ci-bar      { fill: #c8102e; }
+.ci-bar-warn { fill: #eda100; }
+.ci-bar-soft { fill: #ea8c99; }
+.ci-bar-rev  { fill: #2a78d6; }
+
+.ci-s1 { fill: #c8102e; } .ci-s2 { fill: #eda100; } .ci-s3 { fill: #2a78d6; } .ci-s4 { fill: #e87ba4; }
+.ci-f1 { fill: #c8102e; } .ci-f2 { fill: #eda100; } .ci-f3 { fill: #2a78d6; } .ci-f4 { fill: #e87ba4; }
+.ci-d1 { stroke: #c8102e; } .ci-d2 { stroke: #2a78d6; } .ci-d3 { stroke: #eda100; } .ci-d4 { stroke: #e87ba4; }
+.ci-svg text.ci-lg1 { fill: #c8102e; font-size: 13px; font-weight: 800; }
+.ci-svg text.ci-lg2 { fill: #eda100; font-size: 13px; font-weight: 800; }
+.ci-svg text.ci-lg3 { fill: #2a78d6; font-size: 13px; font-weight: 800; }
+.ci-svg text.ci-lg4 { fill: #e87ba4; font-size: 13px; font-weight: 800; }
+.ci-svg text.ci-lgr { fill: #2a78d6; font-size: 13px; font-weight: 800; }
+
+.ci-axis { stroke: var(--ci-line); stroke-width: 2; }
+.ci-avg  { stroke: var(--ci-mute); stroke-width: 1.8; stroke-dasharray: 6 5; }
+
+.ci-line   { fill: none; stroke: #c8102e; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.ci-line-b { stroke: #2a78d6; }
+.ci-line-c { stroke: #9a8a8e; }
+.ci-dot    { fill: #c8102e; stroke: var(--ci-bg); stroke-width: 2; }
+.ci-dot-b  { fill: #2a78d6; stroke: var(--ci-bg); stroke-width: 2; }
+.ci-dot-off { fill: var(--ci-line); }
+
+/* ---------- มือถือ: แผ่นเลื่อนขึ้นจากล่างจอ ---------- */
+
+@media (max-width: 640px) {
+    .ci-overlay { align-items: flex-end; padding: 0; }
+
+    .ci-dialog {
+        width: 100%;
+        max-height: 88vh;
+        border-radius: 26px 26px 0 0;
+        transform: translateY(40px);
+    }
+
+    .ci-head { padding: 18px 18px 10px; }
+    .ci-head h2 { font-size: 19px; }
+    .ci-body { padding: 0 18px calc(22px + env(safe-area-inset-bottom)); }
+    .ci-read li { grid-template-columns: 1fr; gap: 2px; }
+
+    .info-btn { width: 40px; height: 40px; }
+    .info-btn.is-sm { width: 34px; height: 34px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ci-overlay, .ci-dialog, .info-btn { transition: none; }
+}
+
+@media print { .ci-overlay { display: none !important; } }
+
+/* ---------- โหมดมืด ---------- */
+
+:root[data-theme="dark"] .ci-overlay {
+    --ci-bg: #231a1d;
+    --ci-ink: #f6eeef;
+    --ci-ink2: #d9cbce;
+    --ci-mute: #a89a9e;
+    --ci-line: #3d2d31;
+    --ci-soft: #2c2024;
+    --ci-red: #ff6b81;
+    --ci-red-text: #ff9aa8;
+    --ci-red-bg: #3a2127;
+    --ci-good-bg: #173325;
+    --ci-good: #6fdba0;
+    --ci-watch-bg: #3a2f14;
+    --ci-watch: #f2c35a;
+    --ci-fig: #1d1417;
+    background: rgba(0, 0, 0, 0.62);
+}
+
+:root[data-theme="dark"] .ci-dialog { box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65); }
+:root[data-theme="dark"] .ci-analogy { border-color: #5a3d44; }
+:root[data-theme="dark"] .ci-card-light { stroke: #5a3d44; }
+
+:root[data-theme="dark"] .info-btn {
+    background: #271a1e;
+    border-color: #5a3d44;
+    color: #ff9aa8;
+}
+
+:root[data-theme="dark"] .info-btn:hover,
+:root[data-theme="dark"] .info-btn:focus-visible {
+    background: #e5384f;
+    border-color: #e5384f;
+    color: #ffffff;
+}
