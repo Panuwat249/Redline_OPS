@@ -518,7 +518,7 @@ function buildBaseChartOptions(range) {
                 bodyFont: { family: "Sarabun, sans-serif" },
                 callbacks: {
                     label: context =>
-                        `${context.dataset.label}: ${Number(context.raw).toFixed(2)}%`
+                        `${context.dataset.label}: ${context.dataset.ctDec != null && window.ChartTools ? ChartTools.fmtDec(context.raw, context.dataset.ctDec) : Number(context.raw).toFixed(2)}%`
                 }
             }
         },

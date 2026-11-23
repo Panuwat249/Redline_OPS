@@ -176,6 +176,29 @@
         return ds && ds.ctKey != null ? String(ds.ctKey) : String(i);
     }
 
+    /* ---------- จำนวนทศนิยม (ผู้ใช้เลือกต่อชุด/ทั้งกราฟ) ----------
+       0 ตำแหน่ง = ปัดขึ้นเสมอ (744.6 → 745) · 1–3 ตำแหน่ง = ปัดตามปกติ */
+    function fmtDec(v, n) {
+        v = Number(v);
+        if (!isFinite(v)) return String(v);
+        if (n === 0) v = Math.ceil(v - 1e-9);
+        return v.toLocaleString("en-US", { minimumFractionDigits: n, maximumFractionDigits: n });
+    }
+
+    /* ครอบตัวจัดรูปเดิมของกราฟ: คงหน่วย/คำนำหน้า/คำต่อท้าย (เช่น "%", "บาท") ไว้ เปลี่ยนเฉพาะตัวเลข */
+    function withDecimals(orig, n) {
+        return function (value, ctx) {
+            var s = typeof orig === "function" ? orig(value, ctx) : String(value);
+            var m = String(s).match(/-?\d[\d,]*(\.\d+)?/);
+            if (!m) return s;
+            var shown = parseFloat(m[0].replace(/,/g, ""));
+            var raw = Number(value);
+            /* ถ้าเลขที่แสดงตรงกับค่าจริง ใช้ค่าจริงเพื่อไม่เสียความละเอียด (ไม่งั้นเป็นค่าที่ย่อหน่วยแล้ว) */
+            var num = isFinite(raw) && Math.abs(shown - raw) <= 0.5 ? raw : shown;
+            return String(s).replace(m[0], fmtDec(num, n));
+        };
+    }
+
     /* ลำดับชุดข้อมูลที่ผู้ใช้เลือก (pref.order = รายการ key เรียงตามที่ต้องการ)
        คืนค่าเป็นดัชนีของ base.data.datasets เรียงตามลำดับนั้น (ชุดที่ไม่อยู่ในรายการไปต่อท้ายตามเดิม) */
     function orderedIdx(base, pref) {
@@ -486,6 +509,18 @@
             cfg.data.datasets.forEach(function (ds, di) {
                 if (ds.datalabels !== undefined) ds.ctLabelOpts = ds.datalabels;
                 ds.datalabels = { display: false };
+
+                /* จำนวนทศนิยมที่ผู้ใช้เลือก (เฉพาะชุด > ทั้งกราฟ) */
+                if (!radial) {
+                    var decKey = dsKey(ds, di);
+                    var dec = pref.decBy && pref.decBy[decKey] != null ? pref.decBy[decKey] : pref.dec;
+                    if (dec != null) {
+                        var ownF = ds.ctLabelOpts && ds.ctLabelOpts.formatter;
+                        ds.ctLabelOpts = Object.assign({}, ds.ctLabelOpts, { formatter: withDecimals(ownF || lab.formatter, dec) });
+                        ds.ctDec = dec;
+                        ds.ctFmt = function (v) { return fmtDec(v, dec); };     // ทูลทิปใช้ตัวนี้
+                    }
+                }
                 /* ตำแหน่งตัวเลขที่ผู้ใช้เลือกแยกรายชุดข้อมูล (ถ้ามี) */
                 var own = pref.labelPosBy && pref.labelPosBy[dsKey(ds, di)];
                 if (own) ds.ctLabelPos = own;
@@ -756,6 +791,13 @@
                         '<button type="button" data-saxis="y1" data-key="' + esc(key) + '" class="' + (ax === "y1" ? "is-on" : "") + '">แกนขวา</button></div>';
                 }
 
+                var ownDec = pref.decBy && pref.decBy[key] != null ? String(pref.decBy[key]) : "inherit";
+                minis += '<div class="ct-mini ct-mini-pos" role="group" aria-label="ทศนิยมของ ' + esc(ds.label) + '"><span class="ct-mini-cap">ทศนิยม</span>';
+                DEC_OPTS.forEach(function (dv) {
+                    minis += '<button type="button" data-sdec="' + dv[0] + '" data-key="' + esc(key) + '" class="' + (dv[0] === ownDec ? "is-on" : "") + '">' + dv[1] + "</button>";
+                });
+                minis += "</div>";
+
                 if (typeof ChartLabels !== "undefined") {
                     var ownPos = (pref.labelPosBy && pref.labelPosBy[key]) || "inherit";
                     minis += '<div class="ct-mini ct-mini-pos" role="group" aria-label="ตำแหน่งตัวเลขของ ' + esc(ds.label) + '"><span class="ct-mini-cap">ตัวเลข</span>';
@@ -785,6 +827,15 @@
             html += '<div class="ct-labelpos"><div class="ct-sublabel">ตำแหน่งตัวเลข</div><div class="ct-seg ct-seg-sm" role="group" aria-label="ตำแหน่งตัวเลข">';
             posList.forEach(function (pv) {
                 html += '<button type="button" data-lpos="' + pv[0] + '" class="' + (pv[0] === curPos ? "is-on" : "") + '">' + pv[1] + "</button>";
+            });
+            html += "</div></div>";
+        }
+
+        if (!radial && typeof ChartLabels !== "undefined") {
+            var curDec = pref.dec != null ? String(pref.dec) : "inherit";
+            html += '<div class="ct-labelpos"><div class="ct-sublabel">ทศนิยม (ตัวเลขบนกราฟและทูลทิป)</div><div class="ct-seg ct-seg-sm" role="group" aria-label="ทศนิยม">';
+            DEC_OPTS.forEach(function (dv) {
+                html += '<button type="button" data-dec="' + dv[0] + '" class="' + (dv[0] === curDec ? "is-on" : "") + '">' + dv[1] + "</button>";
             });
             html += "</div></div>";
         }
@@ -845,6 +896,29 @@
         panelEl.querySelectorAll("[data-skind]").forEach(function (b) {
             b.addEventListener("click", function () {
                 setSeriesPref(entry.id, "series", b.getAttribute("data-key"), b.getAttribute("data-skind"));
+                apply(entry, true);
+            });
+        });
+
+        panelEl.querySelectorAll("[data-dec]").forEach(function (b) {
+            b.addEventListener("click", function () {
+                var v = b.getAttribute("data-dec");
+                var p = prefs[entry.id] = prefs[entry.id] || {};
+                if (v === "inherit") delete p.dec; else p.dec = +v;
+                delete p.decBy;                                    // เลือกทั้งกราฟ = ล้างค่าที่เลือกแยกชุด
+                savePrefs();
+                apply(entry, true);
+            });
+        });
+
+        panelEl.querySelectorAll("[data-sdec]").forEach(function (b) {
+            b.addEventListener("click", function () {
+                var v = b.getAttribute("data-sdec"), key = b.getAttribute("data-key");
+                var p = prefs[entry.id] = prefs[entry.id] || {};
+                p.decBy = p.decBy || {};
+                if (v === "inherit") delete p.decBy[key]; else p.decBy[key] = +v;
+                if (!Object.keys(p.decBy).length) delete p.decBy;
+                savePrefs();
                 apply(entry, true);
             });
         });
@@ -968,6 +1042,8 @@
             '<input type="color" data-key="' + key + '" value="' + color + '" aria-label="สีของ ' + esc(label) + '"></span></label>';
     }
 
+    var DEC_OPTS = [["inherit", "ตามเดิม"], ["0", "0 (ปัดขึ้น)"], ["1", "1"], ["2", "2"], ["3", "3"]];
+
     function rangeRow(key, label, val, min, max) {
         return '<label class="ct-range"><span>' + label + ' <b data-rv="' + key + '">' + val + '%</b></span>' +
             '<input type="range" min="' + min + '" max="' + max + '" step="5" value="' + val + '" data-range="' + key + '"></label>';
@@ -1064,6 +1140,7 @@
         create: create,
         palettes: PALETTES,
         toHex: toHex,
+        fmtDec: fmtDec,
         css: css,
         rgba: rgba,
         get: function (id) { return registry[id] ? registry[id].chart : null; },

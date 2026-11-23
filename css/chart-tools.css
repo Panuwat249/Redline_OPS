@@ -475,3 +475,6 @@
 /* ---------- ปุ่มเลื่อนลำดับชุดข้อมูล ---------- */
 .ct-mini-move button:disabled { opacity: 0.35; cursor: default; }
 .ct-mini-move button { white-space: nowrap; }
+
+/* ปุ่มทศนิยมมีข้อความยาวกว่าปกติเล็กน้อย */
+.ct-seg-sm button { white-space: nowrap; }
