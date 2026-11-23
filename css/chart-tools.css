@@ -471,3 +471,7 @@
 .ct-range input[type="range"] { width: 100%; accent-color: #c8102e; cursor: pointer; }
 :root[data-theme="dark"] .ct-range b { color: #ff8f9c; }
 :root[data-theme="dark"] .ct-range input[type="range"] { accent-color: #e5384f; }
+
+/* ---------- ปุ่มเลื่อนลำดับชุดข้อมูล ---------- */
+.ct-mini-move button:disabled { opacity: 0.35; cursor: default; }
+.ct-mini-move button { white-space: nowrap; }

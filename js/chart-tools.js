@@ -176,6 +176,20 @@
         return ds && ds.ctKey != null ? String(ds.ctKey) : String(i);
     }
 
+    /* ลำดับชุดข้อมูลที่ผู้ใช้เลือก (pref.order = รายการ key เรียงตามที่ต้องการ)
+       คืนค่าเป็นดัชนีของ base.data.datasets เรียงตามลำดับนั้น (ชุดที่ไม่อยู่ในรายการไปต่อท้ายตามเดิม) */
+    function orderedIdx(base, pref) {
+        var dss = base.data.datasets;
+        var idx = dss.map(function (_, i) { return i; });
+        var ord = pref && pref.order;
+        if (!ord || !ord.length) return idx;
+        function rank(i) {
+            var p = ord.indexOf(dsKey(dss[i], i));
+            return p === -1 ? 1000 + i : p;
+        }
+        return idx.sort(function (a, b) { return rank(a) - rank(b); });
+    }
+
     /* เส้นเฉลี่ยที่วางทับ ฯลฯ — ไม่ถูกเปลี่ยนชนิดและไม่โชว์ในแผงปรับแต่ง */
     function isOverlay(ds, base) {
         return !!(ds.ctFixed || (ds.type && ds.type !== base.type && !ds.ctKind));
@@ -488,6 +502,21 @@
             }
         }
 
+        /* ---------- เรียงลำดับชุดข้อมูลตามที่ผู้ใช้เลือก (ทำหลังสุด เพราะ key อิงลำดับเดิม) ---------- */
+        var hasOrder = !radial && pref.order && pref.order.length;
+        if (hasOrder) {
+            var oi = orderedIdx(base, pref);
+            cfg.data.datasets = oi.map(function (i) { return cfg.data.datasets[i]; });
+        }
+        if (hasOrder || (!radial && mixed)) {
+            /* คำอธิบายกราฟ/ทูลทิปเรียงตามลำดับชุดข้อมูล (ปกติ Chart.js จัดเส้นขึ้นก่อนแท่งในกราฟผสม) */
+            o.plugins.legend = o.plugins.legend || {};
+            o.plugins.legend.labels = o.plugins.legend.labels || {};
+            o.plugins.legend.labels.sort = function (a, b) { return a.datasetIndex - b.datasetIndex; };
+            o.plugins.tooltip = o.plugins.tooltip || {};
+            o.plugins.tooltip.itemSort = function (a, b) { return a.datasetIndex - b.datasetIndex; };
+        }
+
         return cfg;
     }
 
@@ -496,6 +525,15 @@
     function instantiate(entry) {
         var existing = typeof Chart !== "undefined" && Chart.getChart ? Chart.getChart(entry.canvas) : null;
         if (existing) existing.destroy();
+
+        /* ความกว้างกราฟ (ผู้ใช้ปรับเอง): หดกรอบของ canvas ให้แคบลงแล้วจัดกลางการ์ด */
+        var holder = entry.canvas.parentElement;
+        var cw = prefs[entry.id] && prefs[entry.id].chartW;
+        if (holder) {
+            holder.style.width = cw && cw < 100 ? cw + "%" : "";
+            holder.style.marginLeft = holder.style.marginRight = cw && cw < 100 ? "auto" : "";
+        }
+
         entry.chart = new Chart(entry.canvas, buildConfig(entry));
         if (typeof entry.opts.onChange === "function") {
             entry.opts.onChange(entry.chart);
@@ -689,7 +727,9 @@
                 html += colorRow(key, label, color);
             });
         } else {
-            dss.forEach(function (ds, i) {
+            var liveOrder = orderedIdx(base, pref).filter(function (i) { return kindsNow[i] !== null; });
+            orderedIdx(base, pref).forEach(function (i) {
+                var ds = dss[i];
                 var key = dsKey(ds, i);
                 var color = (pref.colors && pref.colors[key]) || baseColor(base, i);
                 var row = colorRow(key, ds.label || ("ชุดที่ " + (i + 1)), color);
@@ -697,7 +737,12 @@
                 if (!multi || kindsNow[i] === null) { html += row; return; }
 
                 /* หลายชุดข้อมูล: ใต้ชื่อแต่ละชุดมีปุ่มเลือก แท่ง/เส้น/พื้นที่ และแกนซ้าย/ขวา */
-                var minis = '<div class="ct-mini" role="group" aria-label="ชนิดกราฟของ ' + esc(ds.label) + '">';
+                var lp = liveOrder.indexOf(i);
+                var minis = '<div class="ct-mini ct-mini-move" role="group" aria-label="ลำดับของ ' + esc(ds.label) + '">' +
+                    '<span class="ct-mini-cap">ลำดับ ' + (lp + 1) + "/" + liveOrder.length + "</span>" +
+                    '<button type="button" data-move="up" data-key="' + esc(key) + '"' + (lp === 0 ? " disabled" : "") + ">▲ ขึ้นก่อน</button>" +
+                    '<button type="button" data-move="down" data-key="' + esc(key) + '"' + (lp === liveOrder.length - 1 ? " disabled" : "") + ">▼ ไปหลัง</button></div>";
+                minis += '<div class="ct-mini" role="group" aria-label="ชนิดกราฟของ ' + esc(ds.label) + '">';
                 entry.opts.kinds.forEach(function (k) {
                     minis += '<button type="button" data-skind="' + k + '" data-key="' + esc(key) + '" class="' +
                         (k === kindsNow[i] ? "is-on" : "") + '">' + KIND_LABEL[k] + "</button>";
@@ -762,6 +807,8 @@
             html += toggle("stacked", live.indexOf("bar") === -1 ? "ซ้อนพื้นที่" : "ซ้อนแท่ง", stackOn);
         }
 
+        html += rangeRow("chartW", "ความกว้างกราฟ", pref.chartW != null ? pref.chartW : 100, 40, 100);
+
         if (!radial && live.indexOf("bar") !== -1) {
             html += rangeRow("barW", "ความกว้างแท่ง", pref.barW != null ? pref.barW : 90, 30, 100);
             html += rangeRow("catW", "ความกว้างกลุ่มแท่ง (มาก = ชิดกัน)", pref.catW != null ? pref.catW : 80, 40, 100);
@@ -798,6 +845,23 @@
         panelEl.querySelectorAll("[data-skind]").forEach(function (b) {
             b.addEventListener("click", function () {
                 setSeriesPref(entry.id, "series", b.getAttribute("data-key"), b.getAttribute("data-skind"));
+                apply(entry, true);
+            });
+        });
+
+        panelEl.querySelectorAll("[data-move]").forEach(function (b) {
+            b.addEventListener("click", function () {
+                var key = b.getAttribute("data-key");
+                var step = b.getAttribute("data-move") === "up" ? -1 : 1;
+                var p = prefs[entry.id] = prefs[entry.id] || {};
+                var keys = orderedIdx(base, p)
+                    .filter(function (i) { return kindsNow[i] !== null; })
+                    .map(function (i) { return dsKey(dss[i], i); });
+                var j = keys.indexOf(key), k = j + step;
+                if (j < 0 || k < 0 || k >= keys.length) return;
+                var t = keys[j]; keys[j] = keys[k]; keys[k] = t;
+                p.order = keys;
+                savePrefs();
                 apply(entry, true);
             });
         });
