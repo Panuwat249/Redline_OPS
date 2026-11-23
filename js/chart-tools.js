@@ -176,13 +176,40 @@
         return ds && ds.ctKey != null ? String(ds.ctKey) : String(i);
     }
 
+    /* ความละเอียดการวาดกราฟ: ใช้ "พิกเซลจริงของจอ" ตรง ๆ (1 พิกเซลกราฟ = 1 พิกเซลจอ) ตัวหนังสือและเส้นจึงคมที่สุด
+       การวาดใหญ่กว่าจอแล้วให้เบราว์เซอร์ย่อ (supersampling) จะทำให้เบลอ โดยเฉพาะจอ 1x หรือซูม 125%/150%
+       ตอนซูม/ย้ายจอ ค่านี้เปลี่ยน → syncDpr() ด้านล่างปรับกราฟทุกอันให้ตรงกับจอใหม่ · ภาพ PNG วาดใหม่ที่ 3 เท่าตอนดาวน์โหลด */
+    function crispDpr() {
+        return Math.max(1, window.devicePixelRatio || 1);
+    }
+
+    var lastDpr = crispDpr();
+    var dprTimer = null;
+    function syncDpr() {
+        var d = crispDpr();
+        if (d === lastDpr) return;
+        lastDpr = d;
+        Object.keys(registry).forEach(function (k) {
+            var c = registry[k] && registry[k].chart;
+            if (c && c.canvas && c.canvas.isConnected) {
+                c.options.devicePixelRatio = d;
+                c.resize();
+            }
+        });
+    }
+    window.addEventListener("resize", function () {
+        clearTimeout(dprTimer);
+        dprTimer = setTimeout(syncDpr, 120);
+    });
+
     /* ---------- จำนวนทศนิยม (ผู้ใช้เลือกต่อชุด/ทั้งกราฟ) ----------
-       0 ตำแหน่ง = ปัดขึ้นเสมอ (744.6 → 745) · 1–3 ตำแหน่ง = ปัดตามปกติ */
+       ปัดตามหลักคณิตศาสตร์: ตั้งแต่ .5 ขึ้นไปปัดขึ้น น้อยกว่า .5 ปัดลง (744.5 → 745, 744.4 → 744, ค่าลบปัดห่างศูนย์) */
     function fmtDec(v, n) {
         v = Number(v);
         if (!isFinite(v)) return String(v);
-        if (n === 0) v = Math.ceil(v - 1e-9);
-        return v.toLocaleString("en-US", { minimumFractionDigits: n, maximumFractionDigits: n });
+        var f = Math.pow(10, n);
+        var r = Math.sign(v) * Math.round((Math.abs(v) + 1e-9) * f) / f;     // + 1e-9 กันปัญหาเลขทศนิยมฐานสองเช่น 1.005
+        return r.toLocaleString("en-US", { minimumFractionDigits: n, maximumFractionDigits: n });
     }
 
     /* ครอบตัวจัดรูปเดิมของกราฟ: คงหน่วย/คำนำหน้า/คำต่อท้าย (เช่น "%", "บาท") ไว้ เปลี่ยนเฉพาะตัวเลข */
@@ -291,6 +318,7 @@
 
         cfg.options = cfg.options || {};
         var o = cfg.options;
+        if (o.devicePixelRatio == null) o.devicePixelRatio = crispDpr();
         o.plugins = o.plugins || {};
         cfg.plugins = (base.plugins || []).slice();   // ปลั๊กอินใช้ตัวเดิม ไม่ทำสำเนา
 
@@ -1042,7 +1070,7 @@
             '<input type="color" data-key="' + key + '" value="' + color + '" aria-label="สีของ ' + esc(label) + '"></span></label>';
     }
 
-    var DEC_OPTS = [["inherit", "ตามเดิม"], ["0", "0 (ปัดขึ้น)"], ["1", "1"], ["2", "2"], ["3", "3"]];
+    var DEC_OPTS = [["inherit", "ตามเดิม"], ["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"]];
 
     function rangeRow(key, label, val, min, max) {
         return '<label class="ct-range"><span>' + label + ' <b data-rv="' + key + '">' + val + '%</b></span>' +
@@ -1118,6 +1146,14 @@
         var chart = entry.chart;
         if (!chart) return;
 
+        /* วาดกราฟใหม่ที่ 3 เท่าชั่วคราวเพื่อให้ไฟล์ PNG คมชัด แล้วคืนค่าเดิม */
+        var prevDpr = chart.options.devicePixelRatio;
+        var hiDpr = Math.max(3, prevDpr || 1);
+        if (prevDpr !== hiDpr) {
+            chart.options.devicePixelRatio = hiDpr;
+            chart.resize();
+        }
+
         var src = chart.canvas;
         var out = document.createElement("canvas");
         out.width = src.width;
@@ -1127,6 +1163,11 @@
         ctx.fillStyle = css("--card", "#ffffff");
         ctx.fillRect(0, 0, out.width, out.height);
         ctx.drawImage(src, 0, 0);
+
+        if (prevDpr !== hiDpr) {
+            chart.options.devicePixelRatio = prevDpr;
+            chart.resize();
+        }
 
         var a = document.createElement("a");
         a.download = (entry.opts.title || entry.id || "chart") + ".png";
