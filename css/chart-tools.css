@@ -463,3 +463,11 @@
 }
 .ct-mini-pos button { padding: 5px 8px; }
 :root[data-theme="dark"] .ct-mini-cap { color: #a89a9e; }
+
+/* ---------- แถบเลื่อนปรับความกว้างแท่ง ---------- */
+.ct-range { display: block; padding: 8px 2px 4px; font-size: 14px; font-weight: 700; }
+.ct-range span { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.ct-range b { color: #a1121b; font-weight: 800; }
+.ct-range input[type="range"] { width: 100%; accent-color: #c8102e; cursor: pointer; }
+:root[data-theme="dark"] .ct-range b { color: #ff8f9c; }
+:root[data-theme="dark"] .ct-range input[type="range"] { accent-color: #e5384f; }

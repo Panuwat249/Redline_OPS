@@ -26,7 +26,7 @@
     --ink: #1b1416;
     --ink-2: #4a3d41;
     --mute: #76686c;
-    --line: #f0e4e5;
+    --line: #e4d0d4;            /* เส้น/ขอบของกล่องย่อยข้างใน */
     --bg: #f3eaec;              /* พื้นหลังหน้า: ชมพูเทาอ่อน ให้การ์ดสีขาวเด่นขึ้นมา */
     --card-bd: #e6d0d4;          /* ขอบการ์ด */
     --card: #ffffff;
@@ -43,7 +43,7 @@
     --shadow: 0 1px 3px rgba(80, 10, 20, 0.08), 0 12px 32px rgba(80, 10, 20, 0.11);
 
     --accent-text: #a1121b;
-    --border-2: #ead7d9;
+    --border-2: #dcc4c9;        /* ขอบปุ่ม/ชิป/ช่องข้างใน */
     --track: #f4eaeb;
     --track-2: #f1dfe1;
     --grid: #f3eaeb;
@@ -580,9 +580,8 @@ a:focus-visible {
 .fact {
     padding: 14px 18px;
     border-radius: 18px;
-    background: #fff;
-    border: 2px solid #e2c8cc;
-    box-shadow: 0 3px 10px rgba(80,10,20,.08);
+    background: var(--red-25);
+    border: 1px solid var(--line);
 }
 
 .fact span { display: block; font-size: 13px; color: var(--mute); font-weight: 600; }

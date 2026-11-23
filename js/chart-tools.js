@@ -358,6 +358,13 @@
                     }
                 }
 
+                /* ความกว้างแท่ง / ความชิดของกลุ่มแท่ง (ผู้ใช้ปรับเองในแผง) */
+                if (k === "bar" && (pref.barW != null || pref.catW != null)) {
+                    if (pref.barW != null) ds.barPercentage = pref.barW / 100;
+                    if (pref.catW != null) ds.categoryPercentage = pref.catW / 100;
+                    ds.maxBarThickness = 400;                 // ปลดเพดานความหนาเดิม (56px) เพื่อให้แท่งกว้างขึ้นได้จริง
+                }
+
                 /* ซ้อนแท่ง/พื้นที่: เส้นล้วนไม่ถูกซ้อนกับชุดอื่น */
                 if (opts.stackable && stacked && k === "line") {
                     ds.stack = "ct-line-" + key;
@@ -755,6 +762,11 @@
             html += toggle("stacked", live.indexOf("bar") === -1 ? "ซ้อนพื้นที่" : "ซ้อนแท่ง", stackOn);
         }
 
+        if (!radial && live.indexOf("bar") !== -1) {
+            html += rangeRow("barW", "ความกว้างแท่ง", pref.barW != null ? pref.barW : 90, 30, 100);
+            html += rangeRow("catW", "ความกว้างกลุ่มแท่ง (มาก = ชิดกัน)", pref.catW != null ? pref.catW : 80, 40, 100);
+        }
+
         html += "</div></div>";
 
         html += '<div class="ct-foot">' +
@@ -854,6 +866,18 @@
             });
         });
 
+        panelEl.querySelectorAll("[data-range]").forEach(function (inp) {
+            inp.addEventListener("input", function () {
+                var key = inp.getAttribute("data-range"), v = +inp.value;
+                var p = prefs[entry.id] = prefs[entry.id] || {};
+                p[key] = v;
+                var tag = panelEl.querySelector('[data-rv="' + key + '"]');
+                if (tag) tag.textContent = v + "%";
+                savePrefs();
+                apply(entry, false);                          // ไม่วาดแผงใหม่ จะได้ลากต่อเนื่องได้
+            });
+        });
+
         panelEl.querySelectorAll("[data-toggle]").forEach(function (inp) {
             inp.addEventListener("change", function () {
                 setPref(entry.id, inp.getAttribute("data-toggle"), inp.checked);
@@ -878,6 +902,11 @@
         return '<label class="ct-color"><span class="ct-color-name">' + esc(label) + "</span>" +
             '<span class="ct-color-pick"><code>' + color.toUpperCase() + "</code>" +
             '<input type="color" data-key="' + key + '" value="' + color + '" aria-label="สีของ ' + esc(label) + '"></span></label>';
+    }
+
+    function rangeRow(key, label, val, min, max) {
+        return '<label class="ct-range"><span>' + label + ' <b data-rv="' + key + '">' + val + '%</b></span>' +
+            '<input type="range" min="' + min + '" max="' + max + '" step="5" value="' + val + '" data-range="' + key + '"></label>';
     }
 
     function toggle(key, label, on) {
