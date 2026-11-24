@@ -429,8 +429,8 @@
             out.push(
                 gap > 0
                     ? "ค่าโดยสารครอบคลุมต้นทุนประมาณ <b>" + fmt1(focus.recovery * 100) + "%</b> " +
-                      "เหลือส่วนต่างที่ต้องสนับสนุน " + fmtM(gap) + " ล้านบาท (ประมาณการ)"
-                    : "รายได้ค่าโดยสารสูงกว่าต้นทุน <b>" + fmtM(-gap) + " ล้านบาท</b> (ประมาณการ)"
+                      "เหลือส่วนต่างที่ต้องสนับสนุน " + fmtM(gap) + " ล้านบาท "
+                    : "รายได้ค่าโดยสารสูงกว่าต้นทุน <b>" + fmtM(-gap) + " ล้านบาท</b> "
             );
         }
 
@@ -827,7 +827,7 @@
             data: {
                 labels: yearLabels(set),
                 datasets: [
-                    { label: "รายได้ค่าโดยสาร (ประมาณการ)", data: set.map(d => d.revenue / 1e6), ctColor: COLOR.revenue },
+                    { label: "รายได้ค่าโดยสาร", data: set.map(d => d.revenue / 1e6), ctColor: COLOR.revenue },
                     { label: "ต้นทุนรวม", data: set.map(d => d.total / 1e6), ctColor: COLOR.cost }
                 ]
             },
@@ -985,7 +985,7 @@
             { key: "costPerPassenger", group: G3, th: "ต้นทุนต่อผู้โดยสาร", en: "Cost per Passenger",        unit: "บาท/คน",       kind: "line", color: "#374151", get: d => d.costPerPassenger, fmt: fmt2 },
 
             { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
-            { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร (ประมาณการ)", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
+            { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
             { key: "recovery", group: G4, th: "คืนทุนจากค่าโดยสาร",         en: "Fare Recovery Ratio",    unit: "%",           kind: "line", color: "#0369a1", get: d => d.recovery * 100,    fmt: fmt1 }
         ];
 
@@ -1431,7 +1431,7 @@
         { label: "บาท / Car-Km" },
         { label: "บาท / ผู้โดยสาร" },
         { label: "ค่าโดยสารเฉลี่ย" },
-        { label: "รายได้ประมาณการ" },
+        { label: "รายได้" },
         { label: "คืนทุน" }
     ];
 
@@ -1509,7 +1509,7 @@
             "ต้นทุนบุคลากร (บาท)", "ต้นทุนพลังงาน (บาท)", "ต้นทุนซ่อมบำรุง (บาท)", "ต้นทุนอื่น ๆ (บาท)",
             "ต้นทุนรวม (บาท)", "เปลี่ยนจากปีก่อน (%)",
             "Car-Km", "ผู้โดยสาร (คน)", "บาทต่อ Car-Km", "บาทต่อผู้โดยสาร",
-            "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ประมาณการ (บาท)", "คืนทุน (%)",
+            "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ (บาท)", "คืนทุน (%)",
             "ผู้โดยสารจริง สายเหนือ (คน/วัน)", "ผู้โดยสารที่ต้องการ สายเหนือ (คน/วัน)",
             "ผู้โดยสารจริง สายตะวันตก (คน/วัน)", "ผู้โดยสารที่ต้องการ สายตะวันตก (คน/วัน)"
         ]];
