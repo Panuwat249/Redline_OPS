@@ -148,6 +148,8 @@
             paxTargetNorth: d.paxTargetNorth > 0 ? d.paxTargetNorth : null,
             paxActualWest: d.paxActualWest > 0 ? d.paxActualWest : null,
             paxTargetWest: d.paxTargetWest > 0 ? d.paxTargetWest : null,
+            // ผู้โดยสารที่ต้องการ "รวม" (คน/ปี) — ผู้โดยสารจริงรวมใช้คอลัมน์ Passenger เดิม
+            paxTarget: d.paxTarget > 0 ? d.paxTarget : null,
             hasData: total > 0
         });
     }
@@ -429,8 +431,8 @@
             out.push(
                 gap > 0
                     ? "ค่าโดยสารครอบคลุมต้นทุนประมาณ <b>" + fmt1(focus.recovery * 100) + "%</b> " +
-                      "เหลือส่วนต่างที่ต้องสนับสนุน " + fmtM(gap) + " ล้านบาท "
-                    : "รายได้ค่าโดยสารสูงกว่าต้นทุน <b>" + fmtM(-gap) + " ล้านบาท</b> "
+                      "เหลือส่วนต่างที่ต้องสนับสนุน " + fmtM(gap) + " ล้านบาท (ประมาณการ)"
+                    : "รายได้ค่าโดยสารสูงกว่าต้นทุน <b>" + fmtM(-gap) + " ล้านบาท</b> (ประมาณการ)"
             );
         }
 
@@ -827,7 +829,7 @@
             data: {
                 labels: yearLabels(set),
                 datasets: [
-                    { label: "รายได้ค่าโดยสาร", data: set.map(d => d.revenue / 1e6), ctColor: COLOR.revenue },
+                    { label: "รายได้ค่าโดยสาร (ประมาณการ)", data: set.map(d => d.revenue / 1e6), ctColor: COLOR.revenue },
                     { label: "ต้นทุนรวม", data: set.map(d => d.total / 1e6), ctColor: COLOR.cost }
                 ]
             },
@@ -857,7 +859,7 @@
         const reach = beMillions ? actualMillions / beMillions * 100 : 0;
 
         $("revFacts").innerHTML =
-            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท", "") +
+            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท/เที่ยว", "") +
             fact(gap > 0 ? "ส่วนต่าง (ต้นทุน − รายได้)" : "รายได้สูงกว่าต้นทุน", fmtM(Math.abs(gap)) + " ล้านบาท", "ประมาณการจากผู้โดยสาร × ค่าโดยสารเฉลี่ย") +
             fact("ผู้โดยสารที่ต้องมีเพื่อคุ้มทุน", fmt1(beMillions) + " ล้านคน/ปี", "≈ " + fmt0(beMillions * 1e6 / 365) + " คน/วัน") +
             fact("ผู้โดยสารจริง", fmt1(actualMillions) + " ล้านคน/ปี", "≈ " + fmt0(focus.passenger / 365) + " คน/วัน · " + fmt1(reach) + "% ของจุดคุ้มทุน");
@@ -870,7 +872,79 @@
     ];
 
     function renderPax(set, focus) {
+        renderPaxTotal(set, focus);
         PAX_LINES.forEach(L => renderPaxLine(L, set, focus));
+    }
+
+    /* ---------- ผู้โดยสารรวม ทั้งปีงบประมาณ (ล้านคน/ปี): จริง = คอลัมน์ Passenger · ที่ต้องการ = คอลัมน์ PaxTarget ---------- */
+    function renderPaxTotal(set, focus) {
+        const hasActual = set.some(d => d.passenger > 0);
+        const hasTarget = set.some(d => d.paxTarget != null);
+        const any = hasActual || hasTarget;
+        const M = v => v == null ? null : v / 1e6;
+
+        $("paxTotalBox").parentElement.classList.toggle("is-empty", !any);
+        $("paxTotalBox").hidden = !any;
+
+        if (any) {
+            ChartTools.create("paxTotalChart", {
+                type: "bar",
+                data: {
+                    labels: yearLabels(set),
+                    datasets: [
+                        {
+                            label: "ผู้โดยสารจริง (รวม)",
+                            data: set.map(d => d.passenger > 0 ? M(d.passenger) : null),
+                            ctKey: "paxActual", ctKind: "bar", ctUnit: "ล้านคน", ctFmt: fmt2,
+                            ctEn: "Actual Passengers (Total)", ctColor: COLOR.passenger
+                        },
+                        {
+                            label: "ผู้โดยสารที่ต้องการ (รวม)",
+                            data: set.map(d => M(d.paxTarget)),
+                            ctKey: "paxTarget", ctKind: "line", ctUnit: "ล้านคน", ctFmt: fmt2,
+                            ctEn: "Target Passengers (Total)", ctColor: COLOR.cost
+                        }
+                    ]
+                },
+                options: baseOptions({ legend: true, labels: true, labelFmt: fmt2, yTitle: "ล้านคน", hideLabelsOnSmall: true })
+            }, {
+                title: "ผู้โดยสารจริงเทียบกับที่ต้องการ (รวม)",
+                autoStyle: true,
+                autoZero: true,
+                labelFormat: fmt2
+            });
+        }
+
+        $("paxTotalPanel").innerHTML = hasActual && hasTarget
+            ? "<h3>ผู้โดยสารจริงได้กี่ % ของที่ต้องการ</h3>" +
+              '<ul class="rec-bars">' +
+              set.map(d => {
+                  const r = d.passenger > 0 && d.paxTarget ? d.passenger / d.paxTarget : null;
+                  return '<li class="' + (d === focus ? "is-focus" : "") + '"><span>' + d.fiscalYear + "</span>" +
+                      '<div class="rec-track"><div style="width:' + (r == null ? 0 : Math.min(100, r * 100)).toFixed(1) + '%"></div></div>' +
+                      "<b>" + (r == null ? "–" : fmt1(r * 100) + "%") + "</b></li>";
+              }).join("") +
+              "</ul>" +
+              '<p class="rec-note">100% = ผู้โดยสารจริงถึงเป้าที่ต้องการ · “–” = ปีนั้นยังไม่ได้กรอกข้อมูลครบ</p>'
+            : "<h3>ยังไม่มีข้อมูลผู้โดยสารที่ต้องการ</h3>" +
+              '<p class="rec-note">เพิ่มคอลัมน์ <b>PaxTarget</b> (คน/ปี หน่วยเดียวกับคอลัมน์ Passenger) ในชีต <b>dashboard_cost</b> ' +
+              "ของไฟล์ data/cost-data.xlsx แล้วกรอกตัวเลขของแต่ละปีงบประมาณ กราฟจะแสดงเองหลังรีเฟรช</p>";
+
+        const act = focus.passenger > 0 ? focus.passenger : null;
+        const tgt = focus.paxTarget;
+        const gap = act != null && tgt != null ? tgt - act : null;
+        const ratio = gap != null ? act / tgt * 100 : null;
+
+        $("paxTotalFacts").innerHTML =
+            fact("ผู้โดยสารจริง ปีงบ " + focus.fiscalYear,
+                act != null ? fmt2(act / 1e6) + " ล้านคน/ปี" : "ยังไม่ได้กรอก",
+                act != null ? "≈ " + fmt0(act / 365) + " คน/วัน · คอลัมน์ Passenger" : "คอลัมน์ Passenger") +
+            fact("ผู้โดยสารที่ต้องการ",
+                tgt != null ? fmt2(tgt / 1e6) + " ล้านคน/ปี" : "ยังไม่ได้กรอก",
+                tgt != null ? "≈ " + fmt0(tgt / 365) + " คน/วัน · คอลัมน์ PaxTarget" : "คอลัมน์ PaxTarget") +
+            fact(gap == null ? "ส่วนต่าง" : gap > 0 ? "ยังขาดอีก" : "เกินเป้า",
+                gap == null ? "–" : fmt2(Math.abs(gap) / 1e6) + " ล้านคน/ปี", "เป้า − จริง") +
+            fact("ทำได้ตามเป้า", ratio == null ? "–" : fmt1(ratio) + "%", "ผู้โดยสารจริง ÷ ที่ต้องการ");
     }
 
     function renderPaxLine(L, set, focus) {
@@ -976,6 +1050,7 @@
 
             { key: "carKm",     group: G2, th: "ระยะทางเดินรถ", en: "Car-Km",     unit: "ล้านตู้-กม.", kind: "line", color: "#1baf7a", get: d => d.carKm / 1e6,     fmt: fmt2 },
             { key: "passenger", group: G2, th: "ผู้โดยสาร",     en: "Passengers", unit: "ล้านคน",      kind: "line", color: "#6250d6", get: d => d.passenger / 1e6, fmt: fmt2 },
+            { key: "paxTarget", group: G2, th: "ผู้โดยสารที่ต้องการ (รวม ต่อปี)", en: "Target Passengers (Total)", unit: "ล้านคน", kind: "line", color: "#a1121b", get: d => d.paxTarget == null ? null : d.paxTarget / 1e6, fmt: fmt2 },
             { key: "paxActualNorth", group: G2, th: "ผู้โดยสารจริง สายเหนือ (ต่อวัน)",       en: "Actual Passengers per Day · North", unit: "คน/วัน", kind: "line", color: "#2a78d6", get: d => d.paxActualNorth, fmt: fmt0 },
             { key: "paxTargetNorth", group: G2, th: "ผู้โดยสารที่ต้องการ สายเหนือ (ต่อวัน)", en: "Target Passengers per Day · North", unit: "คน/วัน", kind: "line", color: "#a1121b", get: d => d.paxTargetNorth, fmt: fmt0 },
             { key: "paxActualWest",  group: G2, th: "ผู้โดยสารจริง สายตะวันตก (ต่อวัน)",    en: "Actual Passengers per Day · West",  unit: "คน/วัน", kind: "line", color: "#1d9a6c", get: d => d.paxActualWest,  fmt: fmt0 },
@@ -984,8 +1059,8 @@
             { key: "costPerCarKm",     group: G3, th: "ต้นทุนการเดินรถ",   en: "Operating Cost per Car.Km", unit: "บาท/ตู้/กม.", kind: "line", color: "#0e9aa7", get: d => d.costPerCarKm,     fmt: fmt2 },
             { key: "costPerPassenger", group: G3, th: "ต้นทุนต่อผู้โดยสาร", en: "Cost per Passenger",        unit: "บาท/คน",       kind: "line", color: "#374151", get: d => d.costPerPassenger, fmt: fmt2 },
 
-            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
-            { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
+            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท/เที่ยว", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
+            { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร (ประมาณการ)", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
             { key: "recovery", group: G4, th: "คืนทุนจากค่าโดยสาร",         en: "Fare Recovery Ratio",    unit: "%",           kind: "line", color: "#0369a1", get: d => d.recovery * 100,    fmt: fmt1 }
         ];
 
@@ -1431,7 +1506,7 @@
         { label: "บาท / Car-Km" },
         { label: "บาท / ผู้โดยสาร" },
         { label: "ค่าโดยสารเฉลี่ย" },
-        { label: "รายได้" },
+        { label: "รายได้ประมาณการ" },
         { label: "คืนทุน" }
     ];
 
@@ -1509,9 +1584,9 @@
             "ต้นทุนบุคลากร (บาท)", "ต้นทุนพลังงาน (บาท)", "ต้นทุนซ่อมบำรุง (บาท)", "ต้นทุนอื่น ๆ (บาท)",
             "ต้นทุนรวม (บาท)", "เปลี่ยนจากปีก่อน (%)",
             "Car-Km", "ผู้โดยสาร (คน)", "บาทต่อ Car-Km", "บาทต่อผู้โดยสาร",
-            "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ (บาท)", "คืนทุน (%)",
+            "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ประมาณการ (บาท)", "คืนทุน (%)",
             "ผู้โดยสารจริง สายเหนือ (คน/วัน)", "ผู้โดยสารที่ต้องการ สายเหนือ (คน/วัน)",
-            "ผู้โดยสารจริง สายตะวันตก (คน/วัน)", "ผู้โดยสารที่ต้องการ สายตะวันตก (คน/วัน)"
+            "ผู้โดยสารจริง สายตะวันตก (คน/วัน)", "ผู้โดยสารที่ต้องการ สายตะวันตก (คน/วัน)", "ผู้โดยสารที่ต้องการ รวม (คน/ปี)"
         ]];
 
         sel.forEach(d => {
@@ -1523,7 +1598,7 @@
                 d.carKm, d.passenger,
                 Number(d.costPerCarKm.toFixed(2)), Number(d.costPerPassenger.toFixed(2)),
                 d.avgFare, Number(d.revenue.toFixed(2)), Number((d.recovery * 100).toFixed(2)),
-                ...["paxActualNorth", "paxTargetNorth", "paxActualWest", "paxTargetWest"].map(k => d[k] != null ? Math.round(d[k]) : "")
+                ...["paxActualNorth", "paxTargetNorth", "paxActualWest", "paxTargetWest", "paxTarget"].map(k => d[k] != null ? Math.round(d[k]) : "")
             ]);
         });
 
