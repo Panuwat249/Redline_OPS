@@ -6,7 +6,7 @@
      dashboard_cost         สรุปรายปีงบประมาณ (ต้นทุน 4 หมวด, Car-Km, ผู้โดยสาร, ค่าโดยสารเฉลี่ย ...)
                             + PaxActualPerDay_North / PaxTargetPerDay_North (สายเหนือ: จริง / ที่ต้องการ คน/วัน)
                             + PaxActualPerDay_West  / PaxTargetPerDay_West  (สายตะวันตก: จริง / ที่ต้องการ คน/วัน)
-                            + PaxTarget (ผู้โดยสารที่ต้องการ "รวม" ทั้งปีงบประมาณ คน/ปี หน่วยเดียวกับ Passenger)
+                            + PaxActualPerDay_Total / PaxTargetPerDay_Total (รวมทั้งสองสาย: จริง / ที่ต้องการ คน/วัน)
      dashboard_cost_detail  รายการต้นทุนย่อยของแต่ละหมวดในแต่ละปี
 
    อยากเพิ่มปีงบประมาณใหม่ → เพิ่มแถวในสองชีตนี้ได้เลย ไม่ต้องแก้โค้ด
@@ -59,8 +59,9 @@ async function loadCostData() {
                 paxTargetNorth: toNumber(row.PaxTargetPerDay_North),
                 paxActualWest: toNumber(row.PaxActualPerDay_West),
                 paxTargetWest: toNumber(row.PaxTargetPerDay_West),
-                // ผู้โดยสารที่ต้องการ (รวมทั้งปี คน/ปี) คู่กับ Passenger (ผู้โดยสารจริงรวม) — ว่าง/0 = ยังไม่มีข้อมูล
-                paxTarget: toNumber(row.PaxTarget)
+                // ผู้โดยสารเฉลี่ยต่อวัน "รวม" (คน/วัน) — ว่าง/0 = ยังไม่มีข้อมูล
+                paxActualTotal: toNumber(row.PaxActualPerDay_Total),
+                paxTargetTotal: toNumber(row.PaxTargetPerDay_Total)
             }));
 
         const detailSheet = workbook.Sheets[COST_DETAIL_SHEET_NAME];
