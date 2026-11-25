@@ -55,11 +55,11 @@
 .tt-theme-red {
     border: 2px solid #d4182d;
     background: var(--card);
-    box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.08), 0 12px 30px rgba(200, 16, 46, 0.2);
+    box-shadow: 0 0 0 4px var(--tt-glow1, rgba(200, 16, 46, 0.08)), 0 12px 30px var(--tt-glow2, rgba(200, 16, 46, 0.2));
 }
 
 .tt-theme-red .data-table th {
-    background: linear-gradient(180deg, #ea1a31 0%, #b50f22 100%);
+    background: linear-gradient(180deg, var(--tt-h1, #ea1a31) 0%, var(--tt-h2, #b50f22) 100%);
     color: #ffffff;
     border-bottom: none;
     text-align: center;
@@ -71,25 +71,25 @@
 
 .tt-theme-red .data-table td { text-align: center; }
 .tt-theme-red .data-table td.sticky { text-align: center; font-size: 16px; }
-.tt-theme-red .data-table td.strong { background: #fde6e9; }
+.tt-theme-red .data-table td.strong { background: var(--tt-tint, #fde6e9); }
 
-.tt-theme-red .data-table tfoot td { background: #fdebed; }
-.tt-theme-red .data-table tfoot td.strong { background: #fbd9de; }
-.tt-theme-red .data-table tfoot td.sticky { background: #fdebed; }
+.tt-theme-red .data-table tfoot td { background: var(--tt-tint2, #fdebed); }
+.tt-theme-red .data-table tfoot td.strong { background: var(--tt-tint3, #fbd9de); }
+.tt-theme-red .data-table tfoot td.sticky { background: var(--tt-tint2, #fdebed); }
 
 .tt-theme-red .tt-avg-pill {
     padding: 6px 18px;
     border-radius: 999px;
-    background: linear-gradient(180deg, #ea1a31 0%, #b50f22 100%);
+    background: linear-gradient(180deg, var(--tt-h1, #ea1a31) 0%, var(--tt-h2, #b50f22) 100%);
     color: #ffffff;
 }
 .tt-theme-red .tt-total td.sticky { color: #a1121b; }
 
 :root[data-theme="dark"] .tt-theme-red { border-color: #e5384f; box-shadow: 0 0 0 4px rgba(229, 56, 79, 0.12), 0 12px 30px rgba(0, 0, 0, 0.45); }
-:root[data-theme="dark"] .tt-theme-red .data-table td.strong { background: #3a1d24; }
+:root[data-theme="dark"] .tt-theme-red .data-table td.strong { background: var(--tt-tint, #3a1d24); }
 :root[data-theme="dark"] .tt-theme-red .data-table tfoot td,
-:root[data-theme="dark"] .tt-theme-red .data-table tfoot td.sticky { background: #321b21; }
-:root[data-theme="dark"] .tt-theme-red .data-table tfoot td.strong { background: #44202a; }
+:root[data-theme="dark"] .tt-theme-red .data-table tfoot td.sticky { background: var(--tt-tint2, #321b21); }
+:root[data-theme="dark"] .tt-theme-red .data-table tfoot td.strong { background: var(--tt-tint3, #44202a); }
 :root[data-theme="dark"] .tt-theme-red .tt-total td.sticky { color: #ff9aa8; }
 
 /* =========================================================
@@ -164,3 +164,107 @@
 @media print {
     .tt-theme-red { box-shadow: none; }
 }
+
+/* =========================================================
+   หัวสองชั้น + กลุ่ม "จุดคุ้มทุน (Break Even Point)" สีทอง
+   ========================================================= */
+.data-table th.tt-group { text-align: center; font-weight: 800; }
+.data-table th.tt-group,
+.data-table th.tt-bep {
+    background: #f1c84b;
+    color: #3b2a00;
+    border-bottom: 1px solid rgba(59, 42, 0, 0.18);
+}
+.data-table th.tt-bep .tt-unit { color: #3b2a00; }
+.data-table td.tt-bep { background: #fff3c7; }
+.data-table tfoot td.tt-bep { background: #fbe9a6; }
+.tt-theme-red .data-table th.tt-group,
+.tt-theme-red .data-table th.tt-bep { background: #f1c84b; color: #3b2a00; }
+.tt-theme-red .data-table td.tt-bep { background: #fff3c7; }
+:root[data-theme="dark"] .data-table td.tt-bep { background: #3b3417; }
+:root[data-theme="dark"] .data-table tfoot td.tt-bep { background: #463d1a; }
+
+/* =========================================================
+   ธีม "แดง-ทอง" ตามตารางต้นแบบ (หัวแดงเข้ม ตัวเลขชิดขวา เส้นตารางครบ แถบสลับเทา)
+   ========================================================= */
+.tt-theme-excel { border: 1px solid #9a9a9a; background: #ffffff; }
+.tt-theme-excel .data-table th {
+    background: var(--tt-solid, #c00000);
+    color: #ffffff;
+    text-align: center;
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.35);
+    font-size: 14px;
+}
+.tt-theme-excel .data-table th .tt-th { align-items: center; }
+.tt-theme-excel .data-table th.sticky { text-align: center; }
+.tt-theme-excel .data-table td {
+    background: #ffffff;
+    color: #1b1416;
+    border-right: 1px solid #c9c9c9;
+    border-bottom: 1px solid #c9c9c9;
+}
+.tt-theme-excel .data-table td.sticky { text-align: center; font-weight: 700; }
+.tt-theme-excel .data-table td.strong { background: inherit; }
+.tt-theme-excel .data-table th.tt-group,
+.tt-theme-excel .data-table th.tt-bep { background: #f1c84b; color: #3b2a00; }
+.tt-theme-excel .data-table td.tt-bep { background: #fde9a3; }
+.tt-theme-excel .data-table tfoot td,
+.tt-theme-excel .data-table tfoot td.strong,
+.tt-theme-excel .data-table tfoot td.sticky { background: #e8e8e8; }
+.tt-theme-excel .data-table tfoot td.tt-bep { background: #fbdc86; }
+.tt-theme-excel .tt-avg-pill { padding: 0; background: none; color: inherit; }
+.tt-theme-excel[data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.tt-bep) { background: #e8e8e8; }
+
+:root[data-theme="dark"] .tt-theme-excel { border-color: #5a4c50; background: var(--card); }
+:root[data-theme="dark"] .tt-theme-excel .data-table td { background: var(--card); color: var(--ink); border-color: #4a3a3f; }
+:root[data-theme="dark"] .tt-theme-excel .data-table tfoot td,
+:root[data-theme="dark"] .tt-theme-excel .data-table tfoot td.strong,
+:root[data-theme="dark"] .tt-theme-excel .data-table tfoot td.sticky { background: #34282c; }
+:root[data-theme="dark"] .tt-theme-excel[data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.tt-bep) { background: #2d2226; }
+:root[data-theme="dark"] .tt-theme-excel .data-table td.tt-bep { background: #4a3f1a; }
+
+/* ปุ่มชุดสำเร็จรูป + ช่องกรอกข้อความในแผง */
+.tt-preset {
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #e8182f, #b50f22);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+}
+.tt-text-gap { margin-top: 6px; }
+
+/* ธีมเรียบ: ใช้สีธีมที่เลือกกับหัวตาราง */
+.tt-theme-soft .data-table th:not(.tt-bep):not(.tt-group) {
+    background: var(--tt-softbg, var(--th-bg));
+    color: var(--tt-softink, var(--accent-text));
+}
+
+/* กรอบตารางที่ผู้ใช้ปรับเอง (ความหนา ลาย สี) */
+.table-wrap[data-frame="1"] { border: var(--tt-fw) var(--tt-fs) var(--tt-fc); }
+
+/* ปุ่มเลือกสีธีม */
+.tt-swatches { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+.tt-swatch {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+}
+.tt-swatch.is-on { box-shadow: 0 0 0 2.5px #1b1416; }
+.tt-swatch-custom { background: conic-gradient(#f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); overflow: hidden; }
+.tt-swatch-custom.is-on { background: var(--c); }
+.tt-swatch-custom input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+:root[data-theme="dark"] .tt-swatch { border-color: #2a1d21; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.3); }
+:root[data-theme="dark"] .tt-swatch.is-on { box-shadow: 0 0 0 2.5px #ffffff; }

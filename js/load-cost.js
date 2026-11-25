@@ -7,6 +7,7 @@
                             + PaxActualPerDay_North / PaxTargetPerDay_North (สายเหนือ: จริง / ที่ต้องการ คน/วัน)
                             + PaxActualPerDay_West  / PaxTargetPerDay_West  (สายตะวันตก: จริง / ที่ต้องการ คน/วัน)
                             + PaxActualPerDay_Total / PaxTargetPerDay_Total (รวมทั้งสองสาย: จริง / ที่ต้องการ คน/วัน)
+                            + CostPerTrip_North / CostPerTrip_West (ต้นทุนต่อเที่ยว สายเหนือ / สายตะวันตก บาท/เที่ยว)
      dashboard_cost_detail  รายการต้นทุนย่อยของแต่ละหมวดในแต่ละปี
 
    อยากเพิ่มปีงบประมาณใหม่ → เพิ่มแถวในสองชีตนี้ได้เลย ไม่ต้องแก้โค้ด
@@ -61,7 +62,10 @@ async function loadCostData() {
                 paxTargetWest: toNumber(row.PaxTargetPerDay_West),
                 // ผู้โดยสารเฉลี่ยต่อวัน "รวม" (คน/วัน) — ว่าง/0 = ยังไม่มีข้อมูล
                 paxActualTotal: toNumber(row.PaxActualPerDay_Total),
-                paxTargetTotal: toNumber(row.PaxTargetPerDay_Total)
+                paxTargetTotal: toNumber(row.PaxTargetPerDay_Total),
+                // ต้นทุนต่อเที่ยวแยกสาย (บาท/เที่ยว) — ว่าง/0 = ยังไม่มีข้อมูล
+                costPerTripNorth: toNumber(row.CostPerTrip_North),
+                costPerTripWest: toNumber(row.CostPerTrip_West)
             }));
 
         const detailSheet = workbook.Sheets[COST_DETAIL_SHEET_NAME];

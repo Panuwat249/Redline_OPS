@@ -36,7 +36,13 @@
         return v.length ? v.reduce(function (a, b) { return a + b; }, 0) / v.length : null;
     }
 
-    // good: "down" = ลดลงคือดี (ต้นทุน) · "up" = เพิ่มขึ้นคือดี
+    // รอบคำนวณจุดคุ้มทุนและผู้โดยสารต่อวัน ตามตารางต้นแบบ: 1 ปี = 12 เดือน = 360 วัน
+    var DAYS = 360, MONTHS = 12;
+
+    function bep(d) { return d.avgFare > 0 && d.total > 0 ? d.total / d.avgFare : null; }       // คนต่อปี = ต้นทุนรวม ÷ ค่าโดยสารเฉลี่ยต่อคน
+
+    // good: "down" = ลดลงคือดี (ต้นทุน) · "up" = เพิ่มขึ้นคือดี · tag = ข้อความต่อท้ายใต้ชื่อ เช่น (1) (2)
+    // group = หัวกลุ่มที่คร่อมหลายคอลัมน์ (ตอนนี้มีกลุ่ม "จุดคุ้มทุน")
     var COLS = [
         { key: "staffCost", label: "บุคลากร", unit: "บาท", kind: "money", dec: 2, good: "down", color: "#c8102e", pill: true,
           get: function (d) { return d.staffCost; }, tot: "sum" },
@@ -48,20 +54,35 @@
           get: function (d) { return d.indirectCost; }, tot: "sum" },
         { key: "total", label: "ต้นทุนรวม", unit: "บาท", kind: "money", dec: 2, good: "down", color: "#a1121b", pill: true, strong: true, pct: true,
           get: function (d) { return d.total; }, tot: "sum" },
-        { key: "carKm", label: "Car-Km", unit: "ตู้-กม.", kind: "count", dec: 0, good: "up", color: "#1baf7a",
+        { key: "carKm", label: "Car.Km", unit: "", kind: "count", dec: 0, good: "up", color: "#1baf7a",
           get: function (d) { return d.carKm; }, tot: "sum" },
-        { key: "passenger", label: "ผู้โดยสาร", unit: "คน", kind: "count", dec: 0, good: "up", color: "#6250d6",
+        { key: "passenger", label: "จำนวนผู้โดยสารจริง", unit: "คน/ปี", kind: "count", dec: 0, good: "up", color: "#6250d6",
           get: function (d) { return d.passenger; }, tot: "sum" },
-        { key: "costPerCarKm", label: "ต้นทุน / Car-Km", unit: "บาท", kind: "rate", dec: 2, good: "down", color: "#0e9aa7",
+        { key: "paxPerDay", label: "จำนวนผู้โดยสาร", unit: "คน/วัน", kind: "count", dec: 0, good: "up", color: "#7c6ae0", hidden: true,
+          get: function (d) { return d.passenger > 0 ? d.passenger / DAYS : null; }, tot: "none" },
+        { key: "costPerCarKm", label: "บาท/ตู้/กม.", unit: "", kind: "rate", dec: 2, good: "down", color: "#0e9aa7",
           get: function (d) { return d.costPerCarKm; }, tot: "ratioKm" },
-        { key: "costPerPassenger", label: "ต้นทุน / ผู้โดยสาร", unit: "บาท", kind: "rate", dec: 2, good: "down", color: "#374151",
+        { key: "tripNorth", label: "North Line (22.45 กม.)", unit: "บาท/เที่ยว", kind: "rate", dec: 2, good: "down", color: "#2a78d6", hidden: true,
+          get: function (d) { return d.costPerTripNorth; }, tot: "none" },
+        { key: "tripWest", label: "West Line (14.54 กม.)", unit: "บาท/เที่ยว", kind: "rate", dec: 2, good: "down", color: "#1d9a6c", hidden: true,
+          get: function (d) { return d.costPerTripWest; }, tot: "none" },
+        { key: "costPerPassenger", label: "ต้นทุน/คน", unit: "", tag: "(1)", kind: "rate", dec: 2, good: "down", color: "#374151",
           get: function (d) { return d.costPerPassenger; }, tot: "ratioPax" },
-        { key: "avgFare", label: "ค่าโดยสารเฉลี่ย", unit: "บาท/เที่ยว", kind: "rate", dec: 2, good: "up", color: "#c2410c",
+        { key: "avgFare", label: "ค่าโดยสารเฉลี่ยต่อคน", unit: "บาท", tag: "(2)", kind: "rate", dec: 2, good: "up", color: "#c2410c",
           get: function (d) { return d.avgFare; }, tot: "fare" },
-        { key: "revenue", label: "รายได้ประมาณการ", unit: "บาท", kind: "money", dec: 2, good: "up", color: "#15803d",
+        { key: "costGap", label: "ผลต่าง ต้นทุน/คน", unit: "", tag: "(1) - (2)", kind: "rate", dec: 2, good: "down", color: "#a1121b", hidden: true,
+          get: function (d) { return d.costPerPassenger != null && d.avgFare != null ? d.costPerPassenger - d.avgFare : null; }, tot: "none" },
+        { key: "revenue", label: "รายได้", unit: "บาท", kind: "money", dec: 2, good: "up", color: "#15803d",
           get: function (d) { return d.revenue; }, tot: "sum" },
         { key: "recovery", label: "คืนทุน", unit: "%", kind: "rate", dec: 1, good: "up", color: "#0369a1",
           get: function (d) { return d.recovery * 100; }, tot: "recovery" },
+
+        { key: "bepYear", label: "คนต่อปี", unit: "", kind: "count", dec: 0, good: "down", color: "#d4a017", group: "bep", hidden: true,
+          get: function (d) { return bep(d); }, tot: "none" },
+        { key: "bepMonth", label: "คนต่อเดือน", unit: "", kind: "count", dec: 0, good: "down", color: "#d4a017", group: "bep", hidden: true,
+          get: function (d) { var v = bep(d); return v == null ? null : v / MONTHS; }, tot: "none" },
+        { key: "bepDay", label: "คนต่อวัน", unit: "", kind: "count", dec: 0, good: "down", color: "#d4a017", group: "bep", hidden: true,
+          get: function (d) { var v = bep(d); return v == null ? null : v / DAYS; }, tot: "none" },
 
         { key: "paxActualTotal", label: "ผู้โดยสารจริง รวม", unit: "คน/วัน", kind: "pax", dec: 0, good: "up", color: "#6250d6", hidden: true,
           get: function (d) { return d.paxActualTotal; }, tot: "mean" },
@@ -76,6 +97,8 @@
         { key: "paxTargetWest", label: "ผู้โดยสารที่ต้องการ สายตะวันตก", unit: "คน/วัน", kind: "pax", dec: 0, good: "up", color: "#e08a00", hidden: true,
           get: function (d) { return d.paxTargetWest; }, tot: "mean" }
     ];
+
+    var GROUP_LABEL = { bep: "จุดคุ้มทุน หรือ Break Even Point" };
 
     var BY_KEY = {};
     COLS.forEach(function (c) { BY_KEY[c.key] = c; });
@@ -123,12 +146,19 @@
     }
     function pillColor(c) { return (prefs.pillColor && prefs.pillColor[c.key]) || c.color; }
     function labelOf(c) { return (prefs.label && prefs.label[c.key]) || c.label; }
+    function groupLabel(g) { return prefs[g + "Label"] || GROUP_LABEL[g]; }
 
     function unitText(c) {
         var s = scaleOf(c);
         if (c.kind === "money") return s === 1e6 ? "ล้านบาท" : s === 1e3 ? "พันบาท" : "บาท";
         if (c.kind === "count") return (s === 1e6 ? "ล้าน" : s === 1e3 ? "พัน" : "") + c.unit;
         return c.unit;
+    }
+
+    /* บรรทัดที่สองใต้ชื่อคอลัมน์ เช่น (ล้านบาท) · (1) · (บาท) (2) */
+    function subText(c) {
+        var u = unitText(c);
+        return (u ? "(" + u + ")" : "") + (c.tag ? (u ? " " : "") + c.tag : "");
     }
 
     /* ---------- ตัวเลข: ปัดตามหลักคณิตศาสตร์ (.5 ขึ้นไปปัดขึ้น) ---------- */
@@ -147,6 +177,58 @@
         var n = parseInt(m[1], 16);
         var l = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
         return l > 0.62 ? "#1b1416" : "#ffffff";
+    }
+
+    /* ---------- สีธีม + กรอบตาราง ---------- */
+
+    function hexRgb(h) {
+        var m = /^#?([0-9a-f]{6})$/i.exec(h || "");
+        var n = m ? parseInt(m[1], 16) : 0xc00000;
+        return [n >> 16, (n >> 8) & 255, n & 255];
+    }
+    function mix(a, b, t) {                    // ผสมสี a→b ที่สัดส่วน t
+        var x = hexRgb(a), y = hexRgb(b);
+        return "#" + x.map(function (v, i) {
+            var o = Math.round(v + (y[i] - v) * t);
+            return (o < 16 ? "0" : "") + o.toString(16);
+        }).join("");
+    }
+    function rgba(h, a) { var c = hexRgb(h); return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + a + ")"; }
+    function isDark() { return document.documentElement.getAttribute("data-theme") === "dark"; }
+
+    var PALETTES = [["red", "แดง", "#d4182d"], ["blue", "น้ำเงิน", "#1f6fd1"], ["green", "เขียว", "#14935f"], ["purple", "ม่วง", "#6a4fd1"],
+                    ["orange", "ส้ม", "#e8730c"], ["pink", "ชมพู", "#d6336c"], ["teal", "ฟ้าน้ำทะเล", "#0e9aa7"], ["gray", "เทา", "#4b5563"]];
+
+    // คืน null เมื่อใช้สีแดงเดิม · ไม่เช่นนั้นคืนชุดสีที่คำนวณจากสีหลัก
+    function palette() {
+        var p = prefs.palette;
+        if (!p || p === "red") return null;
+        var M = "#c00000";
+        if (p === "custom") M = prefs.paletteColor || M;
+        else PALETTES.forEach(function (x) { if (x[0] === p) M = x[2]; });
+        var dk = isDark();
+        return {
+            M: M, h1: mix(M, "#ffffff", 0.12), h2: mix(M, "#000000", 0.22), solid: mix(M, "#000000", 0.1),
+            tint: dk ? mix(M, "#000000", 0.72) : mix(M, "#ffffff", 0.88),
+            tint2: dk ? mix(M, "#000000", 0.76) : mix(M, "#ffffff", 0.92),
+            tint3: dk ? mix(M, "#000000", 0.66) : mix(M, "#ffffff", 0.8),
+            softBg: dk ? mix(M, "#000000", 0.66) : mix(M, "#ffffff", 0.9),
+            softInk: dk ? mix(M, "#ffffff", 0.6) : mix(M, "#000000", 0.35)
+        };
+    }
+
+    // กรอบตาราง: ความหนา / ลาย / สี (ไม่ได้ตั้ง = ค่าตามธีม · ถ้าเลือกสีธีมจะใช้สีหลักของธีม)
+    function frameSpec(realColor) {
+        var th = pv("theme", "soft"), dk = isDark(), P = palette();
+        var w = pv("frameW", th === "red" ? 2 : 1);
+        var st = pv("frameStyle", "solid");
+        if (st === "double" && w < 3) w = 3;
+        var col = prefs.frameColor || (P ? P.M :
+            th === "red" ? (dk ? "#e5384f" : "#d4182d") :
+            th === "excel" ? (dk ? "#5a4c50" : "#9a9a9a") :
+            (realColor ? cssv("--line", "#e4d0d4") : "var(--line)"));
+        var custom = prefs.frameW != null || prefs.frameStyle || prefs.frameColor || !!P;
+        return { w: w, style: st, color: col, custom: custom };
     }
 
     function esc(s) {
@@ -202,25 +284,61 @@
         w.setAttribute("data-dens", pv("dens", "normal"));
         w.style.setProperty("--tt-r", pv("radius", 20) + "px");
 
+        var P = palette();
+        var vars = { "--tt-h1": P && P.h1, "--tt-h2": P && P.h2, "--tt-solid": P && P.solid, "--tt-tint": P && P.tint,
+            "--tt-tint2": P && P.tint2, "--tt-tint3": P && P.tint3, "--tt-softbg": P && P.softBg, "--tt-softink": P && P.softInk,
+            "--tt-glow1": P && rgba(P.M, 0.1), "--tt-glow2": P && rgba(P.M, 0.22) };
+        Object.keys(vars).forEach(function (k) { if (vars[k]) w.style.setProperty(k, vars[k]); else w.style.removeProperty(k); });
+        var fr = frameSpec(false);
+        if (fr.custom) {
+            w.setAttribute("data-frame", "1");
+            w.style.setProperty("--tt-fw", fr.w + "px");
+            w.style.setProperty("--tt-fs", fr.style);
+            w.style.setProperty("--tt-fc", fr.color);
+        } else {
+            w.removeAttribute("data-frame");
+        }
+
         var showUnit = pv("showUnit", true);
         var nCols = cols.length + cols.filter(hasPct).length + 1;
         w.firstElementChild.style.setProperty("--tt-min", Math.max(360, nCols * 96) + "px");
 
-        /* หัวตาราง */
-        var head = '<tr><th class="sticky">ปีงบประมาณ</th>';
-        cols.forEach(function (c) {
+        /* หัวตาราง: ถ้ามีคอลัมน์ที่อยู่ในกลุ่ม (จุดคุ้มทุน) จะเป็นหัวสองชั้นแบบในตารางต้นแบบ */
+        var anyGroup = cols.some(function (c) { return c.group; });
+        var spanAttr = anyGroup ? ' rowspan="2"' : "";
+        var yearHead = esc(pv("yearHead", "ปีงบประมาณ"));
+        var row1 = '<tr><th class="sticky"' + spanAttr + ">" + yearHead + "</th>";
+        var row2 = "";
+
+        function thFor(c, sub2) {
             var name = esc(labelOf(c));
             var inner = pillOn(c)
                 ? '<span class="tt-name tt-pill" style="--pill:' + pillColor(c) + ";--pill-fg:" + fg(pillColor(c)) + '">' + name + "</span>"
                 : '<span class="tt-name">' + name + "</span>";
-            head += '<th class="' + (c.strong ? "strong" : "") + '"><span class="tt-th">' + inner +
-                (showUnit && unitText(c) ? '<small class="tt-unit">(' + esc(unitText(c)) + ")</small>" : "") + "</span></th>";
-            if (hasPct(c)) {
-                head += '<th class="tt-pct"><span class="tt-th"><span class="tt-name">% เพิ่ม/ลด</span>' +
-                    (showUnit ? '<small class="tt-unit">จากปีก่อน</small>' : "") + "</span></th>";
+            var st = showUnit ? subText(c) : "";
+            return '<th class="' + (c.strong ? "strong " : "") + (c.group ? "tt-bep" : "") + '"' + (sub2 ? "" : spanAttr) + '><span class="tt-th">' + inner +
+                (st ? '<small class="tt-unit">' + esc(st) + "</small>" : "") + "</span></th>";
+        }
+        function thPct(c, sub2) {
+            return '<th class="tt-pct' + (c.group ? " tt-bep" : "") + '"' + (sub2 ? "" : spanAttr) + '><span class="tt-th"><span class="tt-name">% เพิ่ม/ลด</span>' +
+                (showUnit ? '<small class="tt-unit">จากปีก่อน</small>' : "") + "</span></th>";
+        }
+
+        for (var i = 0; i < cols.length; i++) {
+            var c = cols[i];
+            if (c.group) {
+                var run = [];
+                var j = i;
+                while (j < cols.length && cols[j].group === c.group) { run.push(cols[j]); j++; }
+                var span = run.reduce(function (n, x) { return n + 1 + (hasPct(x) ? 1 : 0); }, 0);
+                row1 += '<th class="tt-group" colspan="' + span + '">' + esc(groupLabel(c.group)) + "</th>";
+                run.forEach(function (x) { row2 += thFor(x, true) + (hasPct(x) ? thPct(x, true) : ""); });
+                i = j - 1;
+            } else {
+                row1 += thFor(c, false) + (hasPct(c) ? thPct(c, false) : "");
             }
-        });
-        document.getElementById("tableHead").innerHTML = head + "</tr>";
+        }
+        document.getElementById("tableHead").innerHTML = row1 + "</tr>" + (anyGroup ? "<tr>" + row2 + "</tr>" : "");
 
         var yearFmt = pv("yearFmt", "full");
         function yearCell(y) { return yearFmt === "short" ? String(y) : "ปีงบ " + y; }
@@ -229,6 +347,7 @@
             if (v == null) return "–";
             return fmt(v / scaleOf(c), decOf(c)) + (c.unit === "%" ? "%" : "");
         }
+        function tdCls(c) { return ((c.strong ? "strong " : "") + (c.group ? "tt-bep" : "")).trim(); }
 
         /* เนื้อตาราง */
         document.getElementById("tableBody").innerHTML = sel.map(function (d) {
@@ -236,15 +355,15 @@
             var row = '<tr><td class="sticky">' + yearCell(d.fiscalYear) + "</td>";
             cols.forEach(function (c) {
                 var v = c.get(d);
-                row += '<td class="' + (c.strong ? "strong" : "") + '">' + num(c, v) + "</td>";
+                row += '<td class="' + tdCls(c) + '">' + num(c, v) + "</td>";
                 if (hasPct(c)) {
-                    row += '<td class="tt-pct">' + (p ? delta(pct(v, c.get(p)), c.good) : "–") + "</td>";
+                    row += '<td class="tt-pct' + (c.group ? " tt-bep" : "") + '">' + (p ? delta(pct(v, c.get(p)), c.good) : "–") + "</td>";
                 }
             });
             return row + "</tr>";
         }).join("");
 
-        /* แถวรวม / เฉลี่ย */
+        /* แถวรวม / เฉลี่ย (เฉลี่ย = ค่าเฉลี่ยของตัวเลขรายปีในคอลัมน์นั้น เหมือนตารางต้นแบบ) */
         var foot = "";
         var n = sel.length;
         if (n >= 2) {
@@ -265,11 +384,7 @@
                     default: return null;
                 }
             };
-            var avg = function (c) {
-                if (c.tot === "sum") return sum(sel, c.get) / n;
-                if (c.tot === "mean") return mean(sel, c.get);
-                return null;
-            };
+            var avg = function (c) { return mean(sel, c.get); };
             var avgPct = function (c) {
                 var v = sel.map(function (d) {
                     var p = prevOf ? prevOf(d) : null;
@@ -280,24 +395,24 @@
 
             var cell = function (c, kind) {
                 var v = kind === "tot" ? total(c) : avg(c);
-                return '<td class="' + (c.strong ? "strong" : "") + '">' + (v == null ? "" : num(c, v)) + "</td>";
+                return '<td class="' + tdCls(c) + '">' + (v == null || !isFinite(v) ? "" : num(c, v)) + "</td>";
             };
 
             if (pv("showTotal", true)) {
-                foot += '<tr class="tt-total"><td class="sticky">รวม</td>';
+                foot += '<tr class="tt-total"><td class="sticky">' + esc(pv("totalLabel", "รวม")) + "</td>";
                 cols.forEach(function (c) {
                     foot += cell(c, "tot");
-                    if (hasPct(c)) foot += '<td class="tt-pct"></td>';
+                    if (hasPct(c)) foot += '<td class="tt-pct' + (c.group ? " tt-bep" : "") + '"></td>';
                 });
                 foot += "</tr>";
             }
             if (pv("showAvg", true)) {
-                foot += '<tr class="tt-avg"><td class="sticky"><span class="tt-avg-pill">เฉลี่ยต่อปี</span></td>';
+                foot += '<tr class="tt-avg"><td class="sticky"><span class="tt-avg-pill">' + esc(pv("avgLabel", "เฉลี่ยต่อปี")) + "</span></td>";
                 cols.forEach(function (c) {
                     foot += cell(c, "avg");
                     if (hasPct(c)) {
                         var ap = avgPct(c);
-                        foot += '<td class="tt-pct">' + (ap == null ? "" : delta(ap, c.good)) + "</td>";
+                        foot += '<td class="tt-pct' + (c.group ? " tt-bep" : "") + '">' + (ap == null ? "" : delta(ap, c.good)) + "</td>";
                     }
                 });
                 foot += "</tr>";
@@ -337,6 +452,26 @@
         return '<label class="ct-range"><span>' + label + ' <b data-tt-rv="' + key + '">' + val + unit + '</b></span>' +
             '<input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val +
             '" data-tt-range="' + key + '" data-unit="' + unit + '"></label>';
+    }
+
+    function textIn(key, ph) {
+        return '<input type="text" class="tt-text tt-text-gap" data-tt-text="' + key + '" value="' + esc(prefs[key] || "") + '" placeholder="' + esc(ph) + '" maxlength="60" aria-label="' + esc(ph) + '">';
+    }
+
+    /* ชุดตามตารางต้นแบบ: ปีงบ · Car.Km · บาท/ตู้/กม. · North · West · ผู้โดยสารจริง · ผู้โดยสาร/วัน · รายได้ · ต้นทุน/คน (1) · ค่าโดยสารเฉลี่ย (2) · ผลต่าง · จุดคุ้มทุน 3 ช่อง */
+    var SAMPLE_ORDER = ["carKm", "costPerCarKm", "tripNorth", "tripWest", "passenger", "paxPerDay", "revenue", "costPerPassenger", "avgFare", "costGap", "bepYear", "bepMonth", "bepDay"];
+
+    function applySample() {
+        var rest = DEFAULT_ORDER.filter(function (k) { return SAMPLE_ORDER.indexOf(k) === -1; });
+        prefs = {
+            theme: "excel", lines: "grid", zebra: true, dens: "normal", radius: 10, yearFmt: "short",
+            yearHead: "ปีงบ", avgLabel: "เฉลี่ย", showTotal: false, showAvg: true, showUnit: true,
+            unitMoney: 1, unitCount: 1,
+            order: SAMPLE_ORDER.concat(rest),
+            show: {}, dec: { carKm: 2, revenue: 0 }, pct: {}, pill: {}
+        };
+        COLS.forEach(function (c) { prefs.show[c.key] = SAMPLE_ORDER.indexOf(c.key) !== -1; prefs.pct[c.key] = false; prefs.pill[c.key] = false; });
+        openCol = null;
     }
 
     var DEC_ITEMS = [["auto", "ตามเดิม"], ["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"]];
@@ -395,9 +530,22 @@
 
         var h = '<div class="ct-head"><strong>ปรับแต่งตาราง</strong><button type="button" class="ct-close" aria-label="ปิด">✕</button></div><div class="ct-body">';
 
+        /* ชุดสำเร็จรูปตามตารางต้นแบบ */
+        h += '<div class="ct-sec"><div class="ct-label">ชุดสำเร็จรูป</div>' +
+            '<button type="button" class="tt-preset" data-tt-preset="sample">ใช้ชุดตามตารางตัวอย่าง</button>' +
+            '<p class="ct-hint">จัดคอลัมน์ ชื่อหัว หน่วย ทศนิยม และสีแดง-ทอง ให้เหมือนตารางต้นแบบ (ปีงบ · Car.Km · North/West Line · จุดคุ้มทุน) ปรับต่อได้ทุกอย่าง</p></div>';
+
+        /* จุดคุ้มทุน */
+        var bepKeys = ["bepYear", "bepMonth", "bepDay"];
+        var bepOn = bepKeys.filter(function (k) { return isShown(BY_KEY[k]); });
+        var bepMode = bepOn.length === 0 ? "off" : bepOn.length === 3 ? "all" : (bepOn.length === 1 && bepOn[0] === "bepDay") ? "day" : "";
+        h += '<div class="ct-sec"><div class="ct-label">จุดคุ้มทุน (Break Even Point)</div>' +
+            seg("data-tt-bep", [["off", "ปิด"], ["day", "แค่คนต่อวัน"], ["all", "ทั้งหมด"]], bepMode, "", "") +
+            '<p class="ct-hint">คนต่อปี = ต้นทุนรวม ÷ ค่าโดยสารเฉลี่ยต่อคน · คนต่อเดือน = ÷ 12 · คนต่อวัน = ÷ 360 (เลือกเปิดทีละคอลัมน์ได้ในรายการด้านล่าง)</p></div>';
+
         /* ธีม */
         h += '<div class="ct-sec"><div class="ct-label">รูปแบบตาราง</div>' +
-            seg("data-tt-theme", [["soft", "เรียบ"], ["red", "แดงขอบมน"]], pv("theme", "soft"), "", "") +
+            seg("data-tt-theme", [["soft", "เรียบ"], ["red", "แดงขอบมน"], ["excel", "แดง-ทอง"]], pv("theme", "soft"), "") +
             range("radius", "ความโค้งของขอบตาราง", pv("radius", 20), 0, 36, 2, "px") +
             '<div class="ct-sublabel">เส้นตาราง</div>' +
             seg("data-tt-lines", [["h", "แนวนอน"], ["grid", "ทุกช่อง"], ["none", "ไม่มี"]], pv("lines", "h")) +
@@ -408,7 +556,27 @@
             '<div class="ct-sublabel">ชื่อปีในคอลัมน์แรก</div>' +
             seg("data-tt-year", [["full", "ปีงบ 2565"], ["short", "2565"]], pv("yearFmt", "full")) +
             sw("showTotal", "แถว “รวม”", pv("showTotal", true)) +
-            sw("showAvg", "แถว “เฉลี่ยต่อปี”", pv("showAvg", true)) +
+            sw("showAvg", "แถว “เฉลี่ย”", pv("showAvg", true)) +
+            '<div class="ct-sublabel">ชื่อหัวคอลัมน์ปี · ชื่อแถวรวม · ชื่อแถวเฉลี่ย · ชื่อกลุ่มจุดคุ้มทุน</div>' +
+            textIn("yearHead", "ปีงบประมาณ") + textIn("totalLabel", "รวม") + textIn("avgLabel", "เฉลี่ยต่อปี") + textIn("bepLabel", GROUP_LABEL.bep) +
+            "</div>";
+
+        /* สีธีม + กรอบ */
+        var curPal = prefs.palette || "red";
+        h += '<div class="ct-sec"><div class="ct-label">สีธีมและกรอบตาราง</div>' +
+            '<div class="ct-sublabel">สีธีม (หัวตาราง · แถบ · กรอบ)</div><div class="tt-swatches">' +
+            PALETTES.map(function (x) {
+                return '<button type="button" class="tt-swatch' + (curPal === x[0] ? " is-on" : "") + '" data-tt-pal="' + x[0] + '" style="--c:' + x[2] + '" title="' + x[1] + '" aria-label="' + x[1] + '"></button>';
+            }).join("") +
+            '<label class="tt-swatch tt-swatch-custom' + (curPal === "custom" ? " is-on" : "") + '" title="เลือกสีเอง" style="--c:' + (prefs.paletteColor || "#888888") + '">' +
+            '<input type="color" data-tt-palcolor="1" value="' + (prefs.paletteColor || "#c00000") + '" aria-label="เลือกสีธีมเอง"></label></div>' +
+            range("frameW", "ความหนากรอบ", frameSpec(false).w, 0, 6, 1, "px") +
+            '<div class="ct-sublabel">ลายเส้นกรอบ</div>' +
+            seg("data-tt-fstyle", [["solid", "เส้นเรียบ"], ["dashed", "ประ"], ["dotted", "จุด"], ["double", "เส้นคู่"]], pv("frameStyle", "solid")) +
+            '<label class="ct-color"><span class="ct-color-name">สีกรอบ</span><span class="ct-color-pick">' +
+            '<button type="button" class="tt-auto" data-tt-fauto="1">ตามธีม</button>' +
+            '<code>' + (prefs.frameColor ? prefs.frameColor.toUpperCase() : "อัตโนมัติ") + '</code>' +
+            '<input type="color" data-tt-fcolor="1" value="' + (prefs.frameColor || "#c00000") + '" aria-label="สีกรอบ"></span></label>' +
             "</div>";
 
         /* ตั้งทั้งตาราง */
@@ -589,6 +757,37 @@
 
         P.querySelector("[data-tt-png]").addEventListener("click", downloadPng);
 
+        on("[data-tt-pal]", "click", function (n) {
+            var v = n.getAttribute("data-tt-pal");
+            if (v === "red") delete prefs.palette; else prefs.palette = v;
+            apply(true);
+        });
+        on("[data-tt-palcolor]", "input", function (n) {
+            prefs.palette = "custom"; prefs.paletteColor = n.value;
+            n.parentElement.style.setProperty("--c", n.value);
+            apply(false);
+        });
+        on("[data-tt-fstyle]", "click", function (n) { var v = n.getAttribute("data-tt-fstyle"); if (v === "solid") delete prefs.frameStyle; else prefs.frameStyle = v; apply(true); });
+        on("[data-tt-fcolor]", "input", function (n) {
+            prefs.frameColor = n.value;
+            var code = n.parentElement.querySelector("code");
+            if (code) code.textContent = n.value.toUpperCase();
+            apply(false);
+        });
+        on("[data-tt-fauto]", "click", function () { delete prefs.frameColor; apply(true); });
+        on("[data-tt-preset]", "click", function () { applySample(); apply(true); });
+        on("[data-tt-bep]", "click", function (n) {
+            var m = n.getAttribute("data-tt-bep");
+            var showMap = { off: [0, 0, 0], day: [0, 0, 1], all: [1, 1, 1] }[m];
+            ["bepYear", "bepMonth", "bepDay"].forEach(function (k, i) { sub("show")[k] = !!showMap[i]; });
+            apply(true);
+        });
+        on("[data-tt-text]", "change", function (n) {
+            var k = n.getAttribute("data-tt-text"), v = n.value.trim();
+            if (v) prefs[k] = v; else delete prefs[k];
+            apply(false);
+        });
+
         P.querySelector("[data-tt-reset]").addEventListener("click", function () {
             prefs = {};
             openCol = null;
@@ -608,7 +807,11 @@
         var out = [];
         function grab(tr, section) {
             var cells = [].slice.call(tr.children).map(function (c) {
-                var o = { th: c.tagName === "TH", sticky: c.classList.contains("sticky"), strong: c.classList.contains("strong"), pct: c.classList.contains("tt-pct") };
+                var o = {
+                    th: c.tagName === "TH", sticky: c.classList.contains("sticky"), strong: c.classList.contains("strong"),
+                    pct: c.classList.contains("tt-pct"), group: c.classList.contains("tt-group"), bep: c.classList.contains("tt-bep"),
+                    cs: c.colSpan || 1, rs: c.rowSpan || 1
+                };
                 if (o.th) {
                     var nm = c.querySelector(".tt-name"), un = c.querySelector(".tt-unit"), pl = c.querySelector(".tt-pill");
                     o.name = nm ? nm.textContent : c.textContent;
@@ -646,71 +849,108 @@
 
     function downloadPng() {
         var rows = readDom();
-        if (!rows.length || !rows[0].cells.length) return;
+        var headRows = rows.filter(function (r) { return r.section === "head"; });
+        var dataRows = rows.filter(function (r) { return r.section !== "head"; });
+        if (!headRows.length || !dataRows.length) return;
 
         var go = function () {
             var theme = pv("theme", "soft");
-            var red = theme === "red";
+            var red = theme === "red", xl = theme === "excel";
             var dark = document.documentElement.getAttribute("data-theme") === "dark";
             var C = {
                 card: cssv("--card", "#ffffff"), ink: cssv("--ink", "#1b1416"), line: cssv("--line", "#e4d0d4"),
                 thBg: cssv("--th-bg", "#fdf3f3"), accent: cssv("--accent-text", "#a1121b"), strong: cssv("--td-strong", "#fffafa"),
                 foot: cssv("--foot-bg", "#fcf0f1"), hover: cssv("--td-hover", "#fff7f7"), mute: cssv("--mute", "#76686c"),
                 good: cssv("--good", "#0b6b49"), goodBg: cssv("--good-bg", "#e4f4ec"), bad: cssv("--bad", "#a1121b"), badBg: cssv("--bad-bg", "#fdeaec"),
-                flat: cssv("--flat-fg", "#6f6064"), flatBg: cssv("--flat-bg", "#f3eeef")
+                flat: cssv("--flat-fg", "#6f6064"), flatBg: cssv("--flat-bg", "#f3eeef"),
+                gold: "#f1c84b", goldInk: "#3b2a00",
+                bepBg: dark ? "#3b3417" : "#fff3c7", bepFoot: dark ? "#463d1a" : "#fbe9a6"
             };
+            var PL = palette();
+            var H1 = PL ? PL.h1 : "#ea1a31", H2 = PL ? PL.h2 : "#b50f22";
+            if (PL && !red && !xl) { C.thBg = PL.softBg; C.accent = PL.softInk; }
             if (red) {
-                C.strong = dark ? "#3a1d24" : "#fde6e9";
-                C.foot = dark ? "#321b21" : "#fdebed";
-                C.footStrong = dark ? "#44202a" : "#fbd9de";
-                C.border = dark ? "#e5384f" : "#d4182d";
+                C.strong = PL ? PL.tint : (dark ? "#3a1d24" : "#fde6e9");
+                C.foot = PL ? PL.tint2 : (dark ? "#321b21" : "#fdebed");
+                C.footStrong = PL ? PL.tint3 : (dark ? "#44202a" : "#fbd9de");
+            }
+            if (xl) {
+                C.strong = null;
+                C.foot = dark ? "#34282c" : "#e8e8e8";
+                C.hover = dark ? "#2d2226" : "#e8e8e8";
+                C.line = dark ? "#4a3a3f" : "#c9c9c9";
+                C.bepBg = dark ? "#4a3f1a" : "#fde9a3";
+                C.bepFoot = dark ? "#554820" : "#fbdc86";
             }
             var FONT = '"Sarabun", "Noto Sans Thai", sans-serif';
             var dens = pv("dens", "normal");
             var rowH = dens === "compact" ? 38 : dens === "roomy" ? 62 : 48;
-            var lines = pv("lines", "h");
+            var lines = xl ? "grid" : pv("lines", "h");
             var zebra = pv("zebra", false);
             var R = pv("radius", 20);
-            var align = function (c, ci) { return ci === 0 ? (red ? "center" : "left") : (red || c.pct ? "center" : "right"); };
+            var center = function (c, ci) { return ci === 0 ? (red || xl) : (red || c.pct); };
+            var alignOf = function (c, ci) { return center(c, ci) ? "center" : (ci === 0 ? "left" : "right"); };
 
             var cv = document.createElement("canvas");
             var ctx = cv.getContext("2d");
-            var f = function (w, s) { return w + " " + s + "px " + FONT; };
+            var f = function (w, sz) { return w + " " + sz + "px " + FONT; };
             var tw = function (t, font) { ctx.font = font; return ctx.measureText(t).width; };
 
-            var nCols = rows[0].cells.length;
-            var hasUnit = rows[0].cells.some(function (c) { return c.unit; });
-            var headH = hasUnit ? 70 : 54;
+            /* จัดตำแหน่งเซลล์หัวตาราง (รองรับ rowspan / colspan) */
+            var nCols = dataRows[0].cells.length;
+            var occ = headRows.map(function () { return []; });
+            var hcells = [];
+            headRows.forEach(function (r, ri) {
+                var col = 0;
+                r.cells.forEach(function (c) {
+                    while (occ[ri][col]) col++;
+                    for (var rr_ = 0; rr_ < c.rs; rr_++) for (var cc_ = 0; cc_ < c.cs; cc_++) if (occ[ri + rr_]) occ[ri + rr_][col + cc_] = true;
+                    hcells.push({ c: c, c0: col, r0: ri });
+                    col += c.cs;
+                });
+            });
+            var hasUnit = hcells.some(function (h) { return h.c.unit; });
+            var two = headRows.length > 1;
+            var headHs = two ? [38, 36] : [hasUnit ? 70 : 54];
+            var headH = headHs.reduce(function (a, b) { return a + b; }, 0);
             var padX = 18;
 
             /* ความกว้างคอลัมน์ = ข้อความที่ยาวที่สุด + ช่องไฟ */
             var colW = [];
             for (var ci = 0; ci < nCols; ci++) {
                 var m = 84;
-                rows.forEach(function (r) {
+                hcells.forEach(function (h) {
+                    if (h.c0 !== ci || h.c.cs !== 1) return;
+                    var c = h.c;
+                    var w = Math.max(tw(c.name, f(800, 15)) + (c.pill ? 30 : 0), c.unit ? tw(c.unit, f(600, 12)) : 0);
+                    m = Math.max(m, w + padX * 2);
+                });
+                dataRows.forEach(function (r) {
                     var c = r.cells[ci];
                     if (!c) return;
                     var w;
-                    if (c.th) {
-                        w = Math.max(tw(c.name, f(800, 15)) + (c.pill ? 30 : 0), c.unit ? tw(c.unit, f(600, 12)) : 0);
-                    } else if (c.delta) {
-                        w = tw(c.delta.text, f(800, 15)) + (c.delta.chip ? 26 : 0);
-                    } else if (c.avgPill) {
-                        w = tw(c.text, f(800, 16)) + 40;
-                    } else {
-                        w = tw(c.text, f(ci === 0 ? 800 : 700, red && ci === 0 ? 17 : 15));
-                    }
+                    if (c.delta) w = tw(c.delta.text, f(800, 15)) + (c.delta.chip ? 26 : 0);
+                    else if (c.avgPill) w = tw(c.text, f(800, 16)) + 40;
+                    else w = tw(c.text, f(ci === 0 ? 800 : 700, red && ci === 0 ? 17 : 15));
                     m = Math.max(m, w + padX * 2);
                 });
                 colW.push(Math.ceil(m));
             }
-            var tableW = colW.reduce(function (a, b) { return a + b; }, 0);
-            var bodyRows = rows.filter(function (r) { return r.section !== "head"; });
-            var tableH = headH + bodyRows.length * rowH;
+            /* หัวกลุ่มที่คร่อมหลายคอลัมน์ ต้องกว้างพอสำหรับข้อความ */
+            hcells.forEach(function (h) {
+                if (h.c.cs <= 1) return;
+                var need = tw(h.c.name || "", f(800, 15)) + 40, have = 0, k;
+                for (k = h.c0; k < h.c0 + h.c.cs; k++) have += colW[k];
+                if (need > have) for (k = h.c0; k < h.c0 + h.c.cs; k++) colW[k] += Math.ceil((need - have) / h.c.cs);
+            });
+            var colX = [0];
+            colW.forEach(function (w, i) { colX.push(colX[i] + w); });
+            var tableW = colX[nCols];
+            var tableH = headH + dataRows.length * rowH;
 
             var title = "ตารางสรุปรายปีงบประมาณ";
             var yrs = rows.filter(function (r) { return r.section === "body"; }).map(function (r) { return r.cells[0].text.replace(/\D/g, ""); });
-            var sub = (yrs.length ? "ปีงบประมาณ " + yrs[0] + (yrs.length > 1 ? "–" + yrs[yrs.length - 1] : "") + " · " : "") + "Red Line Operating Cost Dashboard";
+            var subT = (yrs.length ? "ปีงบประมาณ " + yrs[0] + (yrs.length > 1 ? "–" + yrs[yrs.length - 1] : "") + " · " : "") + "Red Line Operating Cost Dashboard";
             var pad = 30, titleH = 72;
             var W = tableW + pad * 2, H = titleH + tableH + pad * 2 - 6;
 
@@ -726,116 +966,142 @@
             ctx.font = f(800, 24); ctx.fillStyle = C.ink; ctx.textAlign = "left";
             ctx.fillText(title, pad, pad + 14);
             ctx.font = f(500, 14); ctx.fillStyle = C.mute;
-            ctx.fillText(sub, pad, pad + 42);
+            ctx.fillText(subT, pad, pad + 42);
 
             var X0 = pad, Y0 = pad + titleH - 6;
 
-            /* พื้นตาราง (ตัดขอบมน) */
             ctx.save();
             rr(ctx, X0, Y0, tableW, tableH, R);
             ctx.clip();
             ctx.fillStyle = C.card;
             ctx.fillRect(X0, Y0, tableW, tableH);
 
-            var y = Y0;
-            rows.forEach(function (r, ri) {
-                var isHead = r.section === "head";
-                var h = isHead ? headH : rowH;
-                var bodyIdx = r.section === "body" ? rows.filter(function (q, qi) { return qi < ri && q.section === "body"; }).length : -1;
-                var x = X0;
+            var headFill = function (y, h) {
+                if (red) {
+                    var g = ctx.createLinearGradient(0, y, 0, y + h);
+                    g.addColorStop(0, H1); g.addColorStop(1, H2);
+                    return g;
+                }
+                return xl ? (PL ? PL.solid : "#c00000") : C.thBg;
+            };
+            var headInk = (red || xl) ? "#ffffff" : C.accent;
 
+            /* ---- หัวตาราง ---- */
+            hcells.forEach(function (h) {
+                var c = h.c;
+                var x = X0 + colX[h.c0], w = colX[h.c0 + c.cs] - colX[h.c0];
+                var y = Y0, k;
+                for (k = 0; k < h.r0; k++) y += headHs[k];
+                var hh = 0;
+                for (k = h.r0; k < h.r0 + c.rs; k++) hh += headHs[k];
+
+                var gold = c.group || c.bep;
+                ctx.fillStyle = gold ? C.gold : headFill(y, hh);
+                ctx.fillRect(x, y, w, hh);
+
+                var ink = gold ? C.goldInk : headInk;
+                var cx = x + w / 2;
+                ctx.textAlign = "center";
+                var ty = c.unit ? y + hh / 2 - 11 : y + hh / 2;
+                if (c.pill) {
+                    var pw = tw(c.name, f(800, 15)) + 28;
+                    var px = cx - pw / 2;
+                    if (red) { rr(ctx, px - 2, ty - 15, pw + 4, 30, 15); ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.fill(); }
+                    rr(ctx, px, ty - 13, pw, 26, 13); ctx.fillStyle = c.pill; ctx.fill();
+                    ctx.font = f(800, 15); ctx.fillStyle = c.pillFg || "#fff";
+                    ctx.fillText(c.name, cx, ty + 1);
+                } else {
+                    ctx.font = f(800, 15); ctx.fillStyle = ink;
+                    ctx.fillText(c.name, cx, ty + 1);
+                }
+                if (c.unit) {
+                    ctx.font = f(600, 12); ctx.fillStyle = ink; ctx.globalAlpha = 0.85;
+                    ctx.fillText(c.unit, cx, y + hh / 2 + 17);
+                    ctx.globalAlpha = 1;
+                }
+                /* เส้นคั่นในหัวตาราง */
+                if (xl || lines === "grid" || gold) {
+                    ctx.strokeStyle = gold ? "rgba(59,42,0,0.25)" : "rgba(255,255,255,0.4)";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.moveTo(x + w - 0.5, y); ctx.lineTo(x + w - 0.5, y + hh); ctx.stroke();
+                    if (gold && h.r0 === 0 && c.group) { ctx.beginPath(); ctx.moveTo(x, y + hh - 0.5); ctx.lineTo(x + w, y + hh - 0.5); ctx.stroke(); }
+                }
+            });
+
+            /* ---- เนื้อตาราง / แถวสรุป ---- */
+            var y = Y0 + headH;
+            dataRows.forEach(function (r, ri) {
+                var bodyIdx = r.section === "body" ? ri : -1;
                 r.cells.forEach(function (c, ci) {
-                    var w = colW[ci];
+                    var x = X0 + colX[ci], w = colW[ci];
                     var bg = null;
-                    if (isHead) {
-                        if (red) {
-                            var g = ctx.createLinearGradient(0, y, 0, y + h);
-                            g.addColorStop(0, "#ea1a31"); g.addColorStop(1, "#b50f22");
-                            bg = g;
-                        } else bg = C.thBg;
-                    } else if (r.section === "foot") {
-                        bg = c.strong && C.footStrong ? C.footStrong : C.foot;
-                    } else if (c.strong) bg = C.strong;
+                    if (r.section === "foot") bg = c.bep ? C.bepFoot : (c.strong && C.footStrong ? C.footStrong : C.foot);
+                    else if (c.bep) bg = C.bepBg;
+                    else if (c.strong && C.strong) bg = C.strong;
                     else if (zebra && bodyIdx % 2 === 1) bg = C.hover;
-                    if (bg) { ctx.fillStyle = bg; ctx.fillRect(x, y, w, h); }
+                    if (bg) { ctx.fillStyle = bg; ctx.fillRect(x, y, w, rowH); }
 
-                    var cx = align(c, ci) === "center" ? x + w / 2 : align(c, ci) === "left" ? x + padX : x + w - padX;
-                    ctx.textAlign = align(c, ci);
+                    var al = alignOf(c, ci);
+                    var cx = al === "center" ? x + w / 2 : al === "left" ? x + padX : x + w - padX;
+                    ctx.textAlign = al;
+                    var cy = y + rowH / 2 + 1;
 
-                    if (isHead) {
-                        var ty = c.unit ? y + h / 2 - 11 : y + h / 2;
-                        if (c.pill) {
-                            var pw = tw(c.name, f(800, 15)) + 28;
-                            var px = align(c, ci) === "center" ? x + w / 2 - pw / 2 : align(c, ci) === "left" ? x + padX : x + w - padX - pw;
-                            if (red) { rr(ctx, px - 2, ty - 15, pw + 4, 30, 15); ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.fill(); }
-                            rr(ctx, px, ty - 13, pw, 26, 13); ctx.fillStyle = c.pill; ctx.fill();
-                            ctx.font = f(800, 15); ctx.fillStyle = c.pillFg || "#fff"; ctx.textAlign = "center";
-                            ctx.fillText(c.name, px + pw / 2, ty + 1);
-                        } else {
-                            ctx.font = f(800, 15); ctx.fillStyle = red ? "#ffffff" : C.accent;
-                            ctx.fillText(c.name, cx, ty + 1);
-                        }
-                        if (c.unit) {
-                            ctx.font = f(600, 12); ctx.fillStyle = red ? "rgba(255,255,255,0.85)" : C.accent; ctx.globalAlpha = red ? 1 : 0.8;
-                            ctx.textAlign = align(c, ci);
-                            ctx.fillText(c.unit, cx, y + h / 2 + 17);
-                            ctx.globalAlpha = 1;
-                        }
-                    } else if (c.delta) {
+                    if (c.delta) {
                         var col = c.delta.cls === "good" ? C.good : c.delta.cls === "bad" ? C.bad : C.flat;
+                        ctx.textAlign = "center";
                         if (c.delta.chip) {
                             var dw = tw(c.delta.text, f(800, 14)) + 22;
-                            var dx = x + w / 2 - dw / 2;
-                            rr(ctx, dx, y + h / 2 - 13, dw, 26, 13);
+                            rr(ctx, x + w / 2 - dw / 2, y + rowH / 2 - 13, dw, 26, 13);
                             ctx.fillStyle = c.delta.cls === "good" ? C.goodBg : c.delta.cls === "bad" ? C.badBg : C.flatBg; ctx.fill();
-                            ctx.font = f(800, 14); ctx.fillStyle = col; ctx.textAlign = "center";
-                            ctx.fillText(c.delta.text, x + w / 2, y + h / 2 + 1);
-                        } else {
-                            ctx.font = f(800, 15); ctx.fillStyle = col; ctx.textAlign = "center";
-                            ctx.fillText(c.delta.text, x + w / 2, y + h / 2 + 1);
-                        }
+                            ctx.font = f(800, 14);
+                        } else ctx.font = f(800, 15);
+                        ctx.fillStyle = col;
+                        ctx.fillText(c.delta.text, x + w / 2, cy);
                     } else if (c.avgPill && red) {
                         var aw = tw(c.text, f(800, 16)) + 36;
-                        var g2 = ctx.createLinearGradient(0, y, 0, y + h);
-                        g2.addColorStop(0, "#ea1a31"); g2.addColorStop(1, "#b50f22");
-                        rr(ctx, x + w / 2 - aw / 2, y + h / 2 - 17, aw, 34, 17); ctx.fillStyle = g2; ctx.fill();
+                        var g2 = ctx.createLinearGradient(0, y, 0, y + rowH);
+                        g2.addColorStop(0, H1); g2.addColorStop(1, H2);
+                        rr(ctx, x + w / 2 - aw / 2, y + rowH / 2 - 17, aw, 34, 17); ctx.fillStyle = g2; ctx.fill();
                         ctx.font = f(800, 16); ctx.fillStyle = "#fff"; ctx.textAlign = "center";
-                        ctx.fillText(c.text, x + w / 2, y + h / 2 + 1);
+                        ctx.fillText(c.text, x + w / 2, cy);
                     } else {
-                        var isFirst = ci === 0;
-                        ctx.font = f(isFirst || c.strong || r.section === "foot" ? 800 : 700, red && isFirst ? 17 : 15);
-                        ctx.fillStyle = (red && r.section === "foot" && isFirst) ? C.bad : C.ink;
-                        ctx.fillText(c.text, cx, y + h / 2 + 1);
+                        var first = ci === 0;
+                        ctx.font = f(first || (c.strong && !xl) || (r.section === "foot" && !xl) ? 800 : 700, red && first ? 17 : 15);
+                        ctx.fillStyle = (red && r.section === "foot" && first) ? C.bad : C.ink;
+                        ctx.fillText(c.text, cx, cy);
                     }
-                    x += w;
-                });
 
-                /* เส้นตาราง */
-                ctx.strokeStyle = C.line; ctx.lineWidth = 1;
-                if (lines !== "none" || isHead) {
-                    var ly = Math.round(y + h) - 0.5;
-                    if (!(red && isHead) && !(lines === "none") && ri < rows.length - 1) {
-                        ctx.beginPath(); ctx.moveTo(X0, ly); ctx.lineTo(X0 + tableW, ly); ctx.stroke();
+                    /* เส้นตาราง */
+                    ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+                    if (lines !== "none" && ri < dataRows.length - 1) {
+                        ctx.beginPath(); ctx.moveTo(x, Math.round(y + rowH) - 0.5); ctx.lineTo(x + w, Math.round(y + rowH) - 0.5); ctx.stroke();
                     }
-                }
-                if (lines === "grid" || !isHead) {
-                    var vx = X0;
-                    r.cells.forEach(function (c, ci) {
-                        vx += colW[ci];
-                        if ((lines === "grid" && ci < nCols - 1) || (ci === 0 && lines !== "none" && !(isHead && red))) {
-                            ctx.beginPath(); ctx.moveTo(vx - 0.5, y); ctx.lineTo(vx - 0.5, y + h); ctx.stroke();
-                        }
-                    });
-                }
-                y += h;
+                    if ((lines === "grid" && ci < nCols - 1) || (ci === 0 && lines !== "none")) {
+                        ctx.beginPath(); ctx.moveTo(x + w - 0.5, y); ctx.lineTo(x + w - 0.5, y + rowH); ctx.stroke();
+                    }
+                });
+                y += rowH;
             });
             ctx.restore();
 
-            /* ขอบตาราง */
-            rr(ctx, X0 + 0.5, Y0 + 0.5, tableW - 1, tableH - 1, R);
-            ctx.lineWidth = red ? 3 : 1.2;
-            ctx.strokeStyle = red ? C.border : C.line;
-            ctx.stroke();
+            var FR = frameSpec(true);
+            if (FR.w > 0) {
+                ctx.strokeStyle = FR.color;
+                var drawFrame = function (inset, lw, dash) {
+                    ctx.setLineDash(dash || []);
+                    ctx.lineWidth = lw;
+                    rr(ctx, X0 + inset, Y0 + inset, tableW - inset * 2, tableH - inset * 2, Math.max(0, R - inset));
+                    ctx.stroke();
+                };
+                if (FR.style === "double") {
+                    var t3 = FR.w / 3;
+                    drawFrame(t3 / 2, t3);
+                    drawFrame(FR.w - t3 / 2, t3);
+                } else {
+                    drawFrame(FR.w / 2, FR.w, FR.style === "dashed" ? [FR.w * 3 + 4, FR.w * 2 + 3] : FR.style === "dotted" ? [FR.w, FR.w * 2] : null);
+                }
+                ctx.setLineDash([]);
+            }
 
             cv.toBlob(function (blob) {
                 if (!blob) return;
@@ -882,6 +1148,9 @@
     document.addEventListener("keydown", function (e) {
         if (e.key === "Escape" && panelEl) closePanel();
     });
+    try {
+        new MutationObserver(function () { if (last) render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    } catch (e) { /* เบราว์เซอร์เก่า: สลับโหมดแล้วสีธีมจะอัปเดตเมื่อปรับแต่งครั้งถัดไป */ }
     window.addEventListener("resize", position);
     window.addEventListener("scroll", function () {
         if (panelEl) window.requestAnimationFrame(position);

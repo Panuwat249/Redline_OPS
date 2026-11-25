@@ -151,6 +151,9 @@
             // ผู้โดยสารต่อวัน "รวมทั้งสองสาย" (ค่าจาก Excel เท่านั้น) — ไม่เกี่ยวกับคอลัมน์ Passenger (รวมทั้งปี) ที่ใช้คำนวณรายได้
             paxActualTotal: d.paxActualTotal > 0 ? d.paxActualTotal : null,
             paxTargetTotal: d.paxTargetTotal > 0 ? d.paxTargetTotal : null,
+            // ต้นทุนต่อเที่ยวแยกสาย (บาท/เที่ยว)
+            costPerTripNorth: d.costPerTripNorth > 0 ? d.costPerTripNorth : null,
+            costPerTripWest: d.costPerTripWest > 0 ? d.costPerTripWest : null,
             hasData: total > 0
         });
     }
@@ -862,7 +865,7 @@
         const reach = beMillions ? actualMillions / beMillions * 100 : 0;
 
         $("revFacts").innerHTML =
-            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท", "") +
+            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท/เที่ยว", "") +
             fact(gap > 0 ? "ส่วนต่าง (ต้นทุน − รายได้)" : "รายได้สูงกว่าต้นทุน", fmtM(Math.abs(gap)) + " ล้านบาท", "ประมาณการจากผู้โดยสาร × ค่าโดยสารเฉลี่ย") +
             fact("ผู้โดยสารที่ต้องมีเพื่อคุ้มทุน", fmt1(beMillions) + " ล้านคน/ปี", "≈ " + fmt0(beMillions * 1e6 / 365) + " คน/วัน") +
             fact("ผู้โดยสารจริง", fmt1(actualMillions) + " ล้านคน/ปี", "≈ " + fmt0(focus.passenger / 365) + " คน/วัน · " + fmt1(reach) + "% ของจุดคุ้มทุน");
@@ -984,6 +987,8 @@
             { key: "passenger", group: G2, th: "ผู้โดยสาร",     en: "Passengers", unit: "ล้านคน",      kind: "line", color: "#6250d6", get: d => d.passenger / 1e6, fmt: fmt2 },
             { key: "paxActualTotal", group: G2, th: "ผู้โดยสารจริง รวม (ต่อวัน)",       en: "Actual Passengers per Day · Total", unit: "คน/วัน", kind: "line", color: "#6250d6", get: d => d.paxActualTotal, fmt: fmt0 },
             { key: "paxTargetTotal", group: G2, th: "ผู้โดยสารที่ต้องการ รวม (ต่อวัน)", en: "Target Passengers per Day · Total", unit: "คน/วัน", kind: "line", color: "#c8102e", get: d => d.paxTargetTotal, fmt: fmt0 },
+            { key: "costPerTripNorth", group: G2, th: "ต้นทุนต่อเที่ยว North Line", en: "Cost per Trip · North Line", unit: "บาท/เที่ยว", kind: "line", color: "#2a78d6", get: d => d.costPerTripNorth, fmt: fmt2 },
+            { key: "costPerTripWest", group: G2, th: "ต้นทุนต่อเที่ยว West Line", en: "Cost per Trip · West Line", unit: "บาท/เที่ยว", kind: "line", color: "#1d9a6c", get: d => d.costPerTripWest, fmt: fmt2 },
             { key: "paxActualNorth", group: G2, th: "ผู้โดยสารจริง สายเหนือ (ต่อวัน)",       en: "Actual Passengers per Day · North", unit: "คน/วัน", kind: "line", color: "#2a78d6", get: d => d.paxActualNorth, fmt: fmt0 },
             { key: "paxTargetNorth", group: G2, th: "ผู้โดยสารที่ต้องการ สายเหนือ (ต่อวัน)", en: "Target Passengers per Day · North", unit: "คน/วัน", kind: "line", color: "#a1121b", get: d => d.paxTargetNorth, fmt: fmt0 },
             { key: "paxActualWest",  group: G2, th: "ผู้โดยสารจริง สายตะวันตก (ต่อวัน)",    en: "Actual Passengers per Day · West",  unit: "คน/วัน", kind: "line", color: "#1d9a6c", get: d => d.paxActualWest,  fmt: fmt0 },
@@ -992,7 +997,7 @@
             { key: "costPerCarKm",     group: G3, th: "ต้นทุนการเดินรถ",   en: "Operating Cost per Car.Km", unit: "บาท/ตู้/กม.", kind: "line", color: "#0e9aa7", get: d => d.costPerCarKm,     fmt: fmt2 },
             { key: "costPerPassenger", group: G3, th: "ต้นทุนต่อผู้โดยสาร", en: "Cost per Passenger",        unit: "บาท/คน",       kind: "line", color: "#374151", get: d => d.costPerPassenger, fmt: fmt2 },
 
-            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
+            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท/เที่ยว", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
             { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร (ประมาณการ)", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
             { key: "recovery", group: G4, th: "คืนทุนจากค่าโดยสาร",         en: "Fare Recovery Ratio",    unit: "%",           kind: "line", color: "#0369a1", get: d => d.recovery * 100,    fmt: fmt1 }
         ];
@@ -1450,7 +1455,7 @@
             "Car-Km", "ผู้โดยสาร (คน)", "บาทต่อ Car-Km", "บาทต่อผู้โดยสาร",
             "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ประมาณการ (บาท)", "คืนทุน (%)",
             "ผู้โดยสารจริง สายเหนือ (คน/วัน)", "ผู้โดยสารที่ต้องการ สายเหนือ (คน/วัน)",
-            "ผู้โดยสารจริง สายตะวันตก (คน/วัน)", "ผู้โดยสารที่ต้องการ สายตะวันตก (คน/วัน)", "ผู้โดยสารจริง รวม (คน/วัน)", "ผู้โดยสารที่ต้องการ รวม (คน/วัน)"
+            "ผู้โดยสารจริง สายตะวันตก (คน/วัน)", "ผู้โดยสารที่ต้องการ สายตะวันตก (คน/วัน)", "ผู้โดยสารจริง รวม (คน/วัน)", "ผู้โดยสารที่ต้องการ รวม (คน/วัน)", "ต้นทุนต่อเที่ยว North Line (บาท/เที่ยว)", "ต้นทุนต่อเที่ยว West Line (บาท/เที่ยว)"
         ]];
 
         sel.forEach(d => {
@@ -1462,7 +1467,8 @@
                 d.carKm, d.passenger,
                 Number(d.costPerCarKm.toFixed(2)), Number(d.costPerPassenger.toFixed(2)),
                 d.avgFare, Number(d.revenue.toFixed(2)), Number((d.recovery * 100).toFixed(2)),
-                ...["paxActualNorth", "paxTargetNorth", "paxActualWest", "paxTargetWest", "paxActualTotal", "paxTargetTotal"].map(k => d[k] != null ? Math.round(d[k]) : "")
+                ...["paxActualNorth", "paxTargetNorth", "paxActualWest", "paxTargetWest", "paxActualTotal", "paxTargetTotal"].map(k => d[k] != null ? Math.round(d[k]) : ""),
+                ...["costPerTripNorth", "costPerTripWest"].map(k => d[k] != null ? Number(d[k].toFixed(2)) : "")
             ]);
         });
 
