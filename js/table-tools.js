@@ -436,7 +436,8 @@
         h += '<p class="ct-hint">ติ๊กเพื่อแสดง/ซ่อน · ▲▼ เลื่อนลำดับ · “ตั้งค่า” ปรับทศนิยม หน่วย % ป้ายสี และชื่อของคอลัมน์นั้น</p></div>';
 
         h += "</div>";
-        h += '<div class="ct-foot tt-foot"><button type="button" class="ct-reset" data-tt-reset="1">คืนค่าเริ่มต้น</button></div>';
+        h += '<div class="ct-foot tt-foot"><button type="button" class="ct-reset" data-tt-reset="1">คืนค่าเริ่มต้น</button>' +
+            '<button type="button" class="ct-save" data-tt-png="1">ดาวน์โหลดรูป PNG</button></div>';
 
         panelEl.innerHTML = h;
         document.body.appendChild(panelEl);
@@ -586,11 +587,270 @@
             apply(false);
         });
 
+        P.querySelector("[data-tt-png]").addEventListener("click", downloadPng);
+
         P.querySelector("[data-tt-reset]").addEventListener("click", function () {
             prefs = {};
             openCol = null;
             apply(true);
         });
+    }
+
+
+    /* ---------- ดาวน์โหลดตารางเป็นรูป PNG (วาดเองบน canvas ความละเอียดสูง ไม่พึ่งไลบรารีเพิ่ม) ---------- */
+
+    function cssv(n, fb) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+        return v || fb;
+    }
+
+    function readDom() {
+        var out = [];
+        function grab(tr, section) {
+            var cells = [].slice.call(tr.children).map(function (c) {
+                var o = { th: c.tagName === "TH", sticky: c.classList.contains("sticky"), strong: c.classList.contains("strong"), pct: c.classList.contains("tt-pct") };
+                if (o.th) {
+                    var nm = c.querySelector(".tt-name"), un = c.querySelector(".tt-unit"), pl = c.querySelector(".tt-pill");
+                    o.name = nm ? nm.textContent : c.textContent;
+                    o.unit = un ? un.textContent : "";
+                    if (pl) { o.pill = pl.style.getPropertyValue("--pill").trim(); o.pillFg = pl.style.getPropertyValue("--pill-fg").trim(); }
+                } else {
+                    var d = c.querySelector(".delta, .tt-d");
+                    o.text = c.textContent;
+                    if (d) {
+                        o.delta = { cls: d.classList.contains("good") ? "good" : d.classList.contains("bad") ? "bad" : "flat", chip: d.classList.contains("delta"),
+                            text: d.textContent.replace(/^([▲▼])/, "$1 ") };
+                    }
+                    if (c.querySelector(".tt-avg-pill")) o.avgPill = true;
+                }
+                return o;
+            });
+            out.push({ section: section, cells: cells });
+        }
+        [].forEach.call(document.querySelectorAll("#tableHead tr"), function (tr) { grab(tr, "head"); });
+        [].forEach.call(document.querySelectorAll("#tableBody tr"), function (tr) { grab(tr, "body"); });
+        [].forEach.call(document.querySelectorAll("#tableFoot tr"), function (tr) { grab(tr, "foot"); });
+        return out;
+    }
+
+    function rr(ctx, x, y, w, h, r) {
+        r = Math.max(0, Math.min(r, w / 2, h / 2));
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+    }
+
+    function downloadPng() {
+        var rows = readDom();
+        if (!rows.length || !rows[0].cells.length) return;
+
+        var go = function () {
+            var theme = pv("theme", "soft");
+            var red = theme === "red";
+            var dark = document.documentElement.getAttribute("data-theme") === "dark";
+            var C = {
+                card: cssv("--card", "#ffffff"), ink: cssv("--ink", "#1b1416"), line: cssv("--line", "#e4d0d4"),
+                thBg: cssv("--th-bg", "#fdf3f3"), accent: cssv("--accent-text", "#a1121b"), strong: cssv("--td-strong", "#fffafa"),
+                foot: cssv("--foot-bg", "#fcf0f1"), hover: cssv("--td-hover", "#fff7f7"), mute: cssv("--mute", "#76686c"),
+                good: cssv("--good", "#0b6b49"), goodBg: cssv("--good-bg", "#e4f4ec"), bad: cssv("--bad", "#a1121b"), badBg: cssv("--bad-bg", "#fdeaec"),
+                flat: cssv("--flat-fg", "#6f6064"), flatBg: cssv("--flat-bg", "#f3eeef")
+            };
+            if (red) {
+                C.strong = dark ? "#3a1d24" : "#fde6e9";
+                C.foot = dark ? "#321b21" : "#fdebed";
+                C.footStrong = dark ? "#44202a" : "#fbd9de";
+                C.border = dark ? "#e5384f" : "#d4182d";
+            }
+            var FONT = '"Sarabun", "Noto Sans Thai", sans-serif';
+            var dens = pv("dens", "normal");
+            var rowH = dens === "compact" ? 38 : dens === "roomy" ? 62 : 48;
+            var lines = pv("lines", "h");
+            var zebra = pv("zebra", false);
+            var R = pv("radius", 20);
+            var align = function (c, ci) { return ci === 0 ? (red ? "center" : "left") : (red || c.pct ? "center" : "right"); };
+
+            var cv = document.createElement("canvas");
+            var ctx = cv.getContext("2d");
+            var f = function (w, s) { return w + " " + s + "px " + FONT; };
+            var tw = function (t, font) { ctx.font = font; return ctx.measureText(t).width; };
+
+            var nCols = rows[0].cells.length;
+            var hasUnit = rows[0].cells.some(function (c) { return c.unit; });
+            var headH = hasUnit ? 70 : 54;
+            var padX = 18;
+
+            /* ความกว้างคอลัมน์ = ข้อความที่ยาวที่สุด + ช่องไฟ */
+            var colW = [];
+            for (var ci = 0; ci < nCols; ci++) {
+                var m = 84;
+                rows.forEach(function (r) {
+                    var c = r.cells[ci];
+                    if (!c) return;
+                    var w;
+                    if (c.th) {
+                        w = Math.max(tw(c.name, f(800, 15)) + (c.pill ? 30 : 0), c.unit ? tw(c.unit, f(600, 12)) : 0);
+                    } else if (c.delta) {
+                        w = tw(c.delta.text, f(800, 15)) + (c.delta.chip ? 26 : 0);
+                    } else if (c.avgPill) {
+                        w = tw(c.text, f(800, 16)) + 40;
+                    } else {
+                        w = tw(c.text, f(ci === 0 ? 800 : 700, red && ci === 0 ? 17 : 15));
+                    }
+                    m = Math.max(m, w + padX * 2);
+                });
+                colW.push(Math.ceil(m));
+            }
+            var tableW = colW.reduce(function (a, b) { return a + b; }, 0);
+            var bodyRows = rows.filter(function (r) { return r.section !== "head"; });
+            var tableH = headH + bodyRows.length * rowH;
+
+            var title = "ตารางสรุปรายปีงบประมาณ";
+            var yrs = rows.filter(function (r) { return r.section === "body"; }).map(function (r) { return r.cells[0].text.replace(/\D/g, ""); });
+            var sub = (yrs.length ? "ปีงบประมาณ " + yrs[0] + (yrs.length > 1 ? "–" + yrs[yrs.length - 1] : "") + " · " : "") + "Red Line Operating Cost Dashboard";
+            var pad = 30, titleH = 72;
+            var W = tableW + pad * 2, H = titleH + tableH + pad * 2 - 6;
+
+            var scale = Math.max(1, Math.min(4, 16000 / W));      // คมที่สุดเท่าที่ canvas ของเบราว์เซอร์รองรับ (สูงสุด 4 เท่า)
+            cv.width = Math.round(W * scale);
+            cv.height = Math.round(H * scale);
+            ctx.scale(scale, scale);
+            ctx.textBaseline = "middle";
+
+            ctx.fillStyle = C.card;
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.font = f(800, 24); ctx.fillStyle = C.ink; ctx.textAlign = "left";
+            ctx.fillText(title, pad, pad + 14);
+            ctx.font = f(500, 14); ctx.fillStyle = C.mute;
+            ctx.fillText(sub, pad, pad + 42);
+
+            var X0 = pad, Y0 = pad + titleH - 6;
+
+            /* พื้นตาราง (ตัดขอบมน) */
+            ctx.save();
+            rr(ctx, X0, Y0, tableW, tableH, R);
+            ctx.clip();
+            ctx.fillStyle = C.card;
+            ctx.fillRect(X0, Y0, tableW, tableH);
+
+            var y = Y0;
+            rows.forEach(function (r, ri) {
+                var isHead = r.section === "head";
+                var h = isHead ? headH : rowH;
+                var bodyIdx = r.section === "body" ? rows.filter(function (q, qi) { return qi < ri && q.section === "body"; }).length : -1;
+                var x = X0;
+
+                r.cells.forEach(function (c, ci) {
+                    var w = colW[ci];
+                    var bg = null;
+                    if (isHead) {
+                        if (red) {
+                            var g = ctx.createLinearGradient(0, y, 0, y + h);
+                            g.addColorStop(0, "#ea1a31"); g.addColorStop(1, "#b50f22");
+                            bg = g;
+                        } else bg = C.thBg;
+                    } else if (r.section === "foot") {
+                        bg = c.strong && C.footStrong ? C.footStrong : C.foot;
+                    } else if (c.strong) bg = C.strong;
+                    else if (zebra && bodyIdx % 2 === 1) bg = C.hover;
+                    if (bg) { ctx.fillStyle = bg; ctx.fillRect(x, y, w, h); }
+
+                    var cx = align(c, ci) === "center" ? x + w / 2 : align(c, ci) === "left" ? x + padX : x + w - padX;
+                    ctx.textAlign = align(c, ci);
+
+                    if (isHead) {
+                        var ty = c.unit ? y + h / 2 - 11 : y + h / 2;
+                        if (c.pill) {
+                            var pw = tw(c.name, f(800, 15)) + 28;
+                            var px = align(c, ci) === "center" ? x + w / 2 - pw / 2 : align(c, ci) === "left" ? x + padX : x + w - padX - pw;
+                            if (red) { rr(ctx, px - 2, ty - 15, pw + 4, 30, 15); ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.fill(); }
+                            rr(ctx, px, ty - 13, pw, 26, 13); ctx.fillStyle = c.pill; ctx.fill();
+                            ctx.font = f(800, 15); ctx.fillStyle = c.pillFg || "#fff"; ctx.textAlign = "center";
+                            ctx.fillText(c.name, px + pw / 2, ty + 1);
+                        } else {
+                            ctx.font = f(800, 15); ctx.fillStyle = red ? "#ffffff" : C.accent;
+                            ctx.fillText(c.name, cx, ty + 1);
+                        }
+                        if (c.unit) {
+                            ctx.font = f(600, 12); ctx.fillStyle = red ? "rgba(255,255,255,0.85)" : C.accent; ctx.globalAlpha = red ? 1 : 0.8;
+                            ctx.textAlign = align(c, ci);
+                            ctx.fillText(c.unit, cx, y + h / 2 + 17);
+                            ctx.globalAlpha = 1;
+                        }
+                    } else if (c.delta) {
+                        var col = c.delta.cls === "good" ? C.good : c.delta.cls === "bad" ? C.bad : C.flat;
+                        if (c.delta.chip) {
+                            var dw = tw(c.delta.text, f(800, 14)) + 22;
+                            var dx = x + w / 2 - dw / 2;
+                            rr(ctx, dx, y + h / 2 - 13, dw, 26, 13);
+                            ctx.fillStyle = c.delta.cls === "good" ? C.goodBg : c.delta.cls === "bad" ? C.badBg : C.flatBg; ctx.fill();
+                            ctx.font = f(800, 14); ctx.fillStyle = col; ctx.textAlign = "center";
+                            ctx.fillText(c.delta.text, x + w / 2, y + h / 2 + 1);
+                        } else {
+                            ctx.font = f(800, 15); ctx.fillStyle = col; ctx.textAlign = "center";
+                            ctx.fillText(c.delta.text, x + w / 2, y + h / 2 + 1);
+                        }
+                    } else if (c.avgPill && red) {
+                        var aw = tw(c.text, f(800, 16)) + 36;
+                        var g2 = ctx.createLinearGradient(0, y, 0, y + h);
+                        g2.addColorStop(0, "#ea1a31"); g2.addColorStop(1, "#b50f22");
+                        rr(ctx, x + w / 2 - aw / 2, y + h / 2 - 17, aw, 34, 17); ctx.fillStyle = g2; ctx.fill();
+                        ctx.font = f(800, 16); ctx.fillStyle = "#fff"; ctx.textAlign = "center";
+                        ctx.fillText(c.text, x + w / 2, y + h / 2 + 1);
+                    } else {
+                        var isFirst = ci === 0;
+                        ctx.font = f(isFirst || c.strong || r.section === "foot" ? 800 : 700, red && isFirst ? 17 : 15);
+                        ctx.fillStyle = (red && r.section === "foot" && isFirst) ? C.bad : C.ink;
+                        ctx.fillText(c.text, cx, y + h / 2 + 1);
+                    }
+                    x += w;
+                });
+
+                /* เส้นตาราง */
+                ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+                if (lines !== "none" || isHead) {
+                    var ly = Math.round(y + h) - 0.5;
+                    if (!(red && isHead) && !(lines === "none") && ri < rows.length - 1) {
+                        ctx.beginPath(); ctx.moveTo(X0, ly); ctx.lineTo(X0 + tableW, ly); ctx.stroke();
+                    }
+                }
+                if (lines === "grid" || !isHead) {
+                    var vx = X0;
+                    r.cells.forEach(function (c, ci) {
+                        vx += colW[ci];
+                        if ((lines === "grid" && ci < nCols - 1) || (ci === 0 && lines !== "none" && !(isHead && red))) {
+                            ctx.beginPath(); ctx.moveTo(vx - 0.5, y); ctx.lineTo(vx - 0.5, y + h); ctx.stroke();
+                        }
+                    });
+                }
+                y += h;
+            });
+            ctx.restore();
+
+            /* ขอบตาราง */
+            rr(ctx, X0 + 0.5, Y0 + 0.5, tableW - 1, tableH - 1, R);
+            ctx.lineWidth = red ? 3 : 1.2;
+            ctx.strokeStyle = red ? C.border : C.line;
+            ctx.stroke();
+
+            cv.toBlob(function (blob) {
+                if (!blob) return;
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.download = "ตารางสรุปรายปีงบประมาณ.png";
+                a.href = url;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+            }, "image/png");
+        };
+
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(go); else go();
     }
 
     /* ---------- ติดตั้ง ---------- */
@@ -599,6 +859,8 @@
         var b = btn();
         if (!b || b.__tt) return;
         b.__tt = true;
+        var pb = document.getElementById("tablePngBtn");
+        if (pb) pb.addEventListener("click", downloadPng);
         b.addEventListener("click", function () {
             if (panelEl) { closePanel(); return; }
             renderPanel();
