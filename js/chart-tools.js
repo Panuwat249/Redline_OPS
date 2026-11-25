@@ -597,6 +597,16 @@
             holder.style.marginLeft = holder.style.marginRight = cw && cw < 100 ? "auto" : "";
         }
 
+        /* ความกว้างของ "รายการด้านข้างกราฟ" (เช่น รายการหมวดข้างโดนัท): ตั้งเป็นตัวแปร CSS --ct-side ให้ CSS ของการ์ดนำไปใช้ */
+        if (entry.opts.sideTarget) {
+            var sideEl = document.querySelector(entry.opts.sideTarget);
+            var sw = prefs[entry.id] && prefs[entry.id].sideW;
+            if (sideEl) {
+                if (sw) sideEl.style.setProperty("--ct-side", sw + "px");
+                else sideEl.style.removeProperty("--ct-side");
+            }
+        }
+
         entry.chart = new Chart(entry.canvas, buildConfig(entry));
         if (typeof entry.opts.onChange === "function") {
             entry.opts.onChange(entry.chart);
@@ -888,6 +898,11 @@
 
         html += rangeRow("chartW", "ความกว้างกราฟ", pref.chartW != null ? pref.chartW : 100, 40, 100);
 
+        if (entry.opts.sideTarget) {
+            html += rangeRow("sideW", entry.opts.sideLabel || "ความกว้างรายการด้านข้าง (น้อย = ตัวเลขชิดข้อความ)",
+                pref.sideW != null ? pref.sideW : (entry.opts.sideDefault || 460), 180, 900, "px", 20);
+        }
+
         if (!radial && live.indexOf("bar") !== -1) {
             html += rangeRow("barW", "ความกว้างแท่ง", pref.barW != null ? pref.barW : 90, 30, 100);
             html += rangeRow("catW", "ความกว้างกลุ่มแท่ง (มาก = ชิดกัน)", pref.catW != null ? pref.catW : 80, 40, 100);
@@ -1038,7 +1053,7 @@
                 var p = prefs[entry.id] = prefs[entry.id] || {};
                 p[key] = v;
                 var tag = panelEl.querySelector('[data-rv="' + key + '"]');
-                if (tag) tag.textContent = v + "%";
+                if (tag) tag.textContent = v + (inp.getAttribute("data-unit") || "%");
                 savePrefs();
                 apply(entry, false);                          // ไม่วาดแผงใหม่ จะได้ลากต่อเนื่องได้
             });
@@ -1072,9 +1087,11 @@
 
     var DEC_OPTS = [["inherit", "ตามเดิม"], ["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"]];
 
-    function rangeRow(key, label, val, min, max) {
-        return '<label class="ct-range"><span>' + label + ' <b data-rv="' + key + '">' + val + '%</b></span>' +
-            '<input type="range" min="' + min + '" max="' + max + '" step="5" value="' + val + '" data-range="' + key + '"></label>';
+    function rangeRow(key, label, val, min, max, unit, step) {
+        unit = unit || "%";
+        return '<label class="ct-range"><span>' + label + ' <b data-rv="' + key + '">' + val + unit + '</b></span>' +
+            '<input type="range" min="' + min + '" max="' + max + '" step="' + (step || 5) + '" value="' + val +
+            '" data-range="' + key + '" data-unit="' + unit + '"></label>';
     }
 
     function toggle(key, label, on) {

@@ -771,6 +771,8 @@
             title: "สัดส่วนต้นทุน",
             kinds: ["doughnut", "pie"],
             initialKind: "doughnut",
+            sideTarget: ".mix",                       // ปรับความกว้างรายการหมวดด้านขวาของโดนัทได้
+            sideLabel: "ความกว้างรายการด้านขวา (น้อย = % ชิดชื่อหมวด)",
             onChange: renderMixLegend
         });
     }
@@ -860,7 +862,7 @@
         const reach = beMillions ? actualMillions / beMillions * 100 : 0;
 
         $("revFacts").innerHTML =
-            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท", "") +
+            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท/เที่ยว", "") +
             fact(gap > 0 ? "ส่วนต่าง (ต้นทุน − รายได้)" : "รายได้สูงกว่าต้นทุน", fmtM(Math.abs(gap)) + " ล้านบาท", "ประมาณการจากผู้โดยสาร × ค่าโดยสารเฉลี่ย") +
             fact("ผู้โดยสารที่ต้องมีเพื่อคุ้มทุน", fmt1(beMillions) + " ล้านคน/ปี", "≈ " + fmt0(beMillions * 1e6 / 365) + " คน/วัน") +
             fact("ผู้โดยสารจริง", fmt1(actualMillions) + " ล้านคน/ปี", "≈ " + fmt0(focus.passenger / 365) + " คน/วัน · " + fmt1(reach) + "% ของจุดคุ้มทุน");
@@ -990,7 +992,7 @@
             { key: "costPerCarKm",     group: G3, th: "ต้นทุนการเดินรถ",   en: "Operating Cost per Car.Km", unit: "บาท/ตู้/กม.", kind: "line", color: "#0e9aa7", get: d => d.costPerCarKm,     fmt: fmt2 },
             { key: "costPerPassenger", group: G3, th: "ต้นทุนต่อผู้โดยสาร", en: "Cost per Passenger",        unit: "บาท/คน",       kind: "line", color: "#374151", get: d => d.costPerPassenger, fmt: fmt2 },
 
-            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
+            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท/เที่ยว", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
             { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร (ประมาณการ)", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
             { key: "recovery", group: G4, th: "คืนทุนจากค่าโดยสาร",         en: "Fare Recovery Ratio",    unit: "%",           kind: "line", color: "#0369a1", get: d => d.recovery * 100,    fmt: fmt1 }
         ];
@@ -1424,78 +1426,9 @@
        ตาราง
     ========================================================= */
 
-    const TABLE_COLS = [
-        { label: "ปีงบประมาณ", cls: "sticky" },
-        { label: "บุคลากร" },
-        { label: "พลังงาน" },
-        { label: "ซ่อมบำรุง" },
-        { label: "อื่น ๆ" },
-        { label: "ต้นทุนรวม", cls: "strong" },
-        { label: "เปลี่ยนจากปีก่อน" },
-        { label: "Car-Km" },
-        { label: "ผู้โดยสาร (คน)" },
-        { label: "บาท / Car-Km" },
-        { label: "บาท / ผู้โดยสาร" },
-        { label: "ค่าโดยสารเฉลี่ย" },
-        { label: "รายได้ประมาณการ" },
-        { label: "คืนทุน" }
-    ];
-
+    /* ตารางสรุป: วาดและปรับแต่งโดย js/table-tools.js (เลือกคอลัมน์ ทศนิยม หน่วย % สี ธีม) */
     function renderTable(sel) {
-        $("tableHead").innerHTML = "<tr>" + TABLE_COLS.map(c =>
-            '<th class="' + (c.cls || "") + '">' + c.label + "</th>"
-        ).join("") + "</tr>";
-
-        $("tableBody").innerHTML = sel.map(d => {
-            const p = previousOf(d);
-
-            return "<tr>" +
-                '<td class="sticky">ปีงบ ' + d.fiscalYear + "</td>" +
-                GROUPS.map(g => "<td>" + fmtM(d[g.key]) + "</td>").join("") +
-                '<td class="strong">' + fmtM(d.total) + "</td>" +
-                "<td>" + (p ? deltaChip(pctChange(d.total, p.total), "down") : "–") + "</td>" +
-                "<td>" + fmt0(d.carKm) + "</td>" +
-                "<td>" + fmt0(d.passenger) + "</td>" +
-                "<td>" + fmt2(d.costPerCarKm) + "</td>" +
-                "<td>" + fmt2(d.costPerPassenger) + "</td>" +
-                "<td>" + fmt2(d.avgFare) + "</td>" +
-                "<td>" + fmtM(d.revenue) + "</td>" +
-                "<td>" + fmt1(d.recovery * 100) + "%</td></tr>";
-        }).join("");
-
-        if (sel.length < 2) {
-            $("tableFoot").innerHTML = "";
-            return;
-        }
-
-        const n = sel.length;
-        const sum = fn => sumBy(sel, fn);
-
-        const totalCost = sum(d => d.total);
-        const totalKm = sum(d => d.carKm);
-        const totalPax = sum(d => d.passenger);
-        const totalRev = sum(d => d.revenue);
-
-        $("tableFoot").innerHTML =
-            "<tr>" +
-                '<td class="sticky">รวม</td>' +
-                GROUPS.map(g => "<td>" + fmtM(sum(d => d[g.key])) + "</td>").join("") +
-                '<td class="strong">' + fmtM(totalCost) + "</td><td></td>" +
-                "<td>" + fmt0(totalKm) + "</td><td>" + fmt0(totalPax) + "</td>" +
-                "<td>" + fmt2(totalKm ? totalCost / totalKm : 0) + "</td>" +
-                "<td>" + fmt2(totalPax ? totalCost / totalPax : 0) + "</td>" +
-                "<td>" + fmt2(totalPax ? totalRev / totalPax : 0) + "</td>" +
-                "<td>" + fmtM(totalRev) + "</td>" +
-                "<td>" + fmt1(totalCost ? totalRev / totalCost * 100 : 0) + "%</td>" +
-            "</tr>" +
-            "<tr>" +
-                '<td class="sticky">เฉลี่ยต่อปี</td>' +
-                GROUPS.map(g => "<td>" + fmtM(sum(d => d[g.key]) / n) + "</td>").join("") +
-                '<td class="strong">' + fmtM(totalCost / n) + "</td><td></td>" +
-                "<td>" + fmt0(totalKm / n) + "</td><td>" + fmt0(totalPax / n) + "</td>" +
-                "<td></td><td></td><td></td>" +
-                "<td>" + fmtM(totalRev / n) + "</td><td></td>" +
-            "</tr>";
+        if (window.TableTools) window.TableTools.render(sel, previousOf);
     }
 
     /* =========================================================

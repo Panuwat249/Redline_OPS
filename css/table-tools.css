@@ -1,0 +1,167 @@
+/* =========================================================
+   table-tools.css
+   หน้าตาตารางสรุป + แผง "ปรับแต่งตาราง" (ใช้คู่กับ js/table-tools.js)
+   ธีม "เรียบ" ใช้ตัวแปรสีของหน้า · ธีม "แดงขอบมน" ตามภาพตัวอย่าง
+   ========================================================= */
+
+.table-wrap { border-radius: var(--tt-r, 20px); }
+.data-table { min-width: var(--tt-min, 1240px); }
+
+/* ---------- หัวคอลัมน์ ---------- */
+.tt-th { display: inline-flex; flex-direction: column; align-items: inherit; gap: 3px; line-height: 1.25; }
+.data-table th .tt-unit { font-size: 11.5px; font-weight: 600; opacity: 0.78; }
+
+/* ป้ายสีขอบมนหลังชื่อคอลัมน์ */
+.tt-pill {
+    display: inline-block;
+    padding: 4px 13px;
+    border-radius: 999px;
+    background: var(--pill);
+    color: var(--pill-fg, #fff);
+    font-weight: 800;
+}
+
+/* ---------- ความสูงแถว ---------- */
+.table-wrap[data-dens="compact"] .data-table th,
+.table-wrap[data-dens="compact"] .data-table td { padding-top: 7px; padding-bottom: 7px; }
+.table-wrap[data-dens="roomy"] .data-table th,
+.table-wrap[data-dens="roomy"] .data-table td { padding-top: 19px; padding-bottom: 19px; }
+
+/* ---------- เส้นตาราง ---------- */
+.table-wrap[data-lines="grid"] .data-table th,
+.table-wrap[data-lines="grid"] .data-table td { border-right: 1px solid var(--line); }
+.table-wrap[data-lines="grid"] .data-table th:last-child,
+.table-wrap[data-lines="grid"] .data-table td:last-child { border-right: none; }
+.table-wrap[data-lines="none"] .data-table td,
+.table-wrap[data-lines="none"] .data-table tfoot td { border-top: none; border-bottom: none; }
+.table-wrap[data-lines="none"] .data-table th { border-bottom: none; }
+
+/* ---------- แถบสลับสี ---------- */
+.table-wrap[data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.strong) { background: var(--td-hover); }
+
+/* ---------- % เพิ่ม/ลด ---------- */
+.data-table .tt-pct { text-align: center; }
+.tt-d { font-weight: 800; white-space: nowrap; }
+.tt-d i { font-style: normal; font-size: 10px; margin-right: 3px; }
+.tt-d.good { color: var(--good); }
+.tt-d.bad  { color: var(--bad); }
+.tt-d.flat { color: var(--flat-fg); }
+
+.tt-avg-pill { display: inline-block; }
+
+/* =========================================================
+   ธีม "แดงขอบมน" (ตามภาพตัวอย่าง)
+   ========================================================= */
+.tt-theme-red {
+    border: 2px solid #d4182d;
+    background: var(--card);
+    box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.08), 0 12px 30px rgba(200, 16, 46, 0.2);
+}
+
+.tt-theme-red .data-table th {
+    background: linear-gradient(180deg, #ea1a31 0%, #b50f22 100%);
+    color: #ffffff;
+    border-bottom: none;
+    text-align: center;
+    font-size: 14px;
+}
+.tt-theme-red .data-table th.sticky { text-align: center; }
+.tt-theme-red .data-table th .tt-th { align-items: center; }
+.tt-theme-red .tt-pill { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92); }
+
+.tt-theme-red .data-table td { text-align: center; }
+.tt-theme-red .data-table td.sticky { text-align: center; font-size: 16px; }
+.tt-theme-red .data-table td.strong { background: #fde6e9; }
+
+.tt-theme-red .data-table tfoot td { background: #fdebed; }
+.tt-theme-red .data-table tfoot td.strong { background: #fbd9de; }
+.tt-theme-red .data-table tfoot td.sticky { background: #fdebed; }
+
+.tt-theme-red .tt-avg-pill {
+    padding: 6px 18px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ea1a31 0%, #b50f22 100%);
+    color: #ffffff;
+}
+.tt-theme-red .tt-total td.sticky { color: #a1121b; }
+
+:root[data-theme="dark"] .tt-theme-red { border-color: #e5384f; box-shadow: 0 0 0 4px rgba(229, 56, 79, 0.12), 0 12px 30px rgba(0, 0, 0, 0.45); }
+:root[data-theme="dark"] .tt-theme-red .data-table td.strong { background: #3a1d24; }
+:root[data-theme="dark"] .tt-theme-red .data-table tfoot td,
+:root[data-theme="dark"] .tt-theme-red .data-table tfoot td.sticky { background: #321b21; }
+:root[data-theme="dark"] .tt-theme-red .data-table tfoot td.strong { background: #44202a; }
+:root[data-theme="dark"] .tt-theme-red .tt-total td.sticky { color: #ff9aa8; }
+
+/* =========================================================
+   แผงปรับแต่งตาราง
+   ========================================================= */
+.tt-panel { width: 372px; max-height: min(700px, calc(100vh - 24px)); }
+.tt-panel .ct-seg { margin-bottom: 4px; }
+.tt-foot { grid-template-columns: 1fr; }
+
+.tt-col {
+    margin-bottom: 6px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    background: #fbf6f6;
+}
+.tt-col.is-off { opacity: 0.62; }
+.tt-col-top { display: flex; align-items: center; gap: 8px; }
+
+.tt-chk { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.tt-chk input { width: 18px; height: 18px; flex-shrink: 0; accent-color: #c8102e; cursor: pointer; }
+
+.tt-arrows { display: inline-flex; gap: 3px; }
+.tt-arrows button,
+.tt-more {
+    border: none;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #8f0a20;
+    font-family: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(120, 20, 30, 0.14);
+}
+.tt-arrows button { width: 26px; height: 26px; font-size: 11px; }
+.tt-arrows button:disabled { opacity: 0.35; cursor: default; }
+.tt-more { padding: 5px 11px; font-size: 12.5px; white-space: nowrap; }
+
+.tt-col-body { padding: 8px 2px 4px; }
+
+.tt-text {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #ecd9db;
+    border-radius: 12px;
+    background: #ffffff;
+    color: inherit;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+}
+.tt-text:focus { outline: 2px solid rgba(200, 16, 46, 0.4); outline-offset: 1px; }
+
+.tt-auto {
+    padding: 4px 10px;
+    border: 1px solid #ecd9db;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #8f0a20;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.tt-panel .ct-seg-sm button { padding: 6px 4px; font-size: 12.5px; white-space: nowrap; }
+
+:root[data-theme="dark"] .tt-col { background: #2a1d21; }
+:root[data-theme="dark"] .tt-arrows button,
+:root[data-theme="dark"] .tt-more { background: #3a2a2f; color: #ffb3bd; box-shadow: none; }
+:root[data-theme="dark"] .tt-text { background: #34262a; border-color: #4a3439; }
+:root[data-theme="dark"] .tt-auto { background: #34262a; border-color: #4a3439; color: #ffb3bd; }
+
+@media print {
+    .tt-theme-red { box-shadow: none; }
+}

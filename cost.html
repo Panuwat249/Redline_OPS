@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/cost.css" />
     <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/chart-tools.css" />
+    <link rel="stylesheet" href="css/table-tools.css" />
     <link rel="stylesheet" href="css/chart-info.css" />
 
     <!-- Font: Sarabun -->
@@ -302,7 +303,13 @@
             <header class="card-head">
                 <div>
                     <h2>ตารางสรุปรายปีงบประมาณ</h2>
-                    <p>ตัวเลขต้นทุนหน่วย ล้านบาท · ส่งออกเป็น Excel ได้ในหน่วยบาทเต็ม</p>
+                    <p id="tableNote">หน่วยอยู่ใต้ชื่อคอลัมน์ · ส่งออก Excel เป็นบาทเต็ม</p>
+                </div>
+                <div class="ct-actions">
+                    <button type="button" class="ct-btn" id="tableToolsBtn" aria-haspopup="dialog" aria-expanded="false">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+                        <span>ปรับแต่งตาราง</span>
+                    </button>
                 </div>
             </header>
 
@@ -337,6 +344,7 @@
     <script src="js/chart-labels.js"></script>
     <script src="js/chart-tools.js"></script>
     <script src="js/chart-info.js"></script>
+    <script src="js/table-tools.js"></script>
     <script src="js/cost-app.js"></script>
     <script src="js/load-cost.js"></script>
 

@@ -510,7 +510,7 @@ a:focus-visible {
 /* สัดส่วนต้นทุน */
 .mix {
     display: grid;
-    grid-template-columns: minmax(220px, 320px) minmax(0, 460px);
+    grid-template-columns: minmax(220px, 320px) minmax(0, var(--ct-side, 460px));
     justify-content: center;
     gap: 56px;
     align-items: center;
