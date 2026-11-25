@@ -510,8 +510,9 @@ a:focus-visible {
 /* สัดส่วนต้นทุน */
 .mix {
     display: grid;
-    grid-template-columns: minmax(220px, 340px) minmax(0, 1fr);
-    gap: 40px;
+    grid-template-columns: minmax(220px, 320px) minmax(0, 460px);
+    justify-content: center;
+    gap: 56px;
     align-items: center;
 }
 
@@ -1001,7 +1002,7 @@ a:focus-visible {
     .kpi-main strong { font-size: 27px; }
     .kpi-foot { flex-direction: column; align-items: flex-start; }
 
-    .mix { grid-template-columns: 1fr; }
+    .mix { grid-template-columns: 1fr; gap: 22px; }
     .facts { grid-template-columns: 1fr; }
     .mix-chart { max-width: 260px; height: 260px; margin: 0 auto; }
 
