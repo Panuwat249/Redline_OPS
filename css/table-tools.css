@@ -97,7 +97,6 @@
    ========================================================= */
 .tt-panel { width: 372px; max-height: min(700px, calc(100vh - 24px)); }
 .tt-panel .ct-seg { margin-bottom: 4px; }
-.tt-foot { grid-template-columns: 1fr; }
 
 .tt-col {
     margin-bottom: 6px;
