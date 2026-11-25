@@ -120,34 +120,30 @@
         <!-- =====================================================
              โครงสร้างต้นทุน
         ====================================================== -->
-        <div class="grid-2">
-
-            <section class="card" data-ct-card data-info="cc-mix">
-                <header class="card-head chart-header">
-                    <div>
-                        <h2>สัดส่วนต้นทุนแต่ละหมวด</h2>
-                        <p id="mixNote">รวมทุกปีที่เลือก</p>
-                    </div>
-                </header>
-
-                <div class="mix">
-                    <div class="chart-box h-260 mix-chart"><canvas id="mixChart"></canvas></div>
-                    <ul class="mix-legend" id="mixLegend"></ul>
+        <section class="card" data-ct-card data-info="cc-mix">
+            <header class="card-head chart-header">
+                <div>
+                    <h2>สัดส่วนต้นทุนแต่ละหมวด</h2>
+                    <p id="mixNote">รวมทุกปีที่เลือก</p>
                 </div>
-            </section>
+            </header>
 
-            <section class="card" data-ct-card data-info="cc-stack">
-                <header class="card-head chart-header">
-                    <div>
-                        <h2>ต้นทุนแยกหมวดรายปี</h2>
-                        <p>ดูว่าหมวดไหนโตขึ้นหรือลดลง หน่วย ล้านบาท</p>
-                    </div>
-                </header>
+            <div class="mix">
+                <div class="chart-box h-300 mix-chart"><canvas id="mixChart"></canvas></div>
+                <ul class="mix-legend" id="mixLegend"></ul>
+            </div>
+        </section>
 
-                <div class="chart-box h-300"><canvas id="stackChart"></canvas></div>
-            </section>
+        <section class="card" data-ct-card data-info="cc-stack">
+            <header class="card-head chart-header">
+                <div>
+                    <h2>ต้นทุนแยกหมวดรายปี</h2>
+                    <p>ดูว่าหมวดไหนโตขึ้นหรือลดลง หน่วย ล้านบาท</p>
+                </div>
+            </header>
 
-        </div>
+            <div class="chart-box h-300"><canvas id="stackChart"></canvas></div>
+        </section>
 
         <!-- =====================================================
              รายได้เทียบต้นทุน
