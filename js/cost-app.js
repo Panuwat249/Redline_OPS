@@ -435,8 +435,8 @@
             out.push(
                 gap > 0
                     ? "ค่าโดยสารครอบคลุมต้นทุนประมาณ <b>" + fmt1(focus.recovery * 100) + "%</b> " +
-                      "เหลือส่วนต่างที่ต้องสนับสนุน " + fmtM(gap) + " ล้านบาท (ประมาณการ)"
-                    : "รายได้ค่าโดยสารสูงกว่าต้นทุน <b>" + fmtM(-gap) + " ล้านบาท</b> (ประมาณการ)"
+                      "เหลือส่วนต่างที่ต้องสนับสนุน " + fmtM(gap) + " ล้านบาท "
+                    : "รายได้ค่าโดยสารสูงกว่าต้นทุน <b>" + fmtM(-gap) + " ล้านบาท</b> "
             );
         }
 
@@ -904,7 +904,7 @@
             data: {
                 labels: yearLabels(set),
                 datasets: [
-                    { label: "รายได้ค่าโดยสาร (ประมาณการ)", data: set.map(d => d.revenue / 1e6), ctColor: COLOR.revenue },
+                    { label: "รายได้ค่าโดยสาร", data: set.map(d => d.revenue / 1e6), ctColor: COLOR.revenue },
                     { label: "ต้นทุนรวม", data: set.map(d => d.total / 1e6), ctColor: COLOR.cost }
                 ]
             },
@@ -934,7 +934,7 @@
         const reach = beMillions ? actualMillions / beMillions * 100 : 0;
 
         $("revFacts").innerHTML =
-            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท/เที่ยว", "") +
+            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท", "") +
             fact(gap > 0 ? "ส่วนต่าง (ต้นทุน − รายได้)" : "รายได้สูงกว่าต้นทุน", fmtM(Math.abs(gap)) + " ล้านบาท", "ประมาณการจากผู้โดยสาร × ค่าโดยสารเฉลี่ย") +
             fact("ผู้โดยสารที่ต้องมีเพื่อคุ้มทุน", fmt1(beMillions) + " ล้านคน/ปี", "≈ " + fmt0(beMillions * 1e6 / 365) + " คน/วัน") +
             fact("ผู้โดยสารจริง", fmt1(actualMillions) + " ล้านคน/ปี", "≈ " + fmt0(focus.passenger / 365) + " คน/วัน · " + fmt1(reach) + "% ของจุดคุ้มทุน");
@@ -1066,8 +1066,8 @@
             { key: "costPerCarKm",     group: G3, th: "ต้นทุนการเดินรถ",   en: "Operating Cost per Car.Km", unit: "บาท/ตู้/กม.", kind: "line", color: "#0e9aa7", get: d => d.costPerCarKm,     fmt: fmt2 },
             { key: "costPerPassenger", group: G3, th: "ต้นทุนต่อผู้โดยสาร", en: "Cost per Passenger",        unit: "บาท/คน",       kind: "line", color: "#374151", get: d => d.costPerPassenger, fmt: fmt2 },
 
-            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท/เที่ยว", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
-            { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร (ประมาณการ)", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
+            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
+            { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
             { key: "recovery", group: G4, th: "คืนทุนจากค่าโดยสาร",         en: "Fare Recovery Ratio",    unit: "%",           kind: "line", color: "#0369a1", get: d => d.recovery * 100,    fmt: fmt1 }
         ];
 
@@ -1522,7 +1522,7 @@
             "ต้นทุนบุคลากร (บาท)", "ต้นทุนพลังงาน (บาท)", "ต้นทุนซ่อมบำรุง (บาท)", "ต้นทุนอื่น ๆ (บาท)",
             "ต้นทุนรวม (บาท)", "เปลี่ยนจากปีก่อน (%)",
             "Car-Km", "ผู้โดยสาร (คน)", "บาทต่อ Car-Km", "บาทต่อผู้โดยสาร",
-            "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ประมาณการ (บาท)", "คืนทุน (%)",
+            "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ (บาท)", "คืนทุน (%)",
             "ผู้โดยสารจริง สายเหนือ (คน/วัน)", "ผู้โดยสารที่ต้องการ สายเหนือ (คน/วัน)",
             "ผู้โดยสารจริง สายตะวันตก (คน/วัน)", "ผู้โดยสารที่ต้องการ สายตะวันตก (คน/วัน)", "ผู้โดยสารจริง รวม (คน/วัน)", "ผู้โดยสารที่ต้องการ รวม (คน/วัน)", "ต้นทุนต่อเที่ยว North Line (บาท/เที่ยว)", "ต้นทุนต่อเที่ยว West Line (บาท/เที่ยว)"
         ]];
