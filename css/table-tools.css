@@ -277,3 +277,10 @@
 :root .table-wrap[data-zebra="1"] .data-table tbody tr:nth-child(even) td.tt-bep { background: var(--tt-hi2, #fbe6a0); }
 :root .table-wrap .data-table tbody tr:hover td.tt-bep { background: var(--tt-hi2, #fbe6a0); }
 :root .table-wrap .data-table tfoot td.tt-bep { background: var(--tt-hif, #f6d777); }
+
+/* ===== ไฮไลท์อื่น ๆ ที่ปรับสีได้ (ตัวแปรตั้งจาก js/table-tools.js เมื่อผู้ใช้เลือกสีเท่านั้น) ===== */
+:root .table-wrap.table-wrap[data-hz="1"][data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.strong):not(.tt-bep),
+:root .table-wrap.table-wrap.tt-theme-excel[data-hz="1"][data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.tt-bep) { background: var(--tt-zb); }
+:root .table-wrap.table-wrap[data-hs="1"] .data-table tbody td.strong:not(.tt-bep) { background: var(--tt-sc); }
+:root .table-wrap.table-wrap[data-hf="1"] .data-table tfoot td:not(.tt-bep) { background: var(--tt-ft); }
+:root .table-wrap.table-wrap[data-hf="1"] .data-table tfoot td.strong:not(.tt-bep) { background: var(--tt-ft2); }
