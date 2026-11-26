@@ -156,9 +156,13 @@
     }
 
     /* บรรทัดที่สองใต้ชื่อคอลัมน์ เช่น (ล้านบาท) · (1) · (บาท) (2) */
-    function subText(c) {
+    function autoSub(c) {
         var u = unitText(c);
         return (u ? "(" + u + ")" : "") + (c.tag ? (u ? " " : "") + c.tag : "");
+    }
+    /* ผู้ใช้แก้ข้อความบรรทัดที่สองเองได้ (prefs.sub[key]) · ว่าง = อัตโนมัติ */
+    function subText(c) {
+        return (prefs.sub && prefs.sub[c.key]) || autoSub(c);
     }
 
     /* ---------- ตัวเลข: ปัดตามหลักคณิตศาสตร์ (.5 ขึ้นไปปัดขึ้น) ---------- */
@@ -562,6 +566,8 @@
             }
             h += '<div class="ct-sublabel">ชื่อหัวคอลัมน์</div>' +
                 '<input type="text" class="tt-text" data-tt-label="' + c.key + '" value="' + esc((prefs.label && prefs.label[c.key]) || "") + '" placeholder="' + esc(c.label) + '" maxlength="40">';
+            h += '<div class="ct-sublabel">ชื่อหน่วยใต้หัวคอลัมน์ (พิมพ์เอง เช่น (ล้านบาท))</div>' +
+                '<input type="text" class="tt-text" data-tt-subtext="' + c.key + '" value="' + esc((prefs.sub && prefs.sub[c.key]) || "") + '" placeholder="' + esc(autoSub(c) || "ไม่มีหน่วย") + '" maxlength="40">';
             h += "</div>";
         }
         return h + "</div>";
@@ -818,6 +824,11 @@
             if (prefs.pillColor) delete prefs.pillColor[n.getAttribute("data-tt-autocolor")];
             apply(true);
         });
+        on("[data-tt-subtext]", "change", function (n) {
+            var k = n.getAttribute("data-tt-subtext"), v = n.value.trim();
+            if (v) sub("sub")[k] = v; else if (prefs.sub) delete prefs.sub[k];
+            apply(false);
+        });
         on("[data-tt-pctlabel]", "change", function (n) {
             var k = n.getAttribute("data-tt-pctlabel"), v = n.value.trim();
             if (v) sub("pctLabel")[k] = v; else if (prefs.pctLabel) delete prefs.pctLabel[k];
@@ -1014,7 +1025,8 @@
             });
             var hasUnit = hcells.some(function (h) { return h.c.unit; });
             var two = headRows.length > 1;
-            var headHs = two ? [38, 36] : [hasUnit ? 70 : 54];
+            var subUnit = hcells.some(function (h) { return h.r0 === 1 && h.c.unit; });   // หัวย่อยของกลุ่มมีบรรทัดหน่วย → เพิ่มความสูง ไม่ให้ถูกตัด
+            var headHs = two ? [38, subUnit ? 62 : 36] : [hasUnit ? 70 : 54];
             var headH = headHs.reduce(function (a, b) { return a + b; }, 0);
             var padX = 18;
 
