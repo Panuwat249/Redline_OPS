@@ -221,6 +221,24 @@
     var HI_COLORS = [["gold", "ทอง", "#f1c84b"], ["orange", "ส้ม", "#f7a45b"], ["green", "เขียว", "#8fd19e"], ["blue", "ฟ้า", "#8ec5f2"],
                      ["pink", "ชมพู", "#f4a7c0"], ["purple", "ม่วง", "#c3b1f2"], ["gray", "เทา", "#c4c4c4"]];
 
+    /* ไฮไลท์อื่น ๆ: แถบสลับสี (hiZ) · แถวสรุปเฉลี่ย/รวม (hiF) · คอลัมน์เน้น (hiS) — ว่าง = ตามธีม */
+    var HL = [["hiZ", "แถบสลับสีรายแถว"], ["hiF", "แถวสรุป (เฉลี่ย / รวม)"], ["hiS", "คอลัมน์เน้น (เช่น ปีงบ)"]];
+    function hlBase(k) {
+        var key = prefs[k];
+        if (!key) return null;
+        if (key === "custom") return prefs[k + "Color"] || null;
+        var H = null;
+        HI_COLORS.forEach(function (x) { if (x[0] === key) H = x[2]; });
+        return H;
+    }
+    function hlTints() {
+        var dk = isDark(), o = {}, z = hlBase("hiZ"), f = hlBase("hiF"), c = hlBase("hiS");
+        if (z) o.z = dk ? mix(z, "#000000", 0.78) : mix(z, "#ffffff", 0.8);
+        if (f) { o.f = dk ? mix(f, "#000000", 0.7) : mix(f, "#ffffff", 0.68); o.f2 = dk ? mix(f, "#000000", 0.6) : mix(f, "#ffffff", 0.5); }
+        if (c) o.s = dk ? mix(c, "#000000", 0.76) : mix(c, "#ffffff", 0.82);
+        return o;
+    }
+
     function hiColors() {
         var key = prefs.hi || "gold", H = "#f1c84b", dk = isDark();
         if (key === "custom") H = prefs.hiColor || H;
@@ -313,6 +331,12 @@
         w.style.setProperty("--tt-hi1", HI.b1);
         w.style.setProperty("--tt-hi2", HI.b2);
         w.style.setProperty("--tt-hif", HI.bf);
+        var HT = hlTints();
+        [["z", "zb", "data-hz"], ["f", "ft", "data-hf"], ["s", "sc", "data-hs"]].forEach(function (a) {
+            if (HT[a[0]]) { w.style.setProperty("--tt-" + a[1], HT[a[0]]); w.setAttribute(a[2], "1"); }
+            else { w.style.removeProperty("--tt-" + a[1]); w.removeAttribute(a[2]); }
+        });
+        if (HT.f2) w.style.setProperty("--tt-ft2", HT.f2); else w.style.removeProperty("--tt-ft2");
         var fr = frameSpec(false);
         if (fr.custom) {
             w.setAttribute("data-frame", "1");
@@ -600,6 +624,15 @@
             }).join("") +
             '<label class="tt-swatch tt-swatch-custom' + (prefs.hi === "custom" ? " is-on" : "") + '" title="เลือกสีไฮไลท์เอง" style="--c:' + (prefs.hiColor || "#888888") + '">' +
             '<input type="color" data-tt-hicolor="1" value="' + (prefs.hiColor || "#f1c84b") + '" aria-label="เลือกสีไฮไลท์เอง"></label></div>' +
+            HL.map(function (a) {
+                var k = a[0], cur = prefs[k] || "";
+                return '<div class="ct-sublabel">' + a[1] + ' <button type="button" class="tt-auto" data-tt-hlauto="' + k + '">ตามธีม</button></div><div class="tt-swatches">' +
+                    HI_COLORS.map(function (x) {
+                        return '<button type="button" class="tt-swatch' + (cur === x[0] ? " is-on" : "") + '" data-tt-hl="' + k + '|' + x[0] + '" style="--c:' + x[2] + '" title="' + x[1] + '" aria-label="' + a[1] + ' สี' + x[1] + '"></button>';
+                    }).join("") +
+                    '<label class="tt-swatch tt-swatch-custom' + (cur === "custom" ? " is-on" : "") + '" title="เลือกสีเอง" style="--c:' + (prefs[k + "Color"] || "#888888") + '">' +
+                    '<input type="color" data-tt-hlcolor="' + k + '" value="' + (prefs[k + "Color"] || "#c4c4c4") + '" aria-label="' + a[1] + ' เลือกสีเอง"></label></div>';
+            }).join("") +
             range("frameW", "ความหนากรอบ", frameSpec(false).w, 0, 6, 1, "px") +
             '<div class="ct-sublabel">ลายเส้นกรอบ</div>' +
             seg("data-tt-fstyle", [["solid", "เส้นเรียบ"], ["dashed", "ประ"], ["dotted", "จุด"], ["double", "เส้นคู่"]], pv("frameStyle", "solid")) +
@@ -797,6 +830,22 @@
             n.parentElement.style.setProperty("--c", n.value);
             apply(false);
         });
+        on("[data-tt-hl]", "click", function (n) {
+            var a = n.getAttribute("data-tt-hl").split("|");
+            prefs[a[0]] = a[1];
+            apply(true);
+        });
+        on("[data-tt-hlauto]", "click", function (n) {
+            var k = n.getAttribute("data-tt-hlauto");
+            delete prefs[k]; delete prefs[k + "Color"];
+            apply(true);
+        });
+        on("[data-tt-hlcolor]", "input", function (n) {
+            var k = n.getAttribute("data-tt-hlcolor");
+            prefs[k] = "custom"; prefs[k + "Color"] = n.value;
+            n.parentElement.style.setProperty("--c", n.value);
+            apply(false);
+        });
         on("[data-tt-pal]", "click", function (n) {
             var v = n.getAttribute("data-tt-pal");
             if (v === "red") delete prefs.palette; else prefs.palette = v;
@@ -921,6 +970,10 @@
                 C.hover = dark ? "#2d2226" : "#e8e8e8";
                 C.line = dark ? "#4a3a3f" : "#c9c9c9";
             }
+            var HT = hlTints();
+            if (HT.z) C.hover = HT.z;
+            if (HT.f) { C.foot = HT.f; C.footStrong = HT.f2; }
+            if (HT.s) C.strong = HT.s;
             var FONT = '"Sarabun", "Noto Sans Thai", sans-serif';
             var dens = pv("dens", "normal");
             var rowH = dens === "compact" ? 38 : dens === "roomy" ? 62 : 48;
