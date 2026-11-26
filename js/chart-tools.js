@@ -1181,6 +1181,14 @@
         ctx.fillRect(0, 0, out.width, out.height);
         ctx.drawImage(src, 0, 0);
 
+        /* กราฟที่ต้องการรูปรวมหลายส่วน (เช่น โดนัท + รายการข้างกราฟ) ให้การ์ดวาดเองผ่าน opts.exportCompose(srcCanvas, scale, bg) */
+        if (typeof entry.opts.exportCompose === "function") {
+            try {
+                var composed = entry.opts.exportCompose(src, src.width / (src.clientWidth || src.width), css("--card", "#ffffff"));
+                if (composed) out = composed;
+            } catch (err) { /* ถ้าวาดรวมไม่ได้ ใช้รูปกราฟล้วนตามเดิม */ }
+        }
+
         if (prevDpr !== hiDpr) {
             chart.options.devicePixelRatio = prevDpr;
             chart.resize();

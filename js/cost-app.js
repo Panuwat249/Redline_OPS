@@ -435,8 +435,8 @@
             out.push(
                 gap > 0
                     ? "ค่าโดยสารครอบคลุมต้นทุนประมาณ <b>" + fmt1(focus.recovery * 100) + "%</b> " +
-                      "เหลือส่วนต่างที่ต้องสนับสนุน " + fmtM(gap) + " ล้านบาท "
-                    : "รายได้ค่าโดยสารสูงกว่าต้นทุน <b>" + fmtM(-gap) + " ล้านบาท</b> "
+                      "เหลือส่วนต่างที่ต้องสนับสนุน " + fmtM(gap) + " ล้านบาท (ประมาณการ)"
+                    : "รายได้ค่าโดยสารสูงกว่าต้นทุน <b>" + fmtM(-gap) + " ล้านบาท</b> (ประมาณการ)"
             );
         }
 
@@ -776,8 +776,77 @@
             initialKind: "doughnut",
             sideTarget: ".mix",                       // ปรับความกว้างรายการหมวดด้านขวาของโดนัทได้
             sideLabel: "ความกว้างรายการด้านขวา (น้อย = % ชิดชื่อหมวด)",
-            onChange: renderMixLegend
+            onChange: renderMixLegend,
+            exportCompose: composeMixPng             // รูป PNG = ชื่อการ์ด + โดนัท + รายการหมวดด้านขวา ในภาพเดียว
         });
+    }
+
+    /* รวมโดนัท + รายการหมวด (ข้อความ % และยอด) เป็นรูปเดียว ตามตำแหน่งจริงบนหน้าจอ */
+    function composeMixPng(chartCanvas, k, bg) {
+        const mix = document.querySelector(".mix"), list = $("mixLegend");
+        const card = mix.closest(".card");
+        if (!mix || !list) return null;
+
+        const cr = chartCanvas.getBoundingClientRect(), lr = list.getBoundingClientRect();
+        const left = Math.min(cr.left, lr.left), right = Math.max(cr.right, lr.right);
+        const top = Math.min(cr.top, lr.top), bottom = Math.max(cr.bottom, lr.bottom);
+        const PAD = 32, HEAD = 74, GAP = 0;
+        const W = Math.ceil(right - left + PAD * 2), H = Math.ceil(bottom - top + PAD * 2 + HEAD + GAP);
+        const sc = Math.max(3, k);
+
+        const out = document.createElement("canvas");
+        out.width = Math.round(W * sc);
+        out.height = Math.round(H * sc);
+        const ctx = out.getContext("2d");
+        ctx.scale(sc, sc);
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+        ctx.textBaseline = "middle";
+
+        const css = (el, p) => getComputedStyle(el).getPropertyValue(p);
+        const ink = css(document.documentElement, "--ink").trim() || "#1b1416";
+        const mute = css(document.documentElement, "--mute").trim() || "#7a6a6e";
+        const line = css(document.documentElement, "--line").trim() || "#e4d0d4";
+
+        /* ชื่อการ์ด */
+        const h2 = card.querySelector("h2"), note = card.querySelector("#mixNote");
+        ctx.textAlign = "left";
+        ctx.fillStyle = ink; ctx.font = "800 22px Sarabun, sans-serif";
+        ctx.fillText(h2 ? h2.textContent : "สัดส่วนต้นทุนแต่ละหมวด", PAD, PAD + 14);
+        ctx.fillStyle = mute; ctx.font = "600 14px Sarabun, sans-serif";
+        ctx.fillText(note ? note.textContent : "", PAD, PAD + 42);
+
+        const ox = PAD - left, oy = PAD + HEAD - top;
+
+        /* โดนัท (วาดจากกราฟที่ความละเอียดสูง) */
+        ctx.drawImage(chartCanvas, cr.left + ox, cr.top + oy, cr.width, cr.height);
+
+        /* รายการหมวด */
+        list.querySelectorAll("li").forEach((li, i, all) => {
+            const r = li.getBoundingClientRect(), sw = li.querySelector("i");
+            const sr = sw.getBoundingClientRect();
+            ctx.fillStyle = css(sw, "background-color");
+            ctx.beginPath();
+            ctx.roundRect ? ctx.roundRect(sr.left + ox, sr.top + oy, sr.width, sr.height, 4) : ctx.rect(sr.left + ox, sr.top + oy, sr.width, sr.height);
+            ctx.fill();
+
+            li.querySelectorAll("strong, small").forEach(t => {
+                const tr = t.getBoundingClientRect(), right_ = !!t.closest(".ml-val");
+                ctx.font = css(t, "font-weight") + " " + css(t, "font-size") + " Sarabun, sans-serif";
+                ctx.fillStyle = css(t, "color");
+                ctx.textAlign = right_ ? "right" : "left";
+                ctx.fillText(t.textContent, (right_ ? tr.right : tr.left) + ox, tr.top + tr.height / 2 + oy + 1);
+            });
+
+            if (i < all.length - 1) {
+                ctx.strokeStyle = line; ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(r.left + ox, r.bottom + oy - 0.5);
+                ctx.lineTo(r.right + ox, r.bottom + oy - 0.5);
+                ctx.stroke();
+            }
+        });
+        return out;
     }
 
     /* คำอธิบายสัดส่วน — ดึงสีจากกราฟจริง เพื่อให้ตรงกับที่ผู้ใช้เลือก */
@@ -835,7 +904,7 @@
             data: {
                 labels: yearLabels(set),
                 datasets: [
-                    { label: "รายได้ค่าโดยสาร", data: set.map(d => d.revenue / 1e6), ctColor: COLOR.revenue },
+                    { label: "รายได้ค่าโดยสาร (ประมาณการ)", data: set.map(d => d.revenue / 1e6), ctColor: COLOR.revenue },
                     { label: "ต้นทุนรวม", data: set.map(d => d.total / 1e6), ctColor: COLOR.cost }
                 ]
             },
@@ -865,7 +934,7 @@
         const reach = beMillions ? actualMillions / beMillions * 100 : 0;
 
         $("revFacts").innerHTML =
-            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท", "") +
+            fact("ค่าโดยสารเฉลี่ย ปีงบ " + focus.fiscalYear, fmt2(focus.avgFare) + " บาท/เที่ยว", "") +
             fact(gap > 0 ? "ส่วนต่าง (ต้นทุน − รายได้)" : "รายได้สูงกว่าต้นทุน", fmtM(Math.abs(gap)) + " ล้านบาท", "ประมาณการจากผู้โดยสาร × ค่าโดยสารเฉลี่ย") +
             fact("ผู้โดยสารที่ต้องมีเพื่อคุ้มทุน", fmt1(beMillions) + " ล้านคน/ปี", "≈ " + fmt0(beMillions * 1e6 / 365) + " คน/วัน") +
             fact("ผู้โดยสารจริง", fmt1(actualMillions) + " ล้านคน/ปี", "≈ " + fmt0(focus.passenger / 365) + " คน/วัน · " + fmt1(reach) + "% ของจุดคุ้มทุน");
@@ -997,8 +1066,8 @@
             { key: "costPerCarKm",     group: G3, th: "ต้นทุนการเดินรถ",   en: "Operating Cost per Car.Km", unit: "บาท/ตู้/กม.", kind: "line", color: "#0e9aa7", get: d => d.costPerCarKm,     fmt: fmt2 },
             { key: "costPerPassenger", group: G3, th: "ต้นทุนต่อผู้โดยสาร", en: "Cost per Passenger",        unit: "บาท/คน",       kind: "line", color: "#374151", get: d => d.costPerPassenger, fmt: fmt2 },
 
-            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
-            { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
+            { key: "avgFare",  group: G4, th: "ค่าโดยสารเฉลี่ย",             en: "Average Fare",           unit: "บาท/เที่ยว", kind: "line", color: "#c2410c", get: d => d.avgFare,           fmt: fmt2 },
+            { key: "revenue",  group: G4, th: "รายได้ค่าโดยสาร (ประมาณการ)", en: "Estimated Fare Revenue", unit: "ล้านบาท",    kind: "bar",  color: "#15803d", get: d => d.revenue / 1e6,     fmt: fmt1 },
             { key: "recovery", group: G4, th: "คืนทุนจากค่าโดยสาร",         en: "Fare Recovery Ratio",    unit: "%",           kind: "line", color: "#0369a1", get: d => d.recovery * 100,    fmt: fmt1 }
         ];
 
@@ -1453,7 +1522,7 @@
             "ต้นทุนบุคลากร (บาท)", "ต้นทุนพลังงาน (บาท)", "ต้นทุนซ่อมบำรุง (บาท)", "ต้นทุนอื่น ๆ (บาท)",
             "ต้นทุนรวม (บาท)", "เปลี่ยนจากปีก่อน (%)",
             "Car-Km", "ผู้โดยสาร (คน)", "บาทต่อ Car-Km", "บาทต่อผู้โดยสาร",
-            "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ (บาท)", "คืนทุน (%)",
+            "ค่าโดยสารเฉลี่ย (บาท)", "รายได้ประมาณการ (บาท)", "คืนทุน (%)",
             "ผู้โดยสารจริง สายเหนือ (คน/วัน)", "ผู้โดยสารที่ต้องการ สายเหนือ (คน/วัน)",
             "ผู้โดยสารจริง สายตะวันตก (คน/วัน)", "ผู้โดยสารที่ต้องการ สายตะวันตก (คน/วัน)", "ผู้โดยสารจริง รวม (คน/วัน)", "ผู้โดยสารที่ต้องการ รวม (คน/วัน)", "ต้นทุนต่อเที่ยว North Line (บาท/เที่ยว)", "ต้นทุนต่อเที่ยว West Line (บาท/เที่ยว)"
         ]];
