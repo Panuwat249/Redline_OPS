@@ -284,3 +284,28 @@
 :root .table-wrap.table-wrap[data-hs="1"] .data-table tbody td.strong:not(.tt-bep) { background: var(--tt-sc); }
 :root .table-wrap.table-wrap[data-hf="1"] .data-table tfoot td:not(.tt-bep) { background: var(--tt-ft); }
 :root .table-wrap.table-wrap[data-hf="1"] .data-table tfoot td.strong:not(.tt-bep) { background: var(--tt-ft2); }
+
+/* ===== ตารางที่บันทึกไว้ ===== */
+.tt-save { display: flex; gap: 8px; align-items: center; }
+.tt-save .tt-text { flex: 1; min-width: 0; }
+.tt-save-btn {
+    flex: none; padding: 9px 14px; border: none; border-radius: 999px;
+    background: linear-gradient(180deg, #e8182f, #b50f22); color: #fff;
+    font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(200, 16, 46, 0.28);
+}
+.tt-pset { margin-top: 10px; padding: 10px; border: 1px solid var(--line, #e4d0d4); border-radius: 14px; background: var(--card, #fff); }
+.tt-pset.is-on { border-color: #b50f22; box-shadow: 0 0 0 2px rgba(181, 15, 34, 0.12); }
+.tt-pset-top { display: flex; align-items: center; gap: 8px; }
+.tt-pset-top .tt-pset-name { flex: 1; min-width: 0; font-weight: 700; }
+.tt-badge { flex: none; padding: 3px 9px; border-radius: 999px; background: #e4f4ec; color: #0b6b49; font-size: 11px; font-weight: 800; }
+.tt-badge-mod { background: #fff3c7; color: #7a5a00; }
+.tt-pset-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tt-pbtn {
+    padding: 6px 11px; border: 1px solid var(--line, #e4d0d4); border-radius: 999px; background: transparent;
+    color: var(--ink, #1b1416); font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.tt-pbtn:disabled { opacity: 0.35; cursor: default; }
+.tt-pbtn-main { background: #b50f22; border-color: #b50f22; color: #fff; }
+.tt-pbtn-del { color: #a1121b; }
+.tt-pbtn-del.is-ask { background: #a1121b; border-color: #a1121b; color: #fff; }
