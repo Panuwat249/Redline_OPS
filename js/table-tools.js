@@ -368,8 +368,8 @@
                 (st ? '<small class="tt-unit">' + esc(st) + "</small>" : "") + "</span></th>";
         }
         function thPct(c, sub2) {
-            return '<th class="tt-pct' + (c.group ? " tt-bep" : "") + '"' + (sub2 ? "" : spanAttr) + '><span class="tt-th"><span class="tt-name">% เพิ่ม/ลด</span>' +
-                (showUnit ? '<small class="tt-unit">จากปีก่อน</small>' : "") + "</span></th>";
+            return '<th class="tt-pct' + (c.group ? " tt-bep" : "") + '"' + (sub2 ? "" : spanAttr) + '><span class="tt-th"><span class="tt-name">' + esc((prefs.pctLabel && prefs.pctLabel[c.key]) || pv("pctName", "% เพิ่ม/ลด")) + '</span>' +
+                (showUnit ? '<small class="tt-unit">' + esc(pv("pctSub", "จากปีก่อน")) + "</small>" : "") + "</span></th>";
         }
 
         for (var i = 0; i < cols.length; i++) {
@@ -549,6 +549,10 @@
                     seg("data-tt-unit", c.kind === "money" ? SCALE_MONEY : SCALE_COUNT, scaleOf(c), ' data-key="' + c.key + '"');
             }
             h += sw("pct:" + c.key, "แสดง % เพิ่ม/ลด จากปีก่อน", hasPct(c));
+            if (hasPct(c)) {
+                h += '<div class="ct-sublabel">ชื่อหัวคอลัมน์ % ของคอลัมน์นี้</div>' +
+                    '<input type="text" class="tt-text" data-tt-pctlabel="' + c.key + '" value="' + esc((prefs.pctLabel && prefs.pctLabel[c.key]) || "") + '" placeholder="' + esc(pv("pctName", "% เพิ่ม/ลด")) + '" maxlength="40">';
+            }
             h += sw("pill:" + c.key, "ป้ายสีหลังชื่อคอลัมน์", pillOn(c));
             if (pillOn(c)) {
                 h += '<label class="ct-color"><span class="ct-color-name">สีป้าย</span>' +
@@ -652,6 +656,8 @@
             seg("data-tt-alldec", DEC_ITEMS, prefs.decAll != null ? prefs.decAll : "auto") +
             '<div class="ct-sublabel">คอลัมน์ % เพิ่ม/ลด จากปีก่อน</div>' +
             '<div class="ct-seg ct-seg-sm"><button type="button" data-tt-allpct="on">เปิดทุกคอลัมน์</button><button type="button" data-tt-allpct="off">ปิดทั้งหมด</button></div>' +
+            '<div class="ct-sublabel">ชื่อหัวคอลัมน์ % (บรรทัดบน · บรรทัดล่าง) — ใช้กับทุกคอลัมน์ %</div>' +
+            textIn("pctName", "% เพิ่ม/ลด") + textIn("pctSub", "จากปีก่อน") +
             '<div class="ct-sublabel">ป้ายสีหลังชื่อคอลัมน์</div>' +
             '<div class="ct-seg ct-seg-sm"><button type="button" data-tt-allpill="on">เปิดทุกคอลัมน์</button><button type="button" data-tt-allpill="off">ปิดทั้งหมด</button></div>' +
             '<div class="ct-sublabel">จำนวนทศนิยมของ %</div>' +
@@ -811,6 +817,11 @@
         on("[data-tt-autocolor]", "click", function (n) {
             if (prefs.pillColor) delete prefs.pillColor[n.getAttribute("data-tt-autocolor")];
             apply(true);
+        });
+        on("[data-tt-pctlabel]", "change", function (n) {
+            var k = n.getAttribute("data-tt-pctlabel"), v = n.value.trim();
+            if (v) sub("pctLabel")[k] = v; else if (prefs.pctLabel) delete prefs.pctLabel[k];
+            apply(false);
         });
         on("[data-tt-label]", "change", function (n) {
             var k = n.getAttribute("data-tt-label"), v = n.value.trim();
