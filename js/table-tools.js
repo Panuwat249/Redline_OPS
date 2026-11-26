@@ -21,6 +21,34 @@
     var prefs = {};
     try { prefs = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { prefs = {}; }
 
+    /* ---------- ตารางที่บันทึกไว้ (ชุดค่าตั้งหลายชุด) · localStorage redline-table-presets-v1 ---------- */
+    var PSTORE = "redline-table-presets-v1";
+    var presets = { list: [], active: null };
+    try {
+        var _p = JSON.parse(localStorage.getItem(PSTORE) || "null");
+        if (_p && Array.isArray(_p.list)) presets = { list: _p.list.filter(function (x) { return x && x.id && x.prefs; }), active: _p.active || null };
+    } catch (e) { /* ค่าเริ่มต้น */ }
+    function savePresets() {
+        try { localStorage.setItem(PSTORE, JSON.stringify(presets)); } catch (e) { /* ใช้ต่อได้ แค่ไม่จำ */ }
+    }
+    function clone(o) { return JSON.parse(JSON.stringify(o || {})); }
+    function stable(o) {
+        if (o && typeof o === "object") {
+            if (Array.isArray(o)) return "[" + o.map(stable).join(",") + "]";
+            return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + stable(o[k]); }).join(",") + "}";
+        }
+        return JSON.stringify(o);
+    }
+    function presetById(id) { for (var i = 0; i < presets.list.length; i++) if (presets.list[i].id === id) return presets.list[i]; return null; }
+    function presetIdx(id) { for (var i = 0; i < presets.list.length; i++) if (presets.list[i].id === id) return i; return -1; }
+    function newId() { return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+    function uniqueName(base) {
+        var names = presets.list.map(function (x) { return x.name; }), n = base, i = 2;
+        while (names.indexOf(n) >= 0) n = base + " " + (i++);
+        return n;
+    }
+    var delConfirm = null;     // id ที่กำลังรอกดยืนยันลบ
+
     function save() {
         try { localStorage.setItem(STORE, JSON.stringify(prefs)); } catch (e) { /* ใช้ต่อได้ แค่ไม่จำค่า */ }
         markDirty();
@@ -464,7 +492,7 @@
                     foot += cell(c, "avg");
                     if (hasPct(c)) {
                         var ap = avgPct(c);
-                        foot += '<td class="tt-pct' + (c.group ? " tt-bep" : "") + '">' + (ap == null ? "" : delta(ap, c.good)) + "</td>";
+                        foot += '<td class="tt-pct' + (c.group ? " tt-bep" : "") + '">' + (ap == null || !pv("avgPct", true) ? "" : delta(ap, c.good)) + "</td>";
                     }
                 });
                 foot += "</tr>";
@@ -588,6 +616,28 @@
 
         var h = '<div class="ct-head"><strong>ปรับแต่งตาราง</strong><button type="button" class="ct-close" aria-label="ปิด">✕</button></div><div class="ct-body">';
 
+        /* ตารางที่บันทึกไว้ */
+        var cur = stable(prefs);
+        h += '<div class="ct-sec"><div class="ct-label">ตารางที่บันทึกไว้ (' + presets.list.length + ')</div>' +
+            '<div class="tt-save"><input type="text" class="tt-text" data-tt-savename="1" placeholder="ตั้งชื่อ เช่น ตารางผู้บริหาร" maxlength="40" aria-label="ชื่อตารางที่จะบันทึก">' +
+            '<button type="button" class="tt-save-btn" data-tt-psave="1">บันทึกค่าปัจจุบัน</button></div>';
+        if (!presets.list.length) h += '<p class="ct-hint">ยังไม่มีตารางที่บันทึก · ปรับตารางให้ถูกใจแล้วตั้งชื่อ กดบันทึก จะกลับมาใช้ได้ทันที</p>';
+        presets.list.forEach(function (x, i) {
+            var same = stable(x.prefs) === cur, act = presets.active === x.id;
+            h += '<div class="tt-pset' + (same ? " is-on" : "") + '">' +
+                '<div class="tt-pset-top"><input type="text" class="tt-text tt-pset-name" data-tt-pname="' + x.id + '" value="' + esc(x.name) + '" maxlength="40" aria-label="ชื่อตาราง">' +
+                (same ? '<span class="tt-badge">ใช้อยู่</span>' : (act ? '<span class="tt-badge tt-badge-mod">แก้ไขแล้ว</span>' : "")) + '</div>' +
+                '<div class="tt-pset-acts">' +
+                '<button type="button" class="tt-pbtn tt-pbtn-main" data-tt-puse="' + x.id + '">ใช้ชุดนี้</button>' +
+                '<button type="button" class="tt-pbtn" data-tt-pupd="' + x.id + '" title="เขียนทับด้วยค่าปัจจุบัน"' + (same ? " disabled" : "") + '>อัปเดต</button>' +
+                '<button type="button" class="tt-pbtn" data-tt-pcopy="' + x.id + '" title="ทำสำเนา">คัดลอก</button>' +
+                '<button type="button" class="tt-pbtn" data-tt-pmv="up|' + x.id + '"' + (i === 0 ? " disabled" : "") + ' aria-label="เลื่อนขึ้น">▲</button>' +
+                '<button type="button" class="tt-pbtn" data-tt-pmv="down|' + x.id + '"' + (i === presets.list.length - 1 ? " disabled" : "") + ' aria-label="เลื่อนลง">▼</button>' +
+                '<button type="button" class="tt-pbtn tt-pbtn-del' + (delConfirm === x.id ? " is-ask" : "") + '" data-tt-pdel="' + x.id + '">' + (delConfirm === x.id ? "ยืนยันลบ" : "ลบ") + '</button>' +
+                '</div></div>';
+        });
+        h += '</div>';
+
         /* ชุดสำเร็จรูปตามตารางต้นแบบ */
         h += '<div class="ct-sec"><div class="ct-label">ชุดสำเร็จรูป</div>' +
             '<button type="button" class="tt-preset" data-tt-preset="sample">ใช้ชุดตามตารางตัวอย่าง</button>' +
@@ -615,6 +665,7 @@
             seg("data-tt-year", [["full", "ปีงบ 2565"], ["short", "2565"]], pv("yearFmt", "full")) +
             sw("showTotal", "แถว “รวม”", pv("showTotal", true)) +
             sw("showAvg", "แถว “เฉลี่ย”", pv("showAvg", true)) +
+            sw("avgPct", "แสดง % เพิ่ม/ลด ในแถว “เฉลี่ย” (% รายปียังอยู่)", pv("avgPct", true)) +
             '<div class="ct-sublabel">ชื่อหัวคอลัมน์ปี · ชื่อแถวรวม · ชื่อแถวเฉลี่ย · ชื่อกลุ่มจุดคุ้มทุน</div>' +
             textIn("yearHead", "ปีงบประมาณ") + textIn("totalLabel", "รวม") + textIn("avgLabel", "เฉลี่ยต่อปี") + textIn("bepLabel", GROUP_LABEL.bep) +
             "</div>";
@@ -887,6 +938,57 @@
         });
         on("[data-tt-fauto]", "click", function () { delete prefs.frameColor; apply(true); });
         on("[data-tt-preset]", "click", function () { applySample(); apply(true); });
+
+        /* ตารางที่บันทึกไว้ */
+        var pdone = function () { savePresets(); renderPanel(); };
+        var doSave = function () {
+            var inp = P.querySelector("[data-tt-savename]");
+            var nm = uniqueName((inp && inp.value.trim()) || "ตารางที่ " + (presets.list.length + 1));
+            var it = { id: newId(), name: nm, prefs: clone(prefs) };
+            presets.list.push(it); presets.active = it.id;
+            pdone();
+        };
+        on("[data-tt-psave]", "click", doSave);
+        on("[data-tt-savename]", "keydown", function (n, e) { if (e.key === "Enter") { e.preventDefault(); doSave(); } });
+        on("[data-tt-puse]", "click", function (n) {
+            var it = presetById(n.getAttribute("data-tt-puse"));
+            if (!it) return;
+            prefs = clone(it.prefs); openCol = null; presets.active = it.id; delConfirm = null;
+            savePresets(); apply(true);
+        });
+        on("[data-tt-pupd]", "click", function (n) {
+            var it = presetById(n.getAttribute("data-tt-pupd"));
+            if (!it) return;
+            it.prefs = clone(prefs); presets.active = it.id; pdone();
+        });
+        on("[data-tt-pcopy]", "click", function (n) {
+            var i = presetIdx(n.getAttribute("data-tt-pcopy"));
+            if (i < 0) return;
+            var src = presets.list[i];
+            presets.list.splice(i + 1, 0, { id: newId(), name: uniqueName(src.name + " (สำเนา)"), prefs: clone(src.prefs) });
+            pdone();
+        });
+        on("[data-tt-pmv]", "click", function (n) {
+            var a = n.getAttribute("data-tt-pmv").split("|"), i = presetIdx(a[1]), j = a[0] === "up" ? i - 1 : i + 1;
+            if (i < 0 || j < 0 || j >= presets.list.length) return;
+            var t = presets.list[i]; presets.list[i] = presets.list[j]; presets.list[j] = t;
+            pdone();
+        });
+        on("[data-tt-pdel]", "click", function (n) {
+            var id = n.getAttribute("data-tt-pdel");
+            if (delConfirm !== id) { delConfirm = id; renderPanel(); return; }
+            var i = presetIdx(id);
+            if (i >= 0) presets.list.splice(i, 1);
+            if (presets.active === id) presets.active = null;
+            delConfirm = null; pdone();
+        });
+        on("[data-tt-pname]", "change", function (n) {
+            var it = presetById(n.getAttribute("data-tt-pname"));
+            if (!it) return;
+            var v = n.value.trim();
+            if (v) it.name = v; else n.value = it.name;
+            savePresets();
+        });
         on("[data-tt-bep]", "click", function (n) {
             var m = n.getAttribute("data-tt-bep");
             var showMap = { off: [0, 0, 0], day: [0, 0, 1], all: [1, 1, 1] }[m];
