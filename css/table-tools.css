@@ -37,7 +37,7 @@
 .table-wrap[data-lines="none"] .data-table th { border-bottom: none; }
 
 /* ---------- แถบสลับสี ---------- */
-.table-wrap[data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.strong) { background: var(--td-hover); }
+.table-wrap[data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.strong):not(.tt-bep) { background: var(--td-hover); }
 
 /* ---------- % เพิ่ม/ลด ---------- */
 .data-table .tt-pct { text-align: center; }
@@ -169,20 +169,14 @@
    หัวสองชั้น + กลุ่ม "จุดคุ้มทุน (Break Even Point)" สีทอง
    ========================================================= */
 .data-table th.tt-group { text-align: center; font-weight: 800; }
-.data-table th.tt-group,
-.data-table th.tt-bep {
-    background: #f1c84b;
-    color: #3b2a00;
-    border-bottom: 1px solid rgba(59, 42, 0, 0.18);
-}
-.data-table th.tt-bep .tt-unit { color: #3b2a00; }
-.data-table td.tt-bep { background: #fff3c7; }
-.data-table tfoot td.tt-bep { background: #fbe9a6; }
-.tt-theme-red .data-table th.tt-group,
-.tt-theme-red .data-table th.tt-bep { background: #f1c84b; color: #3b2a00; }
-.tt-theme-red .data-table td.tt-bep { background: #fff3c7; }
-:root[data-theme="dark"] .data-table td.tt-bep { background: #3b3417; }
-:root[data-theme="dark"] .data-table tfoot td.tt-bep { background: #463d1a; }
+
+
+
+
+
+
+
+
 
 /* =========================================================
    ธีม "แดง-ทอง" ตามตารางต้นแบบ (หัวแดงเข้ม ตัวเลขชิดขวา เส้นตารางครบ แถบสลับเทา)
@@ -206,13 +200,12 @@
 }
 .tt-theme-excel .data-table td.sticky { text-align: center; font-weight: 700; }
 .tt-theme-excel .data-table td.strong { background: inherit; }
-.tt-theme-excel .data-table th.tt-group,
-.tt-theme-excel .data-table th.tt-bep { background: #f1c84b; color: #3b2a00; }
-.tt-theme-excel .data-table td.tt-bep { background: #fde9a3; }
+
+
 .tt-theme-excel .data-table tfoot td,
 .tt-theme-excel .data-table tfoot td.strong,
 .tt-theme-excel .data-table tfoot td.sticky { background: #e8e8e8; }
-.tt-theme-excel .data-table tfoot td.tt-bep { background: #fbdc86; }
+
 .tt-theme-excel .tt-avg-pill { padding: 0; background: none; color: inherit; }
 .tt-theme-excel[data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.tt-bep) { background: #e8e8e8; }
 
@@ -222,7 +215,7 @@
 :root[data-theme="dark"] .tt-theme-excel .data-table tfoot td.strong,
 :root[data-theme="dark"] .tt-theme-excel .data-table tfoot td.sticky { background: #34282c; }
 :root[data-theme="dark"] .tt-theme-excel[data-zebra="1"] .data-table tbody tr:nth-child(even) td:not(.tt-bep) { background: #2d2226; }
-:root[data-theme="dark"] .tt-theme-excel .data-table td.tt-bep { background: #4a3f1a; }
+
 
 /* ปุ่มชุดสำเร็จรูป + ช่องกรอกข้อความในแผง */
 .tt-preset {
@@ -268,3 +261,19 @@
 .tt-swatch-custom input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 :root[data-theme="dark"] .tt-swatch { border-color: #2a1d21; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.3); }
 :root[data-theme="dark"] .tt-swatch.is-on { box-shadow: 0 0 0 2.5px #ffffff; }
+
+/* =========================================================
+   ไฮไลท์ (คอลัมน์กลุ่มจุดคุ้มทุน) – ตามแถบสลับสีเดียวกับแถวสีเทา และเปลี่ยนสีได้
+   ตัวแปร --tt-hi* ตั้งจาก js/table-tools.js (ค่าเริ่มต้น = สีทอง)
+   ========================================================= */
+:root .table-wrap .data-table th.tt-group,
+:root .table-wrap .data-table th.tt-bep {
+    background: var(--tt-hi, #f1c84b);
+    color: var(--tt-hi-ink, #3b2a00);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+}
+:root .table-wrap .data-table th.tt-bep .tt-unit { color: var(--tt-hi-ink, #3b2a00); }
+:root .table-wrap .data-table tbody td.tt-bep { background: var(--tt-hi1, #fff3c7); }
+:root .table-wrap[data-zebra="1"] .data-table tbody tr:nth-child(even) td.tt-bep { background: var(--tt-hi2, #fbe6a0); }
+:root .table-wrap .data-table tbody tr:hover td.tt-bep { background: var(--tt-hi2, #fbe6a0); }
+:root .table-wrap .data-table tfoot td.tt-bep { background: var(--tt-hif, #f6d777); }
