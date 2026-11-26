@@ -217,6 +217,24 @@
         };
     }
 
+    /* ไฮไลท์คอลัมน์กลุ่มจุดคุ้มทุน: สีหัว + แถบสลับสีอ่อน/เข้มเหมือนแถวสีเทา · ค่าเริ่มต้นสีทอง */
+    var HI_COLORS = [["gold", "ทอง", "#f1c84b"], ["orange", "ส้ม", "#f7a45b"], ["green", "เขียว", "#8fd19e"], ["blue", "ฟ้า", "#8ec5f2"],
+                     ["pink", "ชมพู", "#f4a7c0"], ["purple", "ม่วง", "#c3b1f2"], ["gray", "เทา", "#c4c4c4"]];
+
+    function hiColors() {
+        var key = prefs.hi || "gold", H = "#f1c84b", dk = isDark();
+        if (key === "custom") H = prefs.hiColor || H;
+        else HI_COLORS.forEach(function (x) { if (x[0] === key) H = x[2]; });
+        var head = dk ? mix(H, "#000000", 0.25) : H;
+        return {
+            H: H, head: head,
+            ink: fg(head) === "#ffffff" ? "#ffffff" : mix(H, "#000000", 0.8),
+            b1: dk ? mix(H, "#000000", 0.74) : mix(H, "#ffffff", 0.78),
+            b2: dk ? mix(H, "#000000", 0.64) : mix(H, "#ffffff", 0.58),
+            bf: dk ? mix(H, "#000000", 0.55) : mix(H, "#ffffff", 0.42)
+        };
+    }
+
     // กรอบตาราง: ความหนา / ลาย / สี (ไม่ได้ตั้ง = ค่าตามธีม · ถ้าเลือกสีธีมจะใช้สีหลักของธีม)
     function frameSpec(realColor) {
         var th = pv("theme", "soft"), dk = isDark(), P = palette();
@@ -289,6 +307,12 @@
             "--tt-tint2": P && P.tint2, "--tt-tint3": P && P.tint3, "--tt-softbg": P && P.softBg, "--tt-softink": P && P.softInk,
             "--tt-glow1": P && rgba(P.M, 0.1), "--tt-glow2": P && rgba(P.M, 0.22) };
         Object.keys(vars).forEach(function (k) { if (vars[k]) w.style.setProperty(k, vars[k]); else w.style.removeProperty(k); });
+        var HI = hiColors();
+        w.style.setProperty("--tt-hi", HI.head);
+        w.style.setProperty("--tt-hi-ink", HI.ink);
+        w.style.setProperty("--tt-hi1", HI.b1);
+        w.style.setProperty("--tt-hi2", HI.b2);
+        w.style.setProperty("--tt-hif", HI.bf);
         var fr = frameSpec(false);
         if (fr.custom) {
             w.setAttribute("data-frame", "1");
@@ -570,6 +594,12 @@
             }).join("") +
             '<label class="tt-swatch tt-swatch-custom' + (curPal === "custom" ? " is-on" : "") + '" title="เลือกสีเอง" style="--c:' + (prefs.paletteColor || "#888888") + '">' +
             '<input type="color" data-tt-palcolor="1" value="' + (prefs.paletteColor || "#c00000") + '" aria-label="เลือกสีธีมเอง"></label></div>' +
+            '<div class="ct-sublabel">สีไฮไลท์ (กลุ่มจุดคุ้มทุน · แถบสลับสีเหมือนแถวเทา)</div><div class="tt-swatches">' +
+            HI_COLORS.map(function (x) {
+                return '<button type="button" class="tt-swatch' + ((prefs.hi || "gold") === x[0] ? " is-on" : "") + '" data-tt-hi="' + x[0] + '" style="--c:' + x[2] + '" title="' + x[1] + '" aria-label="ไฮไลท์สี' + x[1] + '"></button>';
+            }).join("") +
+            '<label class="tt-swatch tt-swatch-custom' + (prefs.hi === "custom" ? " is-on" : "") + '" title="เลือกสีไฮไลท์เอง" style="--c:' + (prefs.hiColor || "#888888") + '">' +
+            '<input type="color" data-tt-hicolor="1" value="' + (prefs.hiColor || "#f1c84b") + '" aria-label="เลือกสีไฮไลท์เอง"></label></div>' +
             range("frameW", "ความหนากรอบ", frameSpec(false).w, 0, 6, 1, "px") +
             '<div class="ct-sublabel">ลายเส้นกรอบ</div>' +
             seg("data-tt-fstyle", [["solid", "เส้นเรียบ"], ["dashed", "ประ"], ["dotted", "จุด"], ["double", "เส้นคู่"]], pv("frameStyle", "solid")) +
@@ -757,6 +787,16 @@
 
         P.querySelector("[data-tt-png]").addEventListener("click", downloadPng);
 
+        on("[data-tt-hi]", "click", function (n) {
+            var v = n.getAttribute("data-tt-hi");
+            if (v === "gold") delete prefs.hi; else prefs.hi = v;
+            apply(true);
+        });
+        on("[data-tt-hicolor]", "input", function (n) {
+            prefs.hi = "custom"; prefs.hiColor = n.value;
+            n.parentElement.style.setProperty("--c", n.value);
+            apply(false);
+        });
         on("[data-tt-pal]", "click", function (n) {
             var v = n.getAttribute("data-tt-pal");
             if (v === "red") delete prefs.palette; else prefs.palette = v;
@@ -863,9 +903,10 @@
                 foot: cssv("--foot-bg", "#fcf0f1"), hover: cssv("--td-hover", "#fff7f7"), mute: cssv("--mute", "#76686c"),
                 good: cssv("--good", "#0b6b49"), goodBg: cssv("--good-bg", "#e4f4ec"), bad: cssv("--bad", "#a1121b"), badBg: cssv("--bad-bg", "#fdeaec"),
                 flat: cssv("--flat-fg", "#6f6064"), flatBg: cssv("--flat-bg", "#f3eeef"),
-                gold: "#f1c84b", goldInk: "#3b2a00",
-                bepBg: dark ? "#3b3417" : "#fff3c7", bepFoot: dark ? "#463d1a" : "#fbe9a6"
+                gold: "#f1c84b", goldInk: "#3b2a00", bepBg: "#fff3c7", bepBg2: "#fbe6a0", bepFoot: "#f6d777"
             };
+            var HI = hiColors();
+            C.gold = HI.head; C.goldInk = HI.ink; C.bepBg = HI.b1; C.bepBg2 = HI.b2; C.bepFoot = HI.bf;
             var PL = palette();
             var H1 = PL ? PL.h1 : "#ea1a31", H2 = PL ? PL.h2 : "#b50f22";
             if (PL && !red && !xl) { C.thBg = PL.softBg; C.accent = PL.softInk; }
@@ -879,8 +920,6 @@
                 C.foot = dark ? "#34282c" : "#e8e8e8";
                 C.hover = dark ? "#2d2226" : "#e8e8e8";
                 C.line = dark ? "#4a3a3f" : "#c9c9c9";
-                C.bepBg = dark ? "#4a3f1a" : "#fde9a3";
-                C.bepFoot = dark ? "#554820" : "#fbdc86";
             }
             var FONT = '"Sarabun", "Noto Sans Thai", sans-serif';
             var dens = pv("dens", "normal");
@@ -1036,7 +1075,7 @@
                     var x = X0 + colX[ci], w = colW[ci];
                     var bg = null;
                     if (r.section === "foot") bg = c.bep ? C.bepFoot : (c.strong && C.footStrong ? C.footStrong : C.foot);
-                    else if (c.bep) bg = C.bepBg;
+                    else if (c.bep) bg = (zebra && bodyIdx % 2 === 1) ? C.bepBg2 : C.bepBg;
                     else if (c.strong && C.strong) bg = C.strong;
                     else if (zebra && bodyIdx % 2 === 1) bg = C.hover;
                     if (bg) { ctx.fillStyle = bg; ctx.fillRect(x, y, w, rowH); }
